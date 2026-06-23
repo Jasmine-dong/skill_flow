@@ -1,0 +1,24 @@
+# 轻量版项目绑定
+
+project:
+  name: my-project
+  prd:
+    primary: docs/prd.md
+
+roots:
+  project: .
+  docs: lightweight-pipeline
+
+features:
+  root: lightweight-pipeline/features
+
+apps:
+  backend:
+    path: services/api
+    dev:
+      base_url: http://localhost:3000/api
+  frontend:
+    path: packages/web
+    dev:
+      base_url: http://localhost:5173
+
