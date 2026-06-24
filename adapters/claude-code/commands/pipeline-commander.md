@@ -55,3 +55,16 @@ argument-hint: <feature-id>
 6. 参考 `~/.claude/pipeline-commander/assets/feature-template/brief.md` 创建 `brief.md`
 
 不要把示例里的路径当成真实项目路径；必须按当前仓库调整。
+
+## 素材输入格式
+
+用户可以在调用时提供：
+
+```text
+需求文档：docs/prd.md
+接口文档：docs/api.md
+测试case：docs/cases.md
+设计稿：https://figma.com/...
+```
+
+先归档到 `source-materials.md`，再分别整理到 `brief.md`、`api.openapi.yaml`、`test/cases.md`、`design/source.md`。

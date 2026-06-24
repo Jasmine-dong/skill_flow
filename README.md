@@ -161,6 +161,29 @@ $pipeline-commander
 推进 2026-05-25--greeting
 ```
 
+也可以在调用时直接提供素材来源，Commander 会先归档到功能包，再整理到目标位置：
+
+```text
+$pipeline-commander
+
+功能：2026-05-25--greeting
+需求文档：docs/greeting-prd.md
+接口文档：docs/greeting-api.md
+测试case：docs/greeting-test-cases.md
+设计稿：https://www.figma.com/design/xxx
+当前项目仅有前端部分，不需要后端实现，但前端需要按接口文档联调。
+```
+
+素材会被整理到：
+
+| 调用标签 | 目标位置 |
+|---|---|
+| `需求文档：` | `features/<feature-id>/brief.md` |
+| `接口文档：` | `features/<feature-id>/api.openapi.yaml` |
+| `测试case：` | `features/<feature-id>/test/cases.md` |
+| `设计稿：` | `features/<feature-id>/design/source.md` |
+| 调用原文和处理状态 | `features/<feature-id>/source-materials.md` |
+
 Claude Code：
 
 ```text

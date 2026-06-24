@@ -1,0 +1,16 @@
+feature: 2026-01-01--example
+title: 功能标题
+workflow: backend-only
+phase: planned
+owner: product-agent
+next: product-agent
+project_details:
+  path: lightweight-pipeline/project-details.md
+  last_confirmed_at:
+  snapshot_note:
+blockers: []
+history:
+  - at: "2026-01-01T00:00:00+08:00"
+    phase: planned
+    by: product-agent
+    note: 创建功能包
