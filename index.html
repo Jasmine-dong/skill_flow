@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agent Pipeline Commander</title>
+    <meta
+      name="description"
+      content="Agent Pipeline Commander 是一个跨 Codex、Claude Code 和 AGENTS.md 工具的项目级多角色 AI 开发工作流。"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #161a1d;
+        --muted: #5e666d;
+        --line: #dce3e8;
+        --paper: #f7f9fb;
+        --panel: #ffffff;
+        --brand: #0f766e;
+        --brand-dark: #115e59;
+        --blue: #2563eb;
+        --amber: #b7791f;
+        --rose: #be123c;
+        --shadow: 0 18px 50px rgba(18, 31, 44, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        background: var(--paper);
+        color: var(--ink);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        line-height: 1.55;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .site-shell {
+        min-height: 100vh;
+      }
+
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid rgba(220, 227, 232, 0.9);
+        background: rgba(247, 249, 251, 0.9);
+        backdrop-filter: blur(16px);
+      }
+
+      .nav-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        width: min(1120px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 14px 0;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 760;
+        letter-spacing: 0;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        border-radius: 8px;
+        background: var(--ink);
+        color: white;
+        font-size: 15px;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .nav-links a:hover {
+        color: var(--ink);
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0 16px;
+        border: 1px solid var(--ink);
+        border-radius: 8px;
+        background: var(--ink);
+        color: white;
+        font-weight: 680;
+        white-space: nowrap;
+      }
+
+      .button.secondary {
+        border-color: var(--line);
+        background: white;
+        color: var(--ink);
+      }
+
+      .hero {
+        width: min(1120px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 72px 0 54px;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+        align-items: center;
+        gap: 46px;
+      }
+
+      .eyebrow {
+        margin: 0 0 16px;
+        color: var(--brand-dark);
+        font-size: 14px;
+        font-weight: 760;
+      }
+
+      h1 {
+        max-width: 760px;
+        margin: 0;
+        font-size: clamp(44px, 7vw, 80px);
+        line-height: 0.96;
+        letter-spacing: 0;
+      }
+
+      .hero-copy {
+        max-width: 650px;
+        margin: 24px 0 0;
+        color: var(--muted);
+        font-size: 19px;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 32px;
+      }
+
+      .terminal {
+        margin-top: 26px;
+        max-width: 690px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #0f1419;
+        box-shadow: var(--shadow);
+      }
+
+      .terminal-bar {
+        display: flex;
+        gap: 6px;
+        padding: 12px 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #ef4444;
+      }
+
+      .dot:nth-child(2) {
+        background: #eab308;
+      }
+
+      .dot:nth-child(3) {
+        background: #22c55e;
+      }
+
+      code,
+      pre {
+        font-family:
+          "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      }
+
+      .terminal pre {
+        margin: 0;
+        padding: 18px;
+        overflow-x: auto;
+        color: #d9fbe8;
+        font-size: 14px;
+        line-height: 1.65;
+      }
+
+      .workflow-visual {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .visual-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 18px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .visual-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 780;
+      }
+
+      .status-pill {
+        border: 1px solid rgba(15, 118, 110, 0.18);
+        border-radius: 999px;
+        padding: 4px 10px;
+        background: rgba(15, 118, 110, 0.08);
+        color: var(--brand-dark);
+        font-size: 12px;
+        font-weight: 720;
+      }
+
+      .visual-body {
+        display: grid;
+        gap: 14px;
+        padding: 18px;
+      }
+
+      .step-row {
+        display: grid;
+        grid-template-columns: 36px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 12px;
+        min-height: 54px;
+      }
+
+      .step-index {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        border-radius: 8px;
+        background: #edf5f4;
+        color: var(--brand-dark);
+        font-weight: 780;
+      }
+
+      .step-copy strong {
+        display: block;
+        font-size: 14px;
+      }
+
+      .step-copy span {
+        display: block;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .step-tag {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 4px 9px;
+        color: var(--muted);
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .visual-note {
+        margin: 6px 18px 18px;
+        padding: 14px;
+        border-left: 4px solid var(--amber);
+        background: #fff8e8;
+        color: #5e4514;
+        font-size: 13px;
+      }
+
+      section {
+        width: min(1120px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 58px 0;
+      }
+
+      .section-head {
+        max-width: 760px;
+        margin-bottom: 30px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: clamp(30px, 4vw, 46px);
+        line-height: 1.05;
+        letter-spacing: 0;
+      }
+
+      .section-head p {
+        margin: 14px 0 0;
+        color: var(--muted);
+        font-size: 17px;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .feature-card {
+        min-height: 210px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 22px;
+      }
+
+      .icon {
+        display: grid;
+        width: 38px;
+        height: 38px;
+        place-items: center;
+        margin-bottom: 18px;
+        border-radius: 8px;
+        background: #eef4ff;
+        color: var(--blue);
+        font-weight: 820;
+      }
+
+      .feature-card:nth-child(2) .icon,
+      .feature-card:nth-child(5) .icon {
+        background: #edf7f5;
+        color: var(--brand-dark);
+      }
+
+      .feature-card:nth-child(3) .icon,
+      .feature-card:nth-child(6) .icon {
+        background: #fff2f4;
+        color: var(--rose);
+      }
+
+      .feature-card h3 {
+        margin: 0 0 10px;
+        font-size: 19px;
+      }
+
+      .feature-card p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .band {
+        width: 100%;
+        margin: 28px 0 0;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        background: #ffffff;
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .flow-step {
+        position: relative;
+        min-height: 142px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        padding: 18px;
+      }
+
+      .flow-step::after {
+        content: "→";
+        position: absolute;
+        top: 50%;
+        right: -13px;
+        transform: translateY(-50%);
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      .flow-step:last-child::after {
+        content: "";
+      }
+
+      .flow-step b {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--brand-dark);
+        font-size: 13px;
+        text-transform: uppercase;
+      }
+
+      .flow-step strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 17px;
+      }
+
+      .flow-step span {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
+        gap: 32px;
+        align-items: start;
+      }
+
+      .check-list {
+        display: grid;
+        gap: 12px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .check-list li {
+        display: grid;
+        grid-template-columns: 28px minmax(0, 1fr);
+        gap: 10px;
+        align-items: start;
+        color: var(--muted);
+      }
+
+      .check-list b {
+        color: var(--ink);
+      }
+
+      .check-mark {
+        display: grid;
+        width: 24px;
+        height: 24px;
+        place-items: center;
+        border-radius: 6px;
+        background: #edf7f5;
+        color: var(--brand-dark);
+        font-weight: 820;
+      }
+
+      .code-panel {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #111827;
+      }
+
+      .code-panel pre {
+        margin: 0;
+        padding: 20px;
+        overflow-x: auto;
+        color: #e5e7eb;
+        font-size: 13px;
+        line-height: 1.7;
+      }
+
+      .targets {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .target {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        padding: 18px;
+      }
+
+      .target strong {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .target span {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .cta {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 24px;
+        padding: 34px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--ink);
+        color: white;
+      }
+
+      .cta p {
+        margin: 8px 0 0;
+        color: rgba(255, 255, 255, 0.72);
+      }
+
+      .cta .button {
+        border-color: white;
+        background: white;
+        color: var(--ink);
+      }
+
+      footer {
+        width: min(1120px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 28px 0 44px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      @media (max-width: 920px) {
+        .hero-grid,
+        .split {
+          grid-template-columns: 1fr;
+        }
+
+        .feature-grid,
+        .targets {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .flow {
+          grid-template-columns: 1fr;
+        }
+
+        .flow-step::after {
+          content: "";
+        }
+
+        .workflow-visual {
+          max-width: 620px;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .nav-inner {
+          width: min(100% - 28px, 1120px);
+        }
+
+        .nav-links {
+          display: none;
+        }
+
+        .hero,
+        section,
+        footer {
+          width: min(100% - 28px, 1120px);
+        }
+
+        .hero {
+          padding-top: 46px;
+        }
+
+        .feature-grid,
+        .targets {
+          grid-template-columns: 1fr;
+        }
+
+        .step-row {
+          grid-template-columns: 32px minmax(0, 1fr);
+        }
+
+        .step-tag {
+          grid-column: 2;
+          width: fit-content;
+        }
+
+        .cta {
+          grid-template-columns: 1fr;
+          padding: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="site-shell">
+      <nav class="nav" aria-label="主导航">
+        <div class="nav-inner">
+          <a class="brand" href="#top" aria-label="Agent Pipeline Commander">
+            <span class="brand-mark">AP</span>
+            <span>Agent Pipeline Commander</span>
+          </a>
+          <div class="nav-links">
+            <a href="#why">设计目标</a>
+            <a href="#workflow">工作流</a>
+            <a href="#project">项目画像</a>
+            <a href="#install">安装</a>
+          </div>
+        </div>
+      </nav>
+
+      <main id="top">
+        <header class="hero">
+          <div class="hero-grid">
+            <div>
+              <p class="eyebrow">跨 AI 编程工具的项目级开发协议</p>
+              <h1>让 Codex、Claude Code 和通用 Agent 按同一套流程开发。</h1>
+              <p class="hero-copy">
+                Agent Pipeline Commander 用一个入口调度产品、后端、前端、测试和
+                UI 走查角色。它先建立项目画像，再按 feature 状态推进，所有交接都落到文档里。
+              </p>
+              <div class="hero-actions">
+                <a class="button" href="#install">快速安装</a>
+                <a class="button secondary" href="#workflow">查看流程</a>
+              </div>
+              <div class="terminal" id="install">
+                <div class="terminal-bar" aria-hidden="true">
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                </div>
+                <pre><code>curl -fsSL https://raw.githubusercontent.com/Jasmine-dong/skill_flow/main/install.sh | bash</code></pre>
+              </div>
+            </div>
+
+            <aside class="workflow-visual" aria-label="工作流示意">
+              <div class="visual-head">
+                <p class="visual-title">Feature: contract-category-admin</p>
+                <span class="status-pill">development_ready</span>
+              </div>
+              <div class="visual-body">
+                <div class="step-row">
+                  <span class="step-index">1</span>
+                  <span class="step-copy">
+                    <strong>读取项目画像</strong>
+                    <span>技术栈、目录、命令、封装方式</span>
+                  </span>
+                  <span class="step-tag">project-details.md</span>
+                </div>
+                <div class="step-row">
+                  <span class="step-index">2</span>
+                  <span class="step-copy">
+                    <strong>确认需求与接口</strong>
+                    <span>Product / Backend / Frontend 输出 TODO</span>
+                  </span>
+                  <span class="step-tag">confirmation</span>
+                </div>
+                <div class="step-row">
+                  <span class="step-index">3</span>
+                  <span class="step-copy">
+                    <strong>分段开发与验收</strong>
+                    <span>Backend 测试、UI 验收、Frontend 测试</span>
+                  </span>
+                  <span class="step-tag">reports</span>
+                </div>
+                <div class="step-row">
+                  <span class="step-index">4</span>
+                  <span class="step-copy">
+                    <strong>全量测试后通知</strong>
+                    <span>所有文档齐全，状态推进到 done</span>
+                  </span>
+                  <span class="step-tag">done</span>
+                </div>
+              </div>
+              <div class="visual-note">
+                如果发现项目画像与真实代码冲突，当前流程立即进入
+                project_rescan_required，重扫并确认后再继续。
+              </div>
+            </aside>
+          </div>
+        </header>
+
+        <section id="why">
+          <div class="section-head">
+            <h2>不是多几个角色名，而是把 AI 开发变成可交接的流程。</h2>
+            <p>
+              每个角色只做自己的事，遇到不确定先确认；每一步都有产物、门禁和下一角色。
+            </p>
+          </div>
+          <div class="feature-grid">
+            <article class="feature-card">
+              <span class="icon">01</span>
+              <h3>一个入口</h3>
+              <p>用户只需要说“推进 feature”，Commander 根据 status.yaml 判断下一步角色和任务。</p>
+            </article>
+            <article class="feature-card">
+              <span class="icon">02</span>
+              <h3>项目画像</h3>
+              <p>首次扫描项目，后续开发前必读，开发后补充，让项目知识越用越准。</p>
+            </article>
+            <article class="feature-card">
+              <span class="icon">03</span>
+              <h3>接口先行</h3>
+              <p>有 Backend 介入时先出接口文档，确认后 Backend 和 FE 才开始同步开发。</p>
+            </article>
+            <article class="feature-card">
+              <span class="icon">04</span>
+              <h3>分段验收</h3>
+              <p>Backend 完成先测后端，FE 完成先 UI 验收，再进入前端测试和全量测试。</p>
+            </article>
+            <article class="feature-card">
+              <span class="icon">05</span>
+              <h3>扩测建议</h3>
+              <p>Backend 和 FE 完成时都要给 Test 影响范围和建议测试点，帮助判断是否扩测。</p>
+            </article>
+            <article class="feature-card">
+              <span class="icon">06</span>
+              <h3>跨工具安装</h3>
+              <p>同一套 shared 资源适配 Codex、Claude Code 和支持 AGENTS.md 的工具。</p>
+            </article>
+          </div>
+        </section>
+
+        <div class="band">
+          <section id="workflow">
+            <div class="section-head">
+              <h2>真实开发流：先确认，再实现，最后全量验证。</h2>
+              <p>
+                full-stack 需求会经过需求澄清、接口文档、TODO 确认、分段验收和全量测试。
+              </p>
+            </div>
+            <div class="flow" aria-label="全链路工作流">
+              <div class="flow-step">
+                <b>Product</b>
+                <strong>需求澄清</strong>
+                <span>输出 brief、验收标准和测试覆盖方向。</span>
+              </div>
+              <div class="flow-step">
+                <b>Backend</b>
+                <strong>接口文档</strong>
+                <span>先写 api.openapi.yaml 和 backend/todo.md。</span>
+              </div>
+              <div class="flow-step">
+                <b>Confirm</b>
+                <strong>开发前确认</strong>
+                <span>使用者确认需求、接口文档和技术 TODO。</span>
+              </div>
+              <div class="flow-step">
+                <b>Build</b>
+                <strong>分段开发</strong>
+                <span>Backend / FE 可同步推进，并输出影响范围。</span>
+              </div>
+              <div class="flow-step">
+                <b>Test</b>
+                <strong>全量测试</strong>
+                <span>分段通过后执行全量测试，最终通知用户。</span>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <section id="project">
+          <div class="split">
+            <div class="section-head">
+              <h2>以项目为维度，不让 AI 每次重新认识仓库。</h2>
+              <p>
+                每个项目用 pipeline.project.yaml 绑定项目根目录、功能包目录和项目画像。画像错误时停止当前流程并重扫。
+              </p>
+              <ul class="check-list">
+                <li>
+                  <span class="check-mark">✓</span>
+                  <span><b>首次使用先扫描。</b> 生成 project-details.md，使用者确认后才能开发。</span>
+                </li>
+                <li>
+                  <span class="check-mark">✓</span>
+                  <span><b>每次开发前必读。</b> 所有角色都以项目画像作为项目事实源。</span>
+                </li>
+                <li>
+                  <span class="check-mark">✓</span>
+                  <span><b>开发后反哺。</b> 只补充可复用项目事实，不记录一次性需求细节。</span>
+                </li>
+              </ul>
+            </div>
+            <div class="code-panel">
+              <pre><code>project:
+  name: my-project
+
+roots:
+  project: .
+  docs: lightweight-pipeline
+
+knowledge:
+  project_details: lightweight-pipeline/project-details.md
+
+features:
+  root: lightweight-pipeline/features
+
+apps:
+  backend:
+    path: services/api
+  frontend:
+    path: packages/web</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <h2>一次安装，多个 AI 编程工具共用。</h2>
+            <p>shared 目录是唯一事实来源，不同工具只安装自己的适配入口。</p>
+          </div>
+          <div class="targets">
+            <div class="target">
+              <strong>Codex</strong>
+              <span>安装 pipeline-commander skill。</span>
+            </div>
+            <div class="target">
+              <strong>Claude Code</strong>
+              <span>安装 /pipeline-commander slash command。</span>
+            </div>
+            <div class="target">
+              <strong>AGENTS.md</strong>
+              <span>安装项目级 AGENTS.md 和资源目录。</span>
+            </div>
+            <div class="target">
+              <strong>All</strong>
+              <span>同一命令安装全部适配器。</span>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div class="cta">
+            <div>
+              <h2>把项目知识、角色边界和测试门禁放进同一套协议。</h2>
+              <p>适合长期维护的真实业务项目，也适合推广给不同 AI 工具的使用者。</p>
+            </div>
+            <a class="button" href="#install">复制安装命令</a>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        Agent Pipeline Commander · Project-level workflow for AI development tools.
+      </footer>
+    </div>
+  </body>
+</html>
