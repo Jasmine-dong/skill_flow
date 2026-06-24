@@ -1,6 +1,6 @@
 ---
 name: pipeline-commander
-description: 轻量级多角色工作流指挥官。根据功能包 status.yaml 与内置 workflow 状态机判断下一步角色和任务，读取对应角色卡执行，不要求用户记多个角色 skill。
+description: 项目工作流助手（pipeline-commander）。轻量级多角色工作流助手，根据功能包 status.yaml 与内置 workflow 状态机判断下一步角色和任务，读取对应角色卡执行，不要求用户记多个角色 skill。
 ---
 
 # Pipeline Commander

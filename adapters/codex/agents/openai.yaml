@@ -1,8 +1,8 @@
 interface:
-  display_name: "Pipeline Commander"
-  short_description: "用一个入口推进多角色功能工作流"
+  display_name: "项目工作流助手 / Pipeline Commander"
+  short_description: "项目工作流助手：用一个入口推进多角色功能工作流"
   brand_color: "#2563EB"
-  default_prompt: "Use $pipeline-commander to推进一个功能包的下一步。"
+  default_prompt: "使用 $pipeline-commander（项目工作流助手）推进一个功能包的下一步。"
 
 policy:
   allow_implicit_invocation: true

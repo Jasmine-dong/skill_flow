@@ -152,6 +152,12 @@ history:
 Codex：
 
 ```text
+$pipeline-commander
+```
+
+也可以输入 `$` 后搜索 `项目工作流助手` 或 `pipeline-commander` 选择该 skill，再输入要推进的 feature：
+
+```text
 推进 2026-05-25--greeting
 ```
 
