@@ -9,6 +9,9 @@ roots:
   project: .
   docs: lightweight-pipeline
 
+knowledge:
+  project_details: lightweight-pipeline/project-details.md
+
 features:
   root: lightweight-pipeline/features
 
@@ -21,4 +24,3 @@ apps:
     path: packages/web
     dev:
       base_url: http://localhost:5173
-

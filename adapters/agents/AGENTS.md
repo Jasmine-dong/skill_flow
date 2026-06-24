@@ -1,0 +1,50 @@
+# Pipeline Commander
+
+当用户说“推进 <feature-id>”、“看下 <feature-id> 下一步”、“继续这个功能”或“跑一下当前工作流”时，使用本项目的 Pipeline Commander 流程。
+
+## 资源位置
+
+资源安装在当前项目的 `.agent-pipeline-commander/`：
+
+- `.agent-pipeline-commander/references/tasks.yaml`：内置任务和 workflow 状态机
+- `.agent-pipeline-commander/references/roles/COMMON.md`：所有角色通用规则
+- `.agent-pipeline-commander/references/roles/<agent>.md`：角色卡片
+- `.agent-pipeline-commander/assets/pipeline.project.yaml.example`：项目绑定配置模板
+- `.agent-pipeline-commander/assets/project-details.md`：项目画像模板
+- `.agent-pipeline-commander/assets/feature-template/status.yaml`：功能包状态模板
+- `.agent-pipeline-commander/assets/feature-template/brief.md`：功能说明模板
+
+## 执行规则
+
+1. 解析用户给出的功能 ID，例如 `2026-05-25--greeting`
+2. 从当前目录向上查找并读取项目根目录的 `pipeline.project.yaml`
+3. 读取 `knowledge.project_details` 指向的项目画像；不存在时先扫描项目并生成项目画像，使用者确认后再进入 feature 流程
+4. 读取 `features.root/<feature-id>/status.yaml`
+5. 读取 `.agent-pipeline-commander/references/tasks.yaml`
+6. 用 `status.workflow + status.phase + status.next` 查找下一步任务
+7. 读取任务指定的 `.agent-pipeline-commander/references/roles/<agent>.md`
+8. 临时扮演该角色完成任务
+9. 完成后补充可复用项目事实，检查门禁，再推进 `status.yaml`
+
+## 硬规则
+
+- 用户不需要直接选择角色，除非他明确指定
+- 不跳过 `phase` / `next` 门禁
+- 当前任务不匹配时，停止并说明当前应该由哪个角色处理
+- 角色只能修改自己职责范围内的产物
+- 所有角色都必须先读取 `.agent-pipeline-commander/references/roles/COMMON.md`，再读取自己的角色卡
+- 遇到问题或不确定时，必须向使用者发起确认；使用者确认或补充后才能继续
+- 每次执行 feature 前必须读取项目画像；发现项目画像与真实项目冲突时，进入 `project_rescan_required` 并停止当前流程
+- 遇到阻塞时写入 `blockers`，不要强行推进
+- 每次推进状态必须追加 `history`
+
+## 项目首次使用
+
+如果当前项目没有 `pipeline.project.yaml`：
+
+1. 参考 `.agent-pipeline-commander/assets/pipeline.project.yaml.example` 在项目根目录创建 `pipeline.project.yaml`
+2. 根据真实项目调整 `knowledge.project_details`、`features.root`、`apps.backend.path`、`apps.frontend.path`
+3. 如果项目画像不存在，参考 `.agent-pipeline-commander/assets/project-details.md` 扫描并生成 `knowledge.project_details` 指向的文件
+4. 使用者确认项目画像后，创建功能包目录：`<features.root>/<feature-id>/`
+5. 参考 `.agent-pipeline-commander/assets/feature-template/status.yaml` 创建 `status.yaml`
+6. 参考 `.agent-pipeline-commander/assets/feature-template/brief.md` 创建 `brief.md`

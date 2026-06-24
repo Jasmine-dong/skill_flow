@@ -4,6 +4,10 @@ workflow: backend-only
 phase: planned
 owner: product-agent
 next: product-agent
+project_details:
+  path: lightweight-pipeline/project-details.md
+  last_confirmed_at:
+  snapshot_note:
 blockers: []
 history:
   - at: "2026-01-01T00:00:00+08:00"

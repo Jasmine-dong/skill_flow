@@ -1,0 +1,394 @@
+# 轻量级任务与流程映射
+
+# tasks 只描述任务本身：谁做、允许什么状态、做完到哪里、需要哪些产物。
+# workflows 决定不同需求类型走哪几步。
+# 注意：full-stack 在 development_ready 后允许 Backend / FE 并行推进。
+# 如果当前工具只能单步执行，Commander 必须询问使用者先推进哪个分支。
+
+tasks:
+  project.rescan:
+    agent: product-agent
+    title: 项目画像重扫
+    allowed_phase: [project_rescan_required]
+    requires_next: product-agent
+    done_phase: planned
+    done_requires:
+      - brief.md
+    steps: |
+      读取 pipeline.project.yaml 中的 knowledge.project_details。
+      根据 blockers 中记录的项目画像冲突原因，重新扫描项目结构、技术栈、命令、前后端约定和测试入口。
+      更新 project-details.md，只记录可复用项目事实，不记录一次性需求细节。
+      向使用者确认新的项目画像。
+      使用者确认后，在 status.history 记录重扫原因和确认结果，将 phase 重置为 planned，重新开启当前 feature 流程。
+
+  product.clarify:
+    agent: product-agent
+    title: 需求澄清
+    allowed_phase: [planned]
+    requires_next: product-agent
+    done_phase: requirements_ready
+    done_requires:
+      - brief.md
+      - test/coverage.md
+    steps: |
+      读取 PRD、用户描述与上下文。
+      先判断需求是否足够进入技术拆解；不完整时向使用者发起澄清。
+      完成功能包 brief.md、验收标准、待确认项与测试覆盖说明。
+      确认需求完整后推进到 requirements_ready。
+
+  product.document:
+    agent: product-agent
+    title: 产品/文档整理
+    allowed_phase: [planned]
+    requires_next: product-agent
+    done_phase: done
+    done_next: null
+    done_requires:
+      - brief.md
+    steps: |
+      梳理背景、范围、验收标准和待确认问题。
+      仅产出文档，不进入研发实现。
+      完成后直接推进到 done。
+
+  backend.api_contract:
+    agent: backend-agent
+    title: 接口文档与后端 TODO
+    allowed_phase: [requirements_ready]
+    requires_next: backend-agent
+    done_phase: api_contract_ready
+    done_requires:
+      - api.openapi.yaml
+      - backend/todo.md
+    steps: |
+      读取 brief.md 与 test/coverage.md。
+      先产出或修正 api.openapi.yaml，再拆解 backend/todo.md。
+      不写业务代码。
+      接口文档未被使用者确认前，不进入 Backend / FE 开发。
+
+  frontend.todo:
+    agent: frontend-agent
+    title: 前端 TODO 拆解
+    allowed_phase: [requirements_ready, api_contract_ready]
+    requires_next: frontend-agent
+    done_phase: frontend_todo_ready
+    done_requires:
+      - frontend/todo.md
+    steps: |
+      读取 brief.md、test/coverage.md；如有 api.openapi.yaml，也一并读取。
+      不写业务代码，只拆解前端开发 TODO。
+      写 frontend/todo.md，包含页面、组件、状态、接口联调、测试、设计走查与风险。
+
+  product.confirm_development:
+    agent: product-agent
+    title: 开发前确认
+    allowed_phase: [api_contract_ready, frontend_todo_ready]
+    requires_next: product-agent
+    done_phase: development_ready
+    done_requires:
+      - brief.md
+      - confirmations/development-confirmation.md
+    steps: |
+      按当前 workflow 只汇总适用角色的 TODO 和接口文档。
+      backend-only 只确认 api.openapi.yaml 与 backend/todo.md。
+      frontend-only 只确认 frontend/todo.md；如果没有后端介入，不要求 api.openapi.yaml。
+      full-stack 必须先确认 api.openapi.yaml，再确认 backend/todo.md 与 frontend/todo.md。
+      不适用的 TODO 不得作为门禁要求，但必须在确认文件中写明不适用原因。
+      向使用者确认需求、接口文档和技术 TODO 是否可以进入开发。
+      使用者确认前不得推进。
+      使用者确认后写 confirmations/development-confirmation.md 记录确认内容，并推进到 development_ready。
+      full-stack 进入 development_ready 后，Backend 和 FE 可以同步开始；如果当前工具只能单步执行，询问使用者先推进哪个分支。
+
+  backend.implement:
+    agent: backend-agent
+    title: 后端实现
+    allowed_phase: [development_ready, backend_fix_needed]
+    requires_next: backend-agent
+    done_phase: backend_done
+    done_requires:
+      - backend/notes.md
+    steps: |
+      读取 brief.md、api.openapi.yaml、backend/todo.md 与 confirmations/development-confirmation.md。
+      在 apps.backend.path 内实现接口或服务端逻辑。
+      写 backend/notes.md，必须包含建议测试点、影响范围和是否建议扩大测试范围。
+      后端完成后，test-agent 可以先介入测试后端部分。
+
+  frontend.implement:
+    agent: frontend-agent
+    title: 前端实现
+    allowed_phase: [development_ready, backend_tested, frontend_fix_needed, ui_fix_needed]
+    requires_next: frontend-agent
+    done_phase: frontend_done
+    done_requires:
+      - frontend/integration.md
+    steps: |
+      读取 brief.md、frontend/todo.md、confirmations/development-confirmation.md；如有 api.openapi.yaml，也读取接口契约。
+      在 apps.frontend.path 内完成页面、交互或联调。
+      写 frontend/integration.md，必须包含建议测试点、影响范围和是否建议扩大测试范围。
+      前端完成后，designer-agent 可以先介入 UI 验收。
+
+  test.backend:
+    agent: test-agent
+    title: 后端分段测试
+    allowed_phase: [backend_done]
+    requires_next: test-agent
+    done_phase: backend_tested
+    done_requires:
+      - test/backend-report.md
+    steps: |
+      读取 test/coverage.md、api.openapi.yaml、backend/notes.md。
+      先读取 Backend 提供的建议测试点、影响范围和扩测建议，判断是否需要扩大测试范围，并在报告中记录判断。
+      测试后端接口、服务逻辑、权限、错误处理和数据边界。
+      写 test/backend-report.md。
+      通过则记录通过；失败则写 blockers，并把 phase 设为 backend_fix_needed，next 设为 backend-agent。
+
+  designer.review:
+    agent: designer-agent
+    title: UI 验收
+    allowed_phase: [planned, frontend_done]
+    requires_next: designer-agent
+    done_phase: ui_reviewed
+    done_requires:
+      - design/ui-review.md
+    steps: |
+      对照 brief.md、设计稿、frontend/todo.md 与 frontend/integration.md 做 UI/交互验收。
+      写 design/ui-review.md。
+      通过后 test-agent 可以进入前端部分测试。
+      有 P0/P1 阻塞问题时写 blockers，并把 phase 设为 ui_fix_needed，next 设为 frontend-agent。
+
+  test.frontend:
+    agent: test-agent
+    title: 前端分段测试
+    allowed_phase: [ui_reviewed]
+    requires_next: test-agent
+    done_phase: frontend_tested
+    done_requires:
+      - test/frontend-report.md
+    steps: |
+      读取 test/coverage.md、frontend/integration.md、design/ui-review.md；如有 api.openapi.yaml，也读取接口契约。
+      先读取 FE 提供的建议测试点、影响范围和扩测建议，判断是否需要扩大测试范围，并在报告中记录判断。
+      测试前端主流程、交互状态、接口联调、权限、异常、空状态和回归风险。
+      写 test/frontend-report.md。
+      通过则记录通过；失败则写 blockers，并把 phase 设为 frontend_fix_needed，next 设为 frontend-agent。
+
+  test.full:
+    agent: test-agent
+    title: 全量测试
+    allowed_phase: [backend_tested, frontend_tested]
+    requires_next: test-agent
+    done_phase: full_tested
+    done_requires:
+      - test/full-report.md
+    steps: |
+      读取当前 workflow 要求的所有产物。
+      确认当前 workflow 要求的 Backend 分段测试、FE 分段测试和 UI 验收都已经通过。
+      执行全量回归或端到端验证。
+      写 test/full-report.md。
+      通过后推进到 full_tested；失败时按归属写 blockers，并把 phase 设为 backend_fix_needed、frontend_fix_needed 或 ui_fix_needed。
+
+  product.accept:
+    agent: product-agent
+    title: 产品验收与通知
+    allowed_phase: [full_tested, ui_reviewed]
+    requires_next: product-agent
+    done_phase: done
+    done_next: null
+    done_requires:
+      - brief.md
+    steps: |
+      对照验收标准和当前 workflow 要求的产物。
+      确认无 P0 阻塞后推进到 done。
+      状态变为 done 后按当前 workflow 通知使用者通过结论和关键文档位置。
+
+  test.regression:
+    agent: test-agent
+    title: 测试回归
+    allowed_phase: [planned, requirements_ready, development_ready, backend_fix_needed, frontend_fix_needed, ui_fix_needed]
+    requires_next: test-agent
+    done_phase: done
+    done_next: null
+    done_requires:
+      - test/report.md
+    steps: |
+      明确回归范围与风险点。
+      执行 API、页面或手工回归用例。
+      写 test/report.md，列出通过项、失败项和未覆盖风险。
+
+workflows:
+  # 全链路：需求澄清 -> 接口文档/TODO -> 使用者确认 -> Backend/FE 同步开发 -> Backend 测试 / UI 验收 -> FE 测试 -> 全量测试 -> 产品验收通知
+  full-stack:
+    description: 同时涉及产品、后端、前端、测试和 UI 走查。
+    start: product.clarify
+    next_task_map:
+      product-agent:
+        project_rescan_required: project.rescan
+        planned: product.clarify
+        frontend_todo_ready: product.confirm_development
+        full_tested: product.accept
+      backend-agent:
+        requirements_ready: backend.api_contract
+        development_ready: backend.implement
+        backend_fix_needed: backend.implement
+      frontend-agent:
+        api_contract_ready: frontend.todo
+        development_ready: frontend.implement
+        backend_tested: frontend.implement
+        frontend_fix_needed: frontend.implement
+        ui_fix_needed: frontend.implement
+      designer-agent:
+        frontend_done: designer.review
+      test-agent:
+        backend_done: test.backend
+        ui_reviewed: test.frontend
+        frontend_tested: test.full
+    done_next:
+      project.rescan: product-agent
+      product.clarify: backend-agent
+      backend.api_contract: frontend-agent
+      frontend.todo: product-agent
+      product.confirm_development: backend-agent
+      backend.implement: test-agent
+      test.backend: frontend-agent
+      frontend.implement: designer-agent
+      designer.review: test-agent
+      test.frontend: test-agent
+      test.full: product-agent
+    final_requires:
+      - brief.md
+      - api.openapi.yaml
+      - backend/todo.md
+      - frontend/todo.md
+      - confirmations/development-confirmation.md
+      - backend/notes.md
+      - test/backend-report.md
+      - frontend/integration.md
+      - design/ui-review.md
+      - test/frontend-report.md
+      - test/full-report.md
+
+  # 只有服务端：需求澄清 -> 接口文档/TODO -> 使用者确认 -> 后端开发 -> 后端测试 -> 全量测试 -> 产品验收通知
+  backend-only:
+    description: 只涉及接口、服务端逻辑、任务调度或数据处理。
+    start: product.clarify
+    next_task_map:
+      product-agent:
+        project_rescan_required: project.rescan
+        planned: product.clarify
+        api_contract_ready: product.confirm_development
+        full_tested: product.accept
+      backend-agent:
+        requirements_ready: backend.api_contract
+        development_ready: backend.implement
+        backend_fix_needed: backend.implement
+      test-agent:
+        backend_done: test.backend
+        backend_tested: test.full
+    done_next:
+      project.rescan: product-agent
+      product.clarify: backend-agent
+      backend.api_contract: product-agent
+      product.confirm_development: backend-agent
+      backend.implement: test-agent
+      test.backend: test-agent
+      test.full: product-agent
+    final_requires:
+      - brief.md
+      - api.openapi.yaml
+      - backend/todo.md
+      - confirmations/development-confirmation.md
+      - backend/notes.md
+      - test/backend-report.md
+      - test/full-report.md
+
+  # 只有前端：需求澄清 -> 前端 TODO -> 使用者确认 -> 前端开发 -> UI 验收 -> 前端测试 -> 全量测试 -> 产品验收通知
+  frontend-only:
+    description: 只涉及页面、交互、样式、前端状态或纯 Mock。
+    start: product.clarify
+    next_task_map:
+      product-agent:
+        project_rescan_required: project.rescan
+        planned: product.clarify
+        frontend_todo_ready: product.confirm_development
+        full_tested: product.accept
+      frontend-agent:
+        requirements_ready: frontend.todo
+        development_ready: frontend.implement
+        frontend_fix_needed: frontend.implement
+        ui_fix_needed: frontend.implement
+      designer-agent:
+        frontend_done: designer.review
+      test-agent:
+        ui_reviewed: test.frontend
+        frontend_tested: test.full
+    done_next:
+      project.rescan: product-agent
+      product.clarify: frontend-agent
+      frontend.todo: product-agent
+      product.confirm_development: frontend-agent
+      frontend.implement: designer-agent
+      designer.review: test-agent
+      test.frontend: test-agent
+      test.full: product-agent
+    final_requires:
+      - brief.md
+      - frontend/todo.md
+      - confirmations/development-confirmation.md
+      - frontend/integration.md
+      - design/ui-review.md
+      - test/frontend-report.md
+      - test/full-report.md
+
+  # 只有产品：产品整理 -> done
+  product-only:
+    description: 只梳理需求、范围、验收标准或评审结论。
+    start: product.document
+    next_task_map:
+      product-agent:
+        project_rescan_required: project.rescan
+        planned: product.document
+    done_next:
+      project.rescan: product-agent
+    final_requires:
+      - brief.md
+
+  # 只有设计走查：设计 -> 产品验收
+  design-review-only:
+    description: 只做 UI/UX 走查、视觉验收或交互检查。
+    start: designer.review
+    next_task_map:
+      designer-agent:
+        planned: designer.review
+      product-agent:
+        project_rescan_required: project.rescan
+        ui_reviewed: product.accept
+    done_next:
+      project.rescan: designer-agent
+      designer.review: product-agent
+    final_requires:
+      - design/ui-review.md
+
+  # 只有测试：测试回归 -> done
+  test-only:
+    description: 只补测试、回归验证、复测或输出测试报告。
+    start: test.regression
+    next_task_map:
+      product-agent:
+        project_rescan_required: project.rescan
+      test-agent:
+        planned: test.regression
+    done_next:
+      project.rescan: test-agent
+    final_requires:
+      - test/report.md
+
+  # 文档/配置类：产品整理 -> done
+  docs-only:
+    description: 只更新说明文档、配置说明、流程文档或项目约定。
+    start: product.document
+    next_task_map:
+      product-agent:
+        project_rescan_required: project.rescan
+        planned: product.document
+    done_next:
+      project.rescan: product-agent
+    final_requires:
+      - brief.md
