@@ -64,7 +64,7 @@
         gap: 24px;
         width: min(1120px, calc(100% - 40px));
         margin: 0 auto;
-        padding: 14px 0;
+        padding: 18px 0;
       }
 
       .brand {
@@ -121,14 +121,14 @@
       .hero {
         width: min(1120px, calc(100% - 40px));
         margin: 0 auto;
-        padding: 72px 0 54px;
+        padding: 92px 0 76px;
       }
 
       .hero-grid {
         display: grid;
         grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
         align-items: center;
-        gap: 46px;
+        gap: 70px;
       }
 
       .eyebrow {
@@ -139,30 +139,32 @@
       }
 
       h1 {
-        max-width: 760px;
+        max-width: 680px;
         margin: 0;
-        font-size: clamp(44px, 7vw, 80px);
-        line-height: 0.96;
+        font-size: clamp(42px, 5.4vw, 66px);
+        line-height: 1.08;
         letter-spacing: 0;
       }
 
       .hero-copy {
         max-width: 650px;
-        margin: 24px 0 0;
+        margin: 30px 0 0;
         color: var(--muted);
-        font-size: 19px;
+        font-size: 20px;
+        line-height: 1.72;
       }
 
       .hero-actions {
         display: flex;
         flex-wrap: wrap;
         gap: 12px;
-        margin-top: 32px;
+        margin-top: 38px;
       }
 
       .terminal {
-        margin-top: 26px;
-        max-width: 690px;
+        position: relative;
+        margin-top: 34px;
+        max-width: 720px;
         overflow: hidden;
         border: 1px solid var(--line);
         border-radius: 8px;
@@ -172,9 +174,16 @@
 
       .terminal-bar {
         display: flex;
+        align-items: center;
+        justify-content: space-between;
         gap: 6px;
         padding: 12px 14px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .terminal-dots {
+        display: flex;
+        gap: 6px;
       }
 
       .dot {
@@ -200,15 +209,46 @@
 
       .terminal pre {
         margin: 0;
-        padding: 18px;
-        overflow-x: auto;
+        padding: 22px 126px 22px 18px;
+        overflow: visible;
         color: #d9fbe8;
-        font-size: 14px;
+        font-size: 13px;
         line-height: 1.65;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+
+      .copy-button {
+        position: absolute;
+        right: 14px;
+        bottom: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 84px;
+        min-height: 34px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        cursor: pointer;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 720;
+      }
+
+      .copy-button:hover {
+        background: rgba(255, 255, 255, 0.16);
+      }
+
+      .copy-button:focus-visible {
+        outline: 3px solid rgba(217, 251, 232, 0.5);
+        outline-offset: 2px;
       }
 
       .workflow-visual {
         overflow: hidden;
+        align-self: start;
         border: 1px solid var(--line);
         border-radius: 8px;
         background: var(--panel);
@@ -220,7 +260,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 18px;
-        padding: 18px;
+        padding: 22px;
         border-bottom: 1px solid var(--line);
       }
 
@@ -242,22 +282,22 @@
 
       .visual-body {
         display: grid;
-        gap: 14px;
-        padding: 18px;
+        gap: 20px;
+        padding: 24px 22px;
       }
 
       .step-row {
         display: grid;
-        grid-template-columns: 36px minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 12px;
-        min-height: 54px;
+        grid-template-columns: 40px minmax(0, 1fr);
+        align-items: start;
+        gap: 14px;
+        min-height: 64px;
       }
 
       .step-index {
         display: grid;
-        width: 34px;
-        height: 34px;
+        width: 38px;
+        height: 38px;
         place-items: center;
         border-radius: 8px;
         background: #edf5f4;
@@ -267,16 +307,19 @@
 
       .step-copy strong {
         display: block;
-        font-size: 14px;
+        margin-bottom: 3px;
+        font-size: 15px;
       }
 
       .step-copy span {
         display: block;
         color: var(--muted);
-        font-size: 13px;
+        font-size: 14px;
+        line-height: 1.55;
       }
 
       .step-tag {
+        display: none;
         border: 1px solid var(--line);
         border-radius: 999px;
         padding: 4px 9px;
@@ -286,23 +329,24 @@
       }
 
       .visual-note {
-        margin: 6px 18px 18px;
-        padding: 14px;
+        margin: 4px 22px 22px;
+        padding: 16px;
         border-left: 4px solid var(--amber);
         background: #fff8e8;
         color: #5e4514;
-        font-size: 13px;
+        font-size: 14px;
+        line-height: 1.65;
       }
 
       section {
         width: min(1120px, calc(100% - 40px));
         margin: 0 auto;
-        padding: 58px 0;
+        padding: 82px 0;
       }
 
       .section-head {
         max-width: 760px;
-        margin-bottom: 30px;
+        margin-bottom: 42px;
       }
 
       h2 {
@@ -313,23 +357,24 @@
       }
 
       .section-head p {
-        margin: 14px 0 0;
+        margin: 18px 0 0;
         color: var(--muted);
-        font-size: 17px;
+        font-size: 18px;
+        line-height: 1.7;
       }
 
       .feature-grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 16px;
+        gap: 24px;
       }
 
       .feature-card {
-        min-height: 210px;
+        min-height: 250px;
         border: 1px solid var(--line);
         border-radius: 8px;
         background: var(--panel);
-        padding: 22px;
+        padding: 28px;
       }
 
       .icon {
@@ -337,7 +382,7 @@
         width: 38px;
         height: 38px;
         place-items: center;
-        margin-bottom: 18px;
+        margin-bottom: 24px;
         border-radius: 8px;
         background: #eef4ff;
         color: var(--blue);
@@ -357,18 +402,19 @@
       }
 
       .feature-card h3 {
-        margin: 0 0 10px;
+        margin: 0 0 14px;
         font-size: 19px;
       }
 
       .feature-card p {
         margin: 0;
         color: var(--muted);
+        line-height: 1.68;
       }
 
       .band {
         width: 100%;
-        margin: 28px 0 0;
+        margin: 44px 0 0;
         border-top: 1px solid var(--line);
         border-bottom: 1px solid var(--line);
         background: #ffffff;
@@ -377,16 +423,16 @@
       .flow {
         display: grid;
         grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 12px;
+        gap: 18px;
       }
 
       .flow-step {
         position: relative;
-        min-height: 142px;
+        min-height: 168px;
         border: 1px solid var(--line);
         border-radius: 8px;
         background: white;
-        padding: 18px;
+        padding: 24px;
       }
 
       .flow-step::after {
@@ -420,18 +466,19 @@
       .flow-step span {
         color: var(--muted);
         font-size: 14px;
+        line-height: 1.65;
       }
 
       .split {
         display: grid;
         grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
-        gap: 32px;
+        gap: 52px;
         align-items: start;
       }
 
       .check-list {
         display: grid;
-        gap: 12px;
+        gap: 18px;
         margin: 0;
         padding: 0;
         list-style: none;
@@ -440,7 +487,7 @@
       .check-list li {
         display: grid;
         grid-template-columns: 28px minmax(0, 1fr);
-        gap: 10px;
+        gap: 14px;
         align-items: start;
         color: var(--muted);
       }
@@ -469,7 +516,7 @@
 
       .code-panel pre {
         margin: 0;
-        padding: 20px;
+        padding: 28px;
         overflow-x: auto;
         color: #e5e7eb;
         font-size: 13px;
@@ -479,14 +526,14 @@
       .targets {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 14px;
+        gap: 22px;
       }
 
       .target {
         border: 1px solid var(--line);
         border-radius: 8px;
         background: white;
-        padding: 18px;
+        padding: 24px;
       }
 
       .target strong {
@@ -497,6 +544,7 @@
       .target span {
         color: var(--muted);
         font-size: 14px;
+        line-height: 1.6;
       }
 
       .cta {
@@ -504,7 +552,7 @@
         grid-template-columns: minmax(0, 1fr) auto;
         align-items: center;
         gap: 24px;
-        padding: 34px;
+        padding: 44px;
         border: 1px solid var(--line);
         border-radius: 8px;
         background: var(--ink);
@@ -551,6 +599,7 @@
 
         .workflow-visual {
           max-width: 620px;
+          margin-top: 8px;
         }
       }
 
@@ -570,7 +619,20 @@
         }
 
         .hero {
-          padding-top: 46px;
+          padding-top: 58px;
+          padding-bottom: 62px;
+        }
+
+        h1 {
+          font-size: clamp(38px, 12vw, 54px);
+        }
+
+        section {
+          padding: 62px 0;
+        }
+
+        .section-head {
+          margin-bottom: 30px;
         }
 
         .feature-grid,
@@ -580,6 +642,7 @@
 
         .step-row {
           grid-template-columns: 32px minmax(0, 1fr);
+          min-height: 72px;
         }
 
         .step-tag {
@@ -589,7 +652,17 @@
 
         .cta {
           grid-template-columns: 1fr;
-          padding: 24px;
+          padding: 28px;
+        }
+
+        .terminal pre {
+          padding: 18px;
+        }
+
+        .copy-button {
+          position: static;
+          width: calc(100% - 28px);
+          margin: 0 14px 14px;
         }
       }
     </style>
@@ -626,12 +699,22 @@
                 <a class="button secondary" href="#workflow">查看流程</a>
               </div>
               <div class="terminal" id="install">
-                <div class="terminal-bar" aria-hidden="true">
-                  <span class="dot"></span>
-                  <span class="dot"></span>
-                  <span class="dot"></span>
+                <div class="terminal-bar">
+                  <span class="terminal-dots" aria-hidden="true">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                  </span>
                 </div>
-                <pre><code>curl -fsSL https://raw.githubusercontent.com/Jasmine-dong/skill_flow/main/install.sh | bash</code></pre>
+                <pre><code id="install-command">curl -fsSL https://raw.githubusercontent.com/Jasmine-dong/skill_flow/main/install.sh | bash</code></pre>
+                <button
+                  class="copy-button"
+                  type="button"
+                  data-copy-target="install-command"
+                  aria-label="复制安装命令"
+                >
+                  复制命令
+                </button>
               </div>
             </div>
 
@@ -846,5 +929,46 @@ apps:
         Agent Pipeline Commander · Project-level workflow for AI development tools.
       </footer>
     </div>
+    <script>
+      const copyButtons = document.querySelectorAll("[data-copy-target]");
+
+      async function copyText(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          return;
+        }
+
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+
+      copyButtons.forEach((button) => {
+        button.addEventListener("click", async () => {
+          const target = document.getElementById(button.dataset.copyTarget);
+          if (!target) return;
+
+          const originalText = button.textContent;
+          try {
+            await copyText(target.textContent.trim());
+            button.textContent = "已复制";
+            window.setTimeout(() => {
+              button.textContent = originalText;
+            }, 1400);
+          } catch {
+            button.textContent = "复制失败";
+            window.setTimeout(() => {
+              button.textContent = originalText;
+            }, 1400);
+          }
+        });
+      });
+    </script>
   </body>
 </html>
