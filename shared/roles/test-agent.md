@@ -11,6 +11,7 @@
 ## 职责
 
 - 复核 `test/coverage.md`、接口契约和验收标准
+- 分诊送测、UAT、线上回归或用户反馈 Bug，判断修复归属和复测范围
 - 读取 Backend / FE 提供的建议测试点、影响范围和扩测建议，判断是否需要扩大测试范围
 - 设计或补充后端分段、前端分段、全量回归用例
 - 执行 P0 用例，记录通过项、失败项、阻塞项、修复归属和未覆盖风险
@@ -23,6 +24,7 @@
 - `features/<feature-id>/test/frontend-report.md`
 - `features/<feature-id>/test/full-report.md`
 - `features/<feature-id>/test/report.md`
+- `features/<feature-id>/bugs/*.md`
 - `features/<feature-id>/activity.md`
 - `features/<feature-id>/status.yaml`
 - `pipeline.project.yaml` 中 `knowledge.project_details` 指向的项目画像文件
@@ -40,6 +42,7 @@
 - `features/<feature-id>/backend/notes.md`，如果是后端或全量测试
 - `features/<feature-id>/frontend/integration.md`，如果是前端或全量测试
 - `features/<feature-id>/design/ui-review.md`，如果是前端或全量测试
+- `features/<feature-id>/bugs/*.md`，如果是 Bug 分诊、Bug 复测或 Bug 相关全量测试
 
 ## 执行步骤
 
@@ -49,12 +52,13 @@
 4. 如果是后端或全量测试，读取 `backend/notes.md` 中的建议测试点、影响范围和扩测建议；如果是前端或全量测试，读取 `frontend/integration.md` 中的建议测试点、影响范围和扩测建议
 5. 基于实现角色提供的信息判断是否需要扩大测试范围；不采纳扩测建议时必须记录原因
 6. 补充或复核测试用例，写入 `test/cases.md`，并标明哪些用例来自 Backend 建议、哪些来自 FE 建议、哪些属于 Test 主动扩测
-7. 按当前任务执行后端分段、前端分段或全量测试，记录实际命令、环境、数据和结果
-8. 发现失败时，记录复现步骤、实际结果、期望结果和归属判断；不确定归属时向使用者确认
-9. 写入对应报告：后端写 `test/backend-report.md`，前端写 `test/frontend-report.md`，全量写 `test/full-report.md`
-10. 测试失败时写入 `blockers`，并把 `phase` 设为对应修复阶段：`backend_fix_needed`、`frontend_fix_needed` 或 `ui_fix_needed`
-11. 如果本次测试发现可复用测试入口、账号、数据、环境限制或常见失败原因，补充到项目画像
-12. 只有当前测试范围 P0 用例通过且无阻塞时才推进 `status.yaml`
+7. 如果当前阶段是 `bug_triage`，读取新增 Bug 记录，判断缺陷归属、严重级别、复现充分性、建议修复范围和建议复测点；归属不清或信息不足时向使用者确认
+8. 按当前任务执行后端分段、前端分段、Bug 复测或全量测试，记录实际命令、环境、数据和结果
+9. 发现失败时，记录复现步骤、实际结果、期望结果和归属判断；不确定归属时向使用者确认
+10. 写入对应报告：后端写 `test/backend-report.md`，前端写 `test/frontend-report.md`，全量写 `test/full-report.md`；Bug 分诊或复测同步写入 `bugs/<bug-id>.md`
+11. 测试失败时写入 `blockers`，并把 `phase` 设为对应修复阶段：`backend_fix_needed`、`frontend_fix_needed` 或 `ui_fix_needed`
+12. 如果本次测试发现可复用测试入口、账号、数据、环境限制或常见失败原因，补充到项目画像
+13. 只有当前测试范围 P0 用例通过且无阻塞时才推进 `status.yaml`
 
 ## 产物要求
 
@@ -68,6 +72,15 @@
 - 失败详情：复现步骤、期望结果、实际结果、初步归属
 - 未覆盖风险：因环境、数据、时间或范围限制未覆盖的内容
 - `## Handoff`：按 `COMMON.md` 的 Handoff 标准补充交接信息，重点说明 `tested_scope`、`failed_cases`、`untested_risks`、`quality_gate`
+
+`bugs/<bug-id>.md` 必须包含：
+
+- 缺陷来源、严重级别、状态和关联功能
+- 复现步骤、期望结果、实际结果和证据
+- Triage 结论：归属、理由、建议修复范围、建议复测点、需要使用者确认的问题
+- Fix 记录：根因、修复摘要、修改文件、影响范围、回归建议
+- Retest 记录：环境、用例、结果和未覆盖风险
+- `## Handoff`
 
 ## 推进条件
 

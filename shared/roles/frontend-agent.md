@@ -29,6 +29,7 @@
 - `apps.frontend.path`
 - `features/<feature-id>/frontend/todo.md`
 - `features/<feature-id>/frontend/integration.md`
+- `features/<feature-id>/bugs/*.md` 中的 Fix 区块
 - `features/<feature-id>/activity.md`
 - `features/<feature-id>/status.yaml`
 - `pipeline.project.yaml` 中 `knowledge.project_details` 指向的项目画像文件
@@ -45,6 +46,7 @@
 - `features/<feature-id>/test/coverage.md`，如果存在
 - `features/<feature-id>/test/cases.md`，如果存在
 - `features/<feature-id>/test/frontend-report.md` 或 `design/ui-review.md`，如果是返工任务
+- `features/<feature-id>/bugs/*.md`，如果是送测 Bug 修复
 
 ## 执行步骤
 
@@ -56,9 +58,9 @@
 6. 如果没有接口契约，只能做纯前端、静态状态或明确允许的 Mock；不确定时向使用者确认，不要自己发明后端字段或接口路径
 7. 修改前先搜索现有路由、组件、请求封装、状态管理、样式和测试约定，优先复用项目既有模式
 8. 如果当前阶段是 `requirements_ready` 或 `api_contract_ready`，只拆解 `frontend/todo.md`，不要写业务代码
-9. 如果当前阶段是 `development_ready`、`backend_tested`、`frontend_fix_needed` 或 `ui_fix_needed`，按已确认的 `frontend/todo.md` 完成页面、交互、联调或返工
+9. 如果当前阶段是 `development_ready`、`backend_tested`、`frontend_fix_needed` 或 `ui_fix_needed`，按已确认的 `frontend/todo.md` 或 `bugs/<bug-id>.md` 完成页面、交互、联调或返工
 10. 完成实现后执行最小必要验证，优先包括类型检查、单测、lint、页面启动或关键路径手工验证
-11. 写入 `frontend/integration.md`，记录改动、联调、验证、建议测试点、影响范围、扩测建议和风险
+11. 写入 `frontend/integration.md`，记录改动、联调、验证、建议测试点、影响范围、扩测建议和风险；如果是 Bug 修复，同时回写 `bugs/<bug-id>.md` 的 Fix 区块
 12. 如果本次实现发现可复用前端项目事实，补充到项目画像
 13. 只有门禁通过时才推进 `status.yaml`；否则写入 `blockers`
 
@@ -75,6 +77,16 @@
 - 扩测建议：是否建议扩大测试范围；如果建议扩大，说明原因和扩测边界；如果不建议扩大，说明判断依据
 - 风险与遗留：未覆盖项、依赖后端/设计/产品确认的问题
 - `## Handoff`：按 `COMMON.md` 的 Handoff 标准补充交接信息，重点说明 `changed_views`、`api_dependencies`、`ui_states`
+
+送测 Bug 修复时，`frontend/integration.md` 和对应 `bugs/<bug-id>.md` 必须补充：
+
+- Bug ID 与缺陷来源
+- 根因分析
+- 修复摘要
+- 修改文件
+- 影响范围
+- 回归建议
+- 是否需要重新 UI 验收、前端分段测试或全量测试
 
 `frontend/todo.md` 必须包含：
 

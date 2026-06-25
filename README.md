@@ -73,6 +73,7 @@ agent-pipeline-commander/
       status.yaml
       brief.md
       activity.md
+      bugs/BUG-001.md
       development-confirmation.md
   adapters/
     codex/
@@ -144,6 +145,7 @@ phase: planned
 owner: product-agent
 next: product-agent
 blockers: []
+active_bugs: []
 history:
   - at: "2026-05-25T00:00:00+08:00"
     phase: planned
@@ -296,6 +298,40 @@ blockers:
 
 重扫并更新项目画像，使用者确认后，才重新开启当前 feature 流程。
 
+## 送测 Bug 流程
+
+真实送测、UAT、线上回归或用户反馈阶段发现 Bug 时，不需要新建一个完整需求流程，可以在关联 feature 下补一条 Bug 记录：
+
+```text
+Bug：登录页验证码输错后没有错误提示
+关联功能：2026-05-25--greeting
+缺陷来源：QA
+严重级别：P1
+复现步骤：
+1. 打开登录页
+2. 输入错误验证码并提交
+期望结果：展示验证码错误提示
+实际结果：无任何错误提示
+证据：截图、日志或缺陷单链接
+```
+
+Commander 收到后先做三件事：
+
+1. 写入 `features/<feature-id>/bugs/<bug-id>.md`
+2. 更新 `status.yaml`：`phase: bug_triage`、`next: test-agent`
+3. 交给 `test-agent` 分诊，不直接让实现角色修复未分诊 Bug
+
+分诊后复用现有修复流程：
+
+```text
+bug_triage
+  -> backend_fix_needed -> backend-agent -> test.backend / test.full
+  -> frontend_fix_needed -> frontend-agent -> designer.review / test.frontend / test.full
+  -> ui_fix_needed -> frontend-agent -> designer.review / test.frontend / test.full
+```
+
+修复角色必须回写 `bugs/<bug-id>.md` 的 Fix 区块，Test 复测时必须回写 Retest 区块，并判断是否需要扩大测试范围。
+
 ## 支持的流程类型
 
 功能包通过 `status.yaml` 声明自己的流程类型：
@@ -329,6 +365,8 @@ workflow: backend-only
 常规开发不会在拿到需求文档后立刻写代码。Product 先做需求澄清；如果有 Backend 介入，Backend 先出 `api.openapi.yaml` 和 `backend/todo.md`，FE 基于接口契约拆 `frontend/todo.md`；使用者确认接口文档和开发 TODO 后才进入开发阶段。进入 `development_ready` 后，Backend 和 FE 可以同步推进。
 
 开发过程中允许分段验收：Backend 完成后必须在 `backend/notes.md` 里提供建议测试点、影响范围和扩测建议，再由 Test 测后端部分；FE 完成后必须在 `frontend/integration.md` 里提供建议测试点、影响范围和扩测建议，再由 Designer 做 UI 验收，UI 通过后 Test 测前端部分；Test 需要依据 Backend / FE 提供的信息判断是否扩大测试范围，并在报告中记录采纳或不采纳原因。所有开发与分段验收完成后，Test 执行全量测试。发现问题时进入对应修复阶段，修复后回到对应的 Test 或 UI 验收。全量测试通过后状态改为 `done`，并通知使用者。所有阶段都必须有文档记录。
+
+真实送测后发现 Bug 时，先进入 `bug_triage`，由 Test 判断归属和复测范围，再接回对应修复阶段。
 
 ## 最小心智模型
 

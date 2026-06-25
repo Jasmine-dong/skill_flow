@@ -9,6 +9,7 @@ project_details:
   last_confirmed_at:
   snapshot_note:
 blockers: []
+active_bugs: []
 history:
   - at: "2026-01-01T00:00:00+08:00"
     phase: planned

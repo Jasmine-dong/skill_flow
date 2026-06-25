@@ -22,6 +22,7 @@
 - `features/<feature-id>/api.openapi.yaml`
 - `features/<feature-id>/backend/todo.md`
 - `features/<feature-id>/backend/notes.md`
+- `features/<feature-id>/bugs/*.md` 中的 Fix 区块
 - `features/<feature-id>/activity.md`
 - `features/<feature-id>/status.yaml`
 - `pipeline.project.yaml` 中 `knowledge.project_details` 指向的项目画像文件
@@ -36,6 +37,7 @@
 - `features/<feature-id>/api.openapi.yaml`
 - `features/<feature-id>/test/coverage.md`，如果存在
 - `features/<feature-id>/test/backend-report.md`，如果是后端返工
+- `features/<feature-id>/bugs/*.md`，如果是送测 Bug 修复
 
 ## 执行步骤
 
@@ -45,9 +47,9 @@
 4. 读取 `brief.md` 和现有 `api.openapi.yaml`，提取接口路径、请求参数、响应字段、错误语义和权限要求
 5. 修改前搜索现有路由、控制器、服务、模型、数据访问、错误处理和测试约定，优先复用项目既有模式
 6. 如果当前阶段是 `requirements_ready`，先产出或修正 `api.openapi.yaml`，再拆解 `backend/todo.md`，不要写业务代码
-7. 如果当前阶段是 `development_ready` 或 `backend_fix_needed`，按已确认的 `backend/todo.md` 实现或修复服务端逻辑，并处理参数校验、权限、空数据、异常和边界条件
+7. 如果当前阶段是 `development_ready` 或 `backend_fix_needed`，按已确认的 `backend/todo.md` 或 `bugs/<bug-id>.md` 实现或修复服务端逻辑，并处理参数校验、权限、空数据、异常和边界条件
 8. 执行最小必要验证，优先包括单测、接口测试、类型检查、lint 或本地请求验证
-9. 写入 `backend/notes.md`，记录实现、验证、请求样例、建议测试点、影响范围、扩测建议和风险
+9. 写入 `backend/notes.md`，记录实现、验证、请求样例、建议测试点、影响范围、扩测建议和风险；如果是 Bug 修复，同时回写 `bugs/<bug-id>.md` 的 Fix 区块
 10. 如果本次实现发现可复用后端项目事实，补充到项目画像
 11. 只有门禁通过时才推进 `status.yaml`；否则写入 `blockers`
 
@@ -64,6 +66,16 @@
 - 扩测建议：是否建议扩大测试范围；如果建议扩大，说明原因和扩测边界；如果不建议扩大，说明判断依据
 - 风险与遗留：未覆盖项、需要产品/前端/测试确认的问题
 - `## Handoff`：按 `COMMON.md` 的 Handoff 标准补充交接信息，重点说明 `api_changes`、`data_changes`、`contract_notes`
+
+送测 Bug 修复时，`backend/notes.md` 和对应 `bugs/<bug-id>.md` 必须补充：
+
+- Bug ID 与缺陷来源
+- 根因分析
+- 修复摘要
+- 修改文件
+- 影响范围
+- 回归建议
+- 是否需要扩大后端分段测试或全量测试范围
 
 `backend/todo.md` 必须包含：
 

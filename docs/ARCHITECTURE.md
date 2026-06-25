@@ -13,6 +13,7 @@ flowchart TD
   ProjectDetails["project-details.md\n项目画像 / 技术栈 / 目录 / 命令 / 约定 / 坑点"]
   Status["features.root/<feature-id>/status.yaml\nworkflow / phase / owner / next / blockers / history"]
   Activity["features.root/<feature-id>/activity.md\n开始 / 阻塞 / 完成事件"]
+  Bugs["features.root/<feature-id>/bugs/<bug-id>.md\n送测 Bug / Triage / Fix / Retest"]
   Tasks["tasks.yaml\ntasks + workflows + next_task_map"]
   Common["roles/COMMON.md\n确认 / 阻塞 / 状态 / Chat Status Protocol"]
   Role["roles/<agent>.md\n角色边界卡片"]
@@ -27,6 +28,7 @@ flowchart TD
   Commander --> ProjectDetails
   Commander --> Status
   Commander --> Activity
+  Commander --> Bugs
   Commander --> Tasks
   Tasks --> Role
   Commander --> Common
@@ -47,6 +49,7 @@ sequenceDiagram
   participant K as project-details.md
   participant S as status.yaml
   participant A as activity.md
+  participant B as bugs/<bug-id>.md
   participant T as tasks.yaml
   participant G as COMMON.md
   participant R as role card
@@ -67,6 +70,11 @@ sequenceDiagram
   C->>R: 读取 roles/<agent>.md
   C-->>U: 输出 [开始] role / feature / phase / 本轮目标
   C->>F: 按任务步骤读写产物
+  alt 用户提交送测 Bug
+    C->>B: 归档 Bug 描述、复现步骤、期望/实际、证据
+    C->>S: phase=bug_triage, next=test-agent
+    C-->>U: 输出 [完成] commander / 已进入 Bug 分诊
+  end
   alt 遇到问题或不确定
     C->>S: 写入 blockers，不推进 phase / next
     C->>A: 追加阻塞事件
@@ -126,6 +134,13 @@ stateDiagram-v2
   frontend_done --> project_rescan_required: project_details_mismatch
   project_rescan_required --> planned: project.rescan / user confirmation
   planned --> requirements_ready: product.clarify
+  done --> bug_triage: external bug intake
+  full_tested --> bug_triage: external bug intake
+  backend_tested --> bug_triage: external bug intake
+  frontend_tested --> bug_triage: external bug intake
+  bug_triage --> backend_fix_needed: test.bug_triage backend
+  bug_triage --> frontend_fix_needed: test.bug_triage frontend
+  bug_triage --> ui_fix_needed: test.bug_triage ui
   requirements_ready --> api_contract_ready: backend.api_contract
   api_contract_ready --> frontend_todo_ready: frontend.todo
   frontend_todo_ready --> development_ready: product.confirm_development / confirmation
@@ -210,6 +225,7 @@ Commander 每次执行前先读 pipeline.project.yaml 和 project-details.md；
 tasks.yaml 按 workflow 决定下一个角色；
 角色卡限制职责边界；
 功能包保存所有交接产物；
+送测 Bug 先写入 bugs/<bug-id>.md，再进入 bug_triage；
 角色主要产物通过 ## Handoff 标准化交接；
 聊天界面输出 [开始] / [阻塞] / [完成] 状态事件；
 activity.md 记录关键流程事件；

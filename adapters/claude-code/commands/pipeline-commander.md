@@ -19,6 +19,7 @@ argument-hint: <feature-id>
 - `assets/feature-template/status.yaml`：功能包状态模板
 - `assets/feature-template/brief.md`：功能说明模板
 - `assets/feature-template/activity.md`：功能流程事件记录模板
+- `assets/feature-template/bugs/BUG-001.md`：送测 Bug 记录模板
 
 ## 执行规则
 
@@ -46,6 +47,7 @@ argument-hint: <feature-id>
 - 所有角色必须遵守 Chat Status Protocol：在聊天界面输出 `[开始]`、`[阻塞]`、`[完成]` 三类状态事件；不输出百分比或进度条
 - 输出 `[阻塞]` 或 `[完成]` 时，必须同步追加 `features/<feature-id>/activity.md`
 - 所有角色完成任务时，必须在自己的主要产物中写入 `## Handoff`，并在 `[完成]` 状态中摘出简版交接
+- 用户提交送测 Bug 时，先写入 `features/<feature-id>/bugs/<bug-id>.md`，再将 `status.phase` 设为 `bug_triage`、`status.next` 设为 `test-agent`，交由 Test 分诊；不要直接让实现角色修复未分诊 Bug
 
 ## 项目首次使用
 
@@ -73,3 +75,18 @@ argument-hint: <feature-id>
 ```
 
 先归档到 `source-materials.md`，再分别整理到 `brief.md`、`api.openapi.yaml`、`test/cases.md`、`design/source.md`。
+
+## 送测 Bug 输入格式
+
+```text
+Bug：登录页验证码输错后没有错误提示
+关联功能：2026-05-25--greeting
+缺陷来源：QA
+严重级别：P1
+复现步骤：...
+期望结果：...
+实际结果：...
+证据：截图、日志或缺陷单链接
+```
+
+先归档到 `bugs/<bug-id>.md`，再进入 `bug_triage`。

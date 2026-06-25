@@ -191,6 +191,22 @@ tasks:
       写 test/full-report.md。
       通过后推进到 full_tested；失败时按归属写 blockers，并把 phase 设为 backend_fix_needed、frontend_fix_needed 或 ui_fix_needed。
 
+  test.bug_triage:
+    agent: test-agent
+    title: 送测 Bug 分诊
+    allowed_phase: [bug_triage]
+    requires_next: test-agent
+    done_phase: bug_triaged
+    done_requires:
+      - bugs
+    steps: |
+      读取 bugs/ 下新增或待处理的 Bug 记录、brief.md、接口契约、实现交接和既有测试报告。
+      复核缺陷来源、严重级别、复现步骤、期望结果、实际结果、截图或日志证据。
+      判断缺陷归属：后端问题设 phase=backend_fix_needed,next=backend-agent；前端功能问题设 phase=frontend_fix_needed,next=frontend-agent；UI/交互走查问题设 phase=ui_fix_needed,next=frontend-agent。
+      如果归属不确定、复现信息不足或需求规则不明确，写入 blockers，向使用者确认，不推进到修复阶段。
+      在对应 bugs/<bug-id>.md 中记录 triage 结论、归属理由、建议修复范围和建议复测点。
+      追加 activity.md，并在 status.history 记录 bug triage 结果。
+
   product.accept:
     agent: product-agent
     title: 产品验收与通知
@@ -243,6 +259,7 @@ workflows:
       designer-agent:
         frontend_done: designer.review
       test-agent:
+        bug_triage: test.bug_triage
         backend_done: test.backend
         ui_reviewed: test.frontend
         frontend_tested: test.full
@@ -256,6 +273,7 @@ workflows:
       test.backend: frontend-agent
       frontend.implement: designer-agent
       designer.review: test-agent
+      test.bug_triage: test-agent
       test.frontend: test-agent
       test.full: product-agent
     final_requires:
@@ -286,6 +304,7 @@ workflows:
         development_ready: backend.implement
         backend_fix_needed: backend.implement
       test-agent:
+        bug_triage: test.bug_triage
         backend_done: test.backend
         backend_tested: test.full
     done_next:
@@ -294,6 +313,7 @@ workflows:
       backend.api_contract: product-agent
       product.confirm_development: backend-agent
       backend.implement: test-agent
+      test.bug_triage: test-agent
       test.backend: test-agent
       test.full: product-agent
     final_requires:
@@ -323,6 +343,7 @@ workflows:
       designer-agent:
         frontend_done: designer.review
       test-agent:
+        bug_triage: test.bug_triage
         ui_reviewed: test.frontend
         frontend_tested: test.full
     done_next:
@@ -332,6 +353,7 @@ workflows:
       product.confirm_development: frontend-agent
       frontend.implement: designer-agent
       designer.review: test-agent
+      test.bug_triage: test-agent
       test.frontend: test-agent
       test.full: product-agent
     final_requires:
