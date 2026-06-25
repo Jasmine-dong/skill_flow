@@ -87,6 +87,23 @@ agent-pipeline-commander/
 
 架构图见 [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)。
 
+## 维护方式
+
+仓库只维护源码和适配器，不提交安装产物：
+
+- `shared/` 是状态机、角色卡和模板的唯一事实源。
+- `adapters/` 只保留 Codex、Claude Code、AGENTS.md 的入口差异。
+- `.agent-pipeline-commander/` 是 `install.sh --target agents` 生成的项目本地资源目录，不进仓库。
+- 根目录 `AGENTS.md` 也是 `agents` 目标的安装产物，不进仓库。
+
+修改 `shared/` 或 `adapters/agents/AGENTS.md` 后，可以运行：
+
+```bash
+./scripts/check-install-artifacts.sh
+```
+
+它会在临时目录执行 `install.sh --target agents`，并确认生成的 `AGENTS.md`、`.agent-pipeline-commander/references` 和 `.agent-pipeline-commander/assets` 与源码一致。
+
 ## 项目首次使用
 
 在目标项目根目录创建 `pipeline.project.yaml`：
