@@ -23,6 +23,7 @@
 - 处理前端状态、交互、表单、路由、权限、埋点、错误提示和 loading/empty/error 等页面状态
 - 处理 UI 验收、前端分段测试、全量测试或产品验收反馈中属于前端职责的返工项
 - 记录实现范围、联调方式、验证结果、建议测试点、影响范围、扩测建议和剩余风险
+- 如果开发阶段没有设计材料，记录跳过 UI 验收的原因，并交给 Test 做前端分段测试；后续补充设计稿时可单独触发 UI 走查
 
 ## 可写
 
@@ -60,7 +61,7 @@
 8. 如果当前阶段是 `requirements_ready` 或 `api_contract_ready`，只拆解 `frontend/todo.md`，不要写业务代码
 9. 如果当前阶段是 `development_ready`、`backend_tested`、`frontend_fix_needed` 或 `ui_fix_needed`，按已确认的 `frontend/todo.md` 或 `bugs/<bug-id>.md` 完成页面、交互、联调或返工
 10. 完成实现后执行最小必要验证，优先包括类型检查、单测、lint、页面启动或关键路径手工验证
-11. 写入 `frontend/integration.md`，记录改动、联调、验证、建议测试点、影响范围、扩测建议和风险；如果是 Bug 修复，同时回写 `bugs/<bug-id>.md` 的 Fix 区块
+11. 写入 `frontend/integration.md`，记录改动、联调、验证、建议测试点、影响范围、扩测建议和风险；如果没有设计材料，记录“本轮跳过 UI 验收”的原因和后续补充设计稿后的处理方式；如果是 Bug 修复，同时回写 `bugs/<bug-id>.md` 的 Fix 区块
 12. 如果本次实现发现可复用前端项目事实，补充到项目画像
 13. 只有门禁通过时才推进 `status.yaml`；否则写入 `blockers`
 
@@ -76,6 +77,7 @@
 - 影响范围：可能受影响的页面、路由、组件、接口、状态管理、缓存、权限、埋点或公共能力
 - 扩测建议：是否建议扩大测试范围；如果建议扩大，说明原因和扩测边界；如果不建议扩大，说明判断依据
 - 风险与遗留：未覆盖项、依赖后端/设计/产品确认的问题
+- UI 验收处理：已执行、待执行或本轮跳过；跳过时必须说明原因
 - `## Handoff`：按 `COMMON.md` 的 Handoff 标准补充交接信息，重点说明 `changed_views`、`api_dependencies`、`ui_states`
 
 送测 Bug 修复时，`frontend/integration.md` 和对应 `bugs/<bug-id>.md` 必须补充：
@@ -105,6 +107,7 @@
 - API 字段、路由、权限和状态处理与 `brief.md` / `api.openapi.yaml` 一致
 - 如果验证命令失败，必须记录失败原因和是否与本次改动相关；不能直接推进
 - 如果存在未确认的产品、接口或设计问题，写入 `blockers`，不要推进到下一阶段
+- 没有设计材料不阻塞前端完成；必须在 `frontend/integration.md` 中记录跳过 UI 验收，并把下一步交给 `test-agent`
 
 ## 不做
 

@@ -299,8 +299,8 @@ handoff:
     - 未覆盖弱网场景
   blockers: []
   next_recommended:
-    role: designer-agent
-    reason: 前端已完成，需要先做 UI 验收
+    role: test-agent
+    reason: 当前未提供设计材料，已记录跳过 UI 验收，下一步进入前端分段测试；如果后续补充设计稿，可单独交给 designer-agent
 ```
 
 如果开发中发现项目画像与真实代码、命令或目录结构冲突，当前流程必须停止，feature 状态进入：
@@ -369,9 +369,9 @@ workflow: backend-only
 
 | workflow | 适用场景 | 主路径 |
 |---|---|---|
-| `full-stack` | 产品、后端、前端、测试、设计都参与 | 需求澄清 -> 接口文档/TODO -> 使用者确认 -> Backend/FE 开发 -> 后端分段测试 / UI 验收 -> 前端分段测试 -> 全量测试 -> 通知 |
+| `full-stack` | 产品、后端、前端、测试，可按需接入设计 | 需求澄清 -> 接口文档/TODO -> 使用者确认 -> Backend/FE 开发 -> 后端分段测试 / 条件 UI 验收 -> 前端分段测试 -> 全量测试 -> 通知 |
 | `backend-only` | 只有服务端、API、数据处理、任务调度 | 需求澄清 -> 接口文档/TODO -> 使用者确认 -> 后端开发 -> 后端分段测试 -> 全量测试 -> 通知 |
-| `frontend-only` | 只有页面、交互、样式、前端 Mock | 需求澄清 -> 前端 TODO -> 使用者确认 -> 前端开发 -> UI 验收 -> 前端分段测试 -> 全量测试 -> 通知 |
+| `frontend-only` | 只有页面、交互、样式、前端 Mock，可按需接入设计 | 需求澄清 -> 前端 TODO -> 使用者确认 -> 前端开发 -> 条件 UI 验收 -> 前端分段测试 -> 全量测试 -> 通知 |
 | `product-only` | 只有需求、范围、验收标准、产品文档 | 产品整理 -> done |
 | `design-review-only` | 只有 UI/UX 走查、视觉验收 | 设计走查 -> 验收 |
 | `test-only` | 只有测试补充、回归验证、复测报告 | 测试回归 -> done |
@@ -381,7 +381,17 @@ workflow: backend-only
 
 常规开发不会在拿到需求文档后立刻写代码。Product 先做需求澄清；如果有 Backend 介入，Backend 先出 `api.openapi.yaml` 和 `backend/todo.md`，FE 基于接口契约拆 `frontend/todo.md`；使用者确认接口文档和开发 TODO 后才进入开发阶段。进入 `development_ready` 后，Backend 和 FE 可以同步推进。
 
-开发过程中允许分段验收：Backend 完成后必须在 `backend/notes.md` 里提供建议测试点、影响范围和扩测建议，再由 Test 测后端部分；FE 完成后必须在 `frontend/integration.md` 里提供建议测试点、影响范围和扩测建议，再由 Designer 做 UI 验收，UI 通过后 Test 测前端部分；Test 需要依据 Backend / FE 提供的信息判断是否扩大测试范围，并在报告中记录采纳或不采纳原因。所有开发与分段验收完成后，Test 执行全量测试。发现问题时进入对应修复阶段，修复后回到对应的 Test 或 UI 验收。全量测试通过后状态改为 `done`，并通知使用者。所有阶段都必须有文档记录。
+开发过程中允许分段验收：Backend 完成后必须在 `backend/notes.md` 里提供建议测试点、影响范围和扩测建议，再由 Test 测后端部分；FE 完成后必须在 `frontend/integration.md` 里提供建议测试点、影响范围和扩测建议。当前 feature 有 `design/source.md` 或使用者明确要求 UI 验收时，FE 完成后先由 Designer 做 UI 验收，UI 通过后 Test 测前端部分；如果开发阶段没有设计材料，FE 在 `frontend/integration.md` 记录跳过 UI 验收的原因，然后直接进入前端分段测试。Test 需要依据 Backend / FE 提供的信息判断是否扩大测试范围，并在报告中记录采纳或不采纳原因。所有开发与分段验收完成后，Test 执行全量测试。发现问题时进入对应修复阶段，修复后回到对应的 Test 或 UI 验收。全量测试通过后状态改为 `done`，并通知使用者。所有阶段都必须有文档记录。
+
+如果后续才提供设计稿，可以单独调用 UI 走查：
+
+```text
+推进 2026-05-25--greeting
+设计稿：https://figma.com/...
+请单独做 UI 验收
+```
+
+Commander 会先把设计稿归档到 `design/source.md`，再把 `next` 指向 `designer-agent` 执行 UI 走查。也可以创建 `design-review-only` 类型的功能包，只做 UI/UX 验收。
 
 真实送测后发现 Bug 时，先进入 `bug_triage`，由 Test 判断归属和复测范围，再接回对应修复阶段。
 

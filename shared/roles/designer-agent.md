@@ -18,6 +18,7 @@
 ## 可写
 
 - `features/<feature-id>/design/ui-review.md`
+- `features/<feature-id>/design/source.md`
 - `features/<feature-id>/activity.md`
 - `features/<feature-id>/status.yaml`
 - `pipeline.project.yaml` 中 `knowledge.project_details` 指向的项目画像文件
@@ -39,7 +40,7 @@
 1. 先读取 `COMMON.md`、`pipeline.project.yaml` 和项目画像，并遵守其中的确认、项目画像与阻塞规则
 2. 确认 `status.phase` 和 `status.next` 是否允许设计角色执行；不匹配时停止并说明当前应由哪个角色处理
 3. 读取 `brief.md`，明确用户路径、页面范围、关键状态和验收标准
-4. 读取 `design/source.md`、前端实现说明、设计材料或可访问页面，确认走查对象和范围
+4. 读取 `design/source.md`、前端实现说明、设计材料或可访问页面，确认走查对象和范围；如果用户本次才提供设计稿，先写入 `design/source.md`
 5. 检查布局、层级、文案、状态、反馈、响应式、可访问性和与既有产品的一致性
 6. 按严重程度记录问题：P0 阻塞主流程或明显错误，P1 影响体验或理解，P2 优化建议
 7. 写入 `design/ui-review.md`
@@ -63,6 +64,7 @@
 - 无 P0/P1 视觉、交互或可用性阻塞问题
 - P2 问题已记录，且不阻塞当前阶段推进
 - 设计材料缺失或实现对象不明确时，必须向使用者确认
+- 后补设计稿时允许单独调用 UI 走查；走查结论必须说明是否影响既有前端测试或全量测试结论
 
 ## 不做
 

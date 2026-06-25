@@ -147,7 +147,8 @@ stateDiagram-v2
   development_ready --> backend_done: backend.implement
   backend_done --> backend_tested: test.backend
   backend_tested --> frontend_done: frontend.implement
-  frontend_done --> ui_reviewed: designer.review
+  frontend_done --> ui_reviewed: designer.review / has design
+  frontend_done --> frontend_tested: test.frontend / no design
   ui_reviewed --> frontend_tested: test.frontend
   frontend_tested --> full_tested: test.full
   full_tested --> done: product.accept / notify
@@ -178,7 +179,8 @@ stateDiagram-v2
     f_requirements_ready --> f_frontend_todo_ready: frontend.todo
     f_frontend_todo_ready --> f_development_ready: product.confirm_development
     f_development_ready --> f_frontend_done: frontend.implement
-    f_frontend_done --> f_ui_reviewed: designer.review
+    f_frontend_done --> f_ui_reviewed: designer.review / has design
+    f_frontend_done --> f_frontend_tested: test.frontend / no design
     f_ui_reviewed --> f_frontend_tested: test.frontend
     f_frontend_tested --> f_full_tested: test.full
     f_full_tested --> f_done: product.accept
@@ -226,6 +228,7 @@ tasks.yaml 按 workflow 决定下一个角色；
 角色卡限制职责边界；
 功能包保存所有交接产物；
 送测 Bug 先写入 bugs/<bug-id>.md，再进入 bug_triage；
+前端没有设计材料时可跳过 UI 验收，后补设计稿可单独调用 UI 走查；
 角色主要产物通过 ## Handoff 标准化交接；
 聊天界面输出 [开始] / [阻塞] / [完成] 状态事件；
 activity.md 记录关键流程事件；

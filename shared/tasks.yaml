@@ -2,6 +2,7 @@
 
 # tasks 只描述任务本身：谁做、允许什么状态、做完到哪里、需要哪些产物。
 # workflows 决定不同需求类型走哪几步。
+# workflows.done_next 是默认下一角色；任务 steps 写明条件分支时，以条件分支设置的 next 为准。
 # 注意：full-stack 在 development_ready 后允许 Backend / FE 并行推进。
 # 如果当前工具只能单步执行，Commander 必须询问使用者先推进哪个分支。
 
@@ -130,7 +131,10 @@ tasks:
       读取 brief.md、frontend/todo.md、confirmations/development-confirmation.md；如有 api.openapi.yaml，也读取接口契约。
       在 apps.frontend.path 内完成页面、交互或联调。
       写 frontend/integration.md，必须包含建议测试点、影响范围和是否建议扩大测试范围。
-      前端完成后，designer-agent 可以先介入 UI 验收。
+      前端完成后检查是否存在 design/source.md，或使用者是否明确要求 UI 验收。
+      如果有设计材料或明确要求 UI 验收，next 设为 designer-agent，先进入 UI 验收。
+      如果没有设计材料且使用者未要求 UI 验收，next 设为 test-agent，直接进入前端分段测试；在 frontend/integration.md 和 status.history 中记录“本轮跳过 UI 验收”的原因。
+      后续补充设计稿时，可以显式把 next 设为 designer-agent，单独调用 UI 走查。
 
   test.backend:
     agent: test-agent
@@ -150,13 +154,14 @@ tasks:
   designer.review:
     agent: designer-agent
     title: UI 验收
-    allowed_phase: [planned, frontend_done]
+    allowed_phase: [planned, frontend_done, frontend_tested, full_tested, done]
     requires_next: designer-agent
     done_phase: ui_reviewed
     done_requires:
       - design/ui-review.md
     steps: |
       对照 brief.md、design/source.md、frontend/todo.md 与 frontend/integration.md 做 UI/交互验收。
+      如果是后补设计稿或单独调用 UI 走查，先归档设计稿来源到 design/source.md，再限定本次走查范围。
       写 design/ui-review.md。
       通过后 test-agent 可以进入前端部分测试。
       有 P0/P1 阻塞问题时写 blockers，并把 phase 设为 ui_fix_needed，next 设为 frontend-agent。
@@ -164,13 +169,14 @@ tasks:
   test.frontend:
     agent: test-agent
     title: 前端分段测试
-    allowed_phase: [ui_reviewed]
+    allowed_phase: [frontend_done, ui_reviewed]
     requires_next: test-agent
     done_phase: frontend_tested
     done_requires:
       - test/frontend-report.md
     steps: |
-      读取 test/coverage.md、frontend/integration.md、design/ui-review.md；如有 api.openapi.yaml，也读取接口契约。
+      读取 test/coverage.md、frontend/integration.md；如有 api.openapi.yaml，也读取接口契约。
+      如果存在 design/ui-review.md，则一并读取并纳入测试范围；如果本轮没有设计材料或 UI 验收被明确跳过，记录原因，不把 design/ui-review.md 作为门禁。
       先读取 FE 提供的建议测试点、影响范围和扩测建议，判断是否需要扩大测试范围，并在报告中记录判断。
       测试前端主流程、交互状态、接口联调、权限、异常、空状态和回归风险。
       写 test/frontend-report.md。
@@ -186,7 +192,8 @@ tasks:
       - test/full-report.md
     steps: |
       读取当前 workflow 要求的所有产物。
-      确认当前 workflow 要求的 Backend 分段测试、FE 分段测试和 UI 验收都已经通过。
+      确认当前 workflow 要求的 Backend 分段测试和 FE 分段测试已经通过。
+      如果本轮存在设计材料或已执行 UI 验收，则确认 UI 验收已通过；如果没有设计材料且已记录跳过原因，则 UI 验收不作为全量测试门禁。
       执行全量回归或端到端验证。
       写 test/full-report.md。
       通过后推进到 full_tested；失败时按归属写 blockers，并把 phase 设为 backend_fix_needed、frontend_fix_needed 或 ui_fix_needed。
@@ -236,7 +243,7 @@ tasks:
       写 test/report.md，列出通过项、失败项和未覆盖风险。
 
 workflows:
-  # 全链路：需求澄清 -> 接口文档/TODO -> 使用者确认 -> Backend/FE 同步开发 -> Backend 测试 / UI 验收 -> FE 测试 -> 全量测试 -> 产品验收通知
+  # 全链路：需求澄清 -> 接口文档/TODO -> 使用者确认 -> Backend/FE 同步开发 -> Backend 测试 / 条件 UI 验收 -> FE 测试 -> 全量测试 -> 产品验收通知
   full-stack:
     description: 同时涉及产品、后端、前端、测试和 UI 走查。
     start: product.clarify
@@ -258,9 +265,13 @@ workflows:
         ui_fix_needed: frontend.implement
       designer-agent:
         frontend_done: designer.review
+        frontend_tested: designer.review
+        full_tested: designer.review
+        done: designer.review
       test-agent:
         bug_triage: test.bug_triage
         backend_done: test.backend
+        frontend_done: test.frontend
         ui_reviewed: test.frontend
         frontend_tested: test.full
     done_next:
@@ -271,7 +282,7 @@ workflows:
       product.confirm_development: backend-agent
       backend.implement: test-agent
       test.backend: frontend-agent
-      frontend.implement: designer-agent
+      frontend.implement: test-agent
       designer.review: test-agent
       test.bug_triage: test-agent
       test.frontend: test-agent
@@ -285,7 +296,6 @@ workflows:
       - backend/notes.md
       - test/backend-report.md
       - frontend/integration.md
-      - design/ui-review.md
       - test/frontend-report.md
       - test/full-report.md
 
@@ -325,7 +335,7 @@ workflows:
       - test/backend-report.md
       - test/full-report.md
 
-  # 只有前端：需求澄清 -> 前端 TODO -> 使用者确认 -> 前端开发 -> UI 验收 -> 前端测试 -> 全量测试 -> 产品验收通知
+  # 只有前端：需求澄清 -> 前端 TODO -> 使用者确认 -> 前端开发 -> 条件 UI 验收 -> 前端测试 -> 全量测试 -> 产品验收通知
   frontend-only:
     description: 只涉及页面、交互、样式、前端状态或纯 Mock。
     start: product.clarify
@@ -342,8 +352,12 @@ workflows:
         ui_fix_needed: frontend.implement
       designer-agent:
         frontend_done: designer.review
+        frontend_tested: designer.review
+        full_tested: designer.review
+        done: designer.review
       test-agent:
         bug_triage: test.bug_triage
+        frontend_done: test.frontend
         ui_reviewed: test.frontend
         frontend_tested: test.full
     done_next:
@@ -351,7 +365,7 @@ workflows:
       product.clarify: frontend-agent
       frontend.todo: product-agent
       product.confirm_development: frontend-agent
-      frontend.implement: designer-agent
+      frontend.implement: test-agent
       designer.review: test-agent
       test.bug_triage: test-agent
       test.frontend: test-agent
@@ -361,7 +375,6 @@ workflows:
       - frontend/todo.md
       - confirmations/development-confirmation.md
       - frontend/integration.md
-      - design/ui-review.md
       - test/frontend-report.md
       - test/full-report.md
 
@@ -385,6 +398,10 @@ workflows:
     next_task_map:
       designer-agent:
         planned: designer.review
+        frontend_done: designer.review
+        frontend_tested: designer.review
+        full_tested: designer.review
+        done: designer.review
       product-agent:
         project_rescan_required: project.rescan
         ui_reviewed: product.accept

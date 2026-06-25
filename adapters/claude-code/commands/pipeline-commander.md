@@ -44,6 +44,7 @@ argument-hint: <feature-id>
 - 每次执行 feature 前必须读取项目画像；发现项目画像与真实项目冲突时，进入 `project_rescan_required` 并停止当前流程
 - 遇到阻塞时写入 `blockers`，不要强行推进
 - 每次推进状态必须追加 `history`
+- `workflows.done_next` 是默认下一角色；任务步骤写明条件分支时，以条件分支设置的 `next` 为准
 - 所有角色必须遵守 Chat Status Protocol：在聊天界面输出 `[开始]`、`[阻塞]`、`[完成]` 三类状态事件；不输出百分比或进度条
 - 输出 `[阻塞]` 或 `[完成]` 时，必须同步追加 `features/<feature-id>/activity.md`
 - 所有角色完成任务时，必须在自己的主要产物中写入 `## Handoff`，并在 `[完成]` 状态中摘出简版交接
@@ -75,6 +76,8 @@ argument-hint: <feature-id>
 ```
 
 先归档到 `source-materials.md`，再分别整理到 `brief.md`、`api.openapi.yaml`、`test/cases.md`、`design/source.md`。
+
+前端开发阶段 UI 验收是条件流程：有 `design/source.md` 或使用者明确要求 UI 验收时，前端完成后先交给 `designer-agent`；没有设计材料时，前端完成后直接交给 `test-agent` 做前端分段测试，并在 `frontend/integration.md` 记录跳过原因。后续补充设计稿时，可以显式调用 `designer-agent` 或使用 `design-review-only` 单独做 UI 走查。
 
 ## 送测 Bug 输入格式
 
