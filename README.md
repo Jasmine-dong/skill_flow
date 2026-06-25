@@ -197,6 +197,24 @@ $pipeline-commander
 当前项目仅有前端部分，不需要后端实现，但前端需要按接口文档联调。
 ```
 
+也可以批量提供材料，或把多类内容放在一个整合文件里：
+
+```text
+功能：2026-05-25--greeting
+材料：
+- docs/greeting-prd.md：需求文档
+- docs/greeting-api.md：接口文档
+- docs/greeting-cases.md：测试case
+- https://www.figma.com/design/xxx：设计稿
+```
+
+```text
+功能：2026-05-25--greeting
+整合材料：docs/greeting-all-in-one.md
+```
+
+`材料：` 会先逐项识别类型；`整合材料：` 会先按章节、标题和内容语义拆分。识别或拆分不确定时，Commander 必须先向使用者确认，不会猜测归档。
+
 素材会被整理到：
 
 | 调用标签 | 目标位置 |
@@ -205,6 +223,8 @@ $pipeline-commander
 | `接口文档：` | `features/<feature-id>/api.openapi.yaml` |
 | `测试case：` | `features/<feature-id>/test/cases.md` |
 | `设计稿：` | `features/<feature-id>/design/source.md` |
+| `材料：` | 先写入 `source-materials.md` 的材料识别，再按类型分发 |
+| `整合材料：` | 先写入 `source-materials.md` 的整合材料拆分，再按内容分发 |
 | 调用原文和处理状态 | `features/<feature-id>/source-materials.md` |
 
 Claude Code：
@@ -348,6 +368,28 @@ bug_triage
 ```
 
 修复角色必须回写 `bugs/<bug-id>.md` 的 Fix 区块，Test 复测时必须回写 Retest 区块，并判断是否需要扩大测试范围。
+
+如果 Bug 来自 Meegle、Jira、GitLab Issue 或其他缺陷平台，也可以只提供链接：
+
+```text
+Bug链接：https://meegle.example.com/...
+Bug平台：meegle
+关联功能：2026-05-25--greeting
+```
+
+Commander 会先识别平台和工作项 ID，写入 `bugs/<bug-id>.md` 的 `external_issue`。如果当前 AI 工具已接入并授权 Meegle MCP，则优先通过 MCP 读取工作项详情和评论，自动填充 Bug 标题、严重级别、复现步骤、期望/实际结果和证据。
+
+读取失败时不会猜测 Bug 内容，而是写入阻塞：
+
+```yaml
+external_issue:
+  platform: meegle
+  url: https://meegle.example.com/...
+  work_item_id:
+  fetch_status: auth_required
+```
+
+这时需要使用者重新授权 MCP、补充 `project_key / work_item_id`，或直接提供 Bug 正文。
 
 ## 支持的流程类型
 

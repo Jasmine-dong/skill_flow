@@ -73,9 +73,16 @@ argument-hint: <feature-id>
 接口文档：docs/api.md
 测试case：docs/cases.md
 设计稿：https://figma.com/...
+材料：
+- docs/prd.md：需求文档
+- docs/api.md：接口文档
+- docs/cases.md：测试case
+整合材料：docs/all-in-one.md
 ```
 
 先归档到 `source-materials.md`，再分别整理到 `brief.md`、`api.openapi.yaml`、`test/cases.md`、`design/source.md`。
+
+`材料：` 表示批量材料，必须先逐项识别类型并写入 `source-materials.md` 的“材料识别 / 批量材料”。`整合材料：` 表示单个文件或长文本中混合了需求、接口、测试或设计内容，必须先拆分并写入“材料识别 / 整合材料拆分”。分类或拆分不确定时，先向使用者确认，不要猜测归档。
 
 前端开发阶段 UI 验收是条件流程：有 `design/source.md` 或使用者明确要求 UI 验收时，前端完成后先交给 `designer-agent`；没有设计材料时，前端完成后直接交给 `test-agent` 做前端分段测试，并在 `frontend/integration.md` 记录跳过原因。后续补充设计稿时，可以显式调用 `designer-agent` 或使用 `design-review-only` 单独做 UI 走查。
 
@@ -93,3 +100,13 @@ Bug：登录页验证码输错后没有错误提示
 ```
 
 先归档到 `bugs/<bug-id>.md`，再进入 `bug_triage`。
+
+也可以提交外部缺陷链接：
+
+```text
+Bug链接：https://meegle.example.com/...
+Bug平台：meegle
+关联功能：2026-05-25--greeting
+```
+
+先识别平台和工作项 ID，并写入 `bugs/<bug-id>.md` 的 `external_issue`。如果是 Meegle 且当前环境存在 Meegle MCP，优先调用 MCP 读取工作项详情和评论。读取成功后进入 `bug_triage`；读取失败时写入 `fetch_status` 和 blockers，向使用者索要授权、project_key/work_item_id 或 Bug 正文。

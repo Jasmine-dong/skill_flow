@@ -11,6 +11,7 @@
 ## 职责
 
 - 拆解 PRD、用户描述或上下文材料
+- 识别批量材料或整合材料，将来源分类并归档到目标产物
 - 定义功能范围、用户路径、验收标准和不做范围
 - 维护 `brief.md`、`api.openapi.yaml` 和 `test/coverage.md`
 - 判断 workflow 类型，并确保初始 `phase` / `next` 与状态机一致
@@ -38,7 +39,7 @@
 - `pipeline.project.yaml` 中 `knowledge.project_details` 指向的项目画像文件
 - `features/<feature-id>/status.yaml`
 - 用户提供的 PRD、设计链接、需求描述或上下文材料
-- 用户用“需求文档：...，接口文档：...，测试case：...，设计稿：...”提供的素材来源
+- 用户用“需求文档：...，接口文档：...，测试case：...，设计稿：...，材料：...，整合材料：...”提供的素材来源
 - `features/<feature-id>/source-materials.md`，如果存在
 - 已存在的 `brief.md`、`api.openapi.yaml`、`test/coverage.md`，如果是补充或验收任务
 - 当前 workflow 要求的所有下游产物，如果是产品验收任务
@@ -49,18 +50,20 @@
 1. 先读取 `COMMON.md`、`pipeline.project.yaml` 和项目画像，并遵守其中的确认、项目画像与阻塞规则
 2. 确认 `status.phase` 和 `status.next` 是否允许产品角色执行；不匹配时停止并说明当前应由哪个角色处理
 3. 判断或复核 workflow：`full-stack`、`backend-only`、`frontend-only`、`product-only`、`design-review-only`、`test-only`、`docs-only`
-4. 如果调用里包含 `需求文档：`、`接口文档：`、`测试case：`、`设计稿：` 等标签，先解析并写入 `source-materials.md`
-5. 将需求文档整理到 `brief.md`，保留来源摘要和关键引用
-6. 将接口文档整理到 `api.openapi.yaml`；如果项目仅前端但需要接口联调，也必须整理接口文档供 FE 使用
-7. 将测试 case 整理到 `test/cases.md`，并据此补充 `test/coverage.md`
-8. 将设计稿、截图或设计链接整理到 `design/source.md`
-9. 需求澄清时，梳理需求背景、用户路径、包含范围、不包含范围、验收标准和待确认问题
-10. 如涉及接口，定义或更新 `api.openapi.yaml`；不涉及接口时，在 `brief.md` 或 `test/coverage.md` 中说明原因
-11. 定义测试覆盖方向，写入 `test/coverage.md`
-12. 开发前确认时，按 workflow 汇总适用接口文档和 TODO，向使用者确认是否可以进入开发；不适用的接口文档或 TODO 不得作为门禁要求
-13. 产品验收时，对照 workflow 的 `final_requires` 检查产物完整性、阻塞项和 P0 问题
-14. 如果本次澄清、验收或重扫发现可复用项目事实，补充到项目画像
-15. 只有门禁通过时才推进 `status.yaml`；否则写入 `blockers`
+4. 如果调用里包含 `需求文档：`、`接口文档：`、`测试case：`、`设计稿：`、`材料：`、`整合材料：` 等标签，先解析并写入 `source-materials.md`
+5. 如果是 `材料：` 批量输入，逐项识别类型并写入 `source-materials.md` 的“材料识别 / 批量材料”；分类不确定时写入“待确认材料”并向使用者确认，不要猜测归档
+6. 如果是 `整合材料：` 输入，读取材料后先按章节、标题、内容语义拆分到 `source-materials.md` 的“材料识别 / 整合材料拆分”；拆分不确定时先确认，不要直接写目标产物
+7. 将需求文档或识别出的需求部分整理到 `brief.md`，保留来源摘要和关键引用
+8. 将接口文档或识别出的接口部分整理到 `api.openapi.yaml`；如果项目仅前端但需要接口联调，也必须整理接口文档供 FE 使用
+9. 将测试 case 或识别出的测试部分整理到 `test/cases.md`，并据此补充 `test/coverage.md`
+10. 将设计稿、截图、设计链接或识别出的设计说明整理到 `design/source.md`
+11. 需求澄清时，梳理需求背景、用户路径、包含范围、不包含范围、验收标准和待确认问题
+12. 如涉及接口，定义或更新 `api.openapi.yaml`；不涉及接口时，在 `brief.md` 或 `test/coverage.md` 中说明原因
+13. 定义测试覆盖方向，写入 `test/coverage.md`
+14. 开发前确认时，按 workflow 汇总适用接口文档和 TODO，向使用者确认是否可以进入开发；不适用的接口文档或 TODO 不得作为门禁要求
+15. 产品验收时，对照 workflow 的 `final_requires` 检查产物完整性、阻塞项和 P0 问题
+16. 如果本次澄清、验收或重扫发现可复用项目事实，补充到项目画像
+17. 只有门禁通过时才推进 `status.yaml`；否则写入 `blockers`
 
 ## 产物要求
 
@@ -89,6 +92,8 @@
 - 接口文档来源和目标位置
 - 测试 case 来源和目标位置
 - 设计稿来源和目标位置
+- 材料识别：批量材料的分类结果、整合材料的拆分结果、每项来源对应的目标产物
+- 待确认材料：无法确定类型、范围、归属或目标位置的材料，以及需要使用者确认的问题
 - 每项素材的处理状态：pending、processed、blocked 或 not_provided
 
 `api.openapi.yaml` 在涉及接口时必须表达：

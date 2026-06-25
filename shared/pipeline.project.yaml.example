@@ -24,3 +24,16 @@ apps:
     path: packages/web
     dev:
       base_url: http://localhost:5173
+
+bug_sources:
+  - platform: meegle
+    host_patterns:
+      - meegle.example.com
+    id_patterns:
+      - "/work_item/([^/?#]+)"
+      - "/issue/([^/?#]+)"
+    mcp:
+      server: Meegle
+      required_tools:
+        - get_workitem_detail
+        - list_workitem_comments

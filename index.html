@@ -961,32 +961,28 @@
             <article class="usage-card">
               <div class="usage-head">
                 <div>
-                  <strong>继续当前流程</strong>
-                  <span>按 status.yaml 的 phase / next 自动分派角色</span>
+                  <strong>整合材料拆分</strong>
+                  <span>一个文件里同时包含需求、接口、测试和设计说明</span>
                 </div>
-                <button class="mini-copy" type="button" data-copy-target="usage-next">复制</button>
+                <button class="mini-copy" type="button" data-copy-target="usage-all">复制</button>
               </div>
-              <pre><code id="usage-next">推进 2026-06-25--login</code></pre>
+              <pre><code id="usage-all">推进 2026-06-25--login
+整合材料：docs/login-all-in-one.md</code></pre>
             </article>
 
             <article class="usage-card">
               <div class="usage-head">
                 <div>
-                  <strong>提交送测 Bug</strong>
-                  <span>先进入 bug_triage，再分派给修复角色</span>
+                  <strong>接入 Meegle Bug</strong>
+                  <span>通过链接识别工作项，能读则自动填充详情</span>
                 </div>
                 <button class="mini-copy" type="button" data-copy-target="usage-bug">复制</button>
               </div>
-              <pre><code id="usage-bug">Bug：登录页验证码输错后没有错误提示
+              <pre><code id="usage-bug">Bug链接：https://meegle.example.com/work_item/BUG-123
+Bug平台：meegle
 关联功能：2026-06-25--login
-缺陷来源：QA
-严重级别：P1
-复现步骤：
-1. 打开登录页
-2. 输入错误验证码并提交
-期望结果：展示验证码错误提示
-实际结果：无任何错误提示
-证据：截图或缺陷单链接</code></pre>
+Meegle项目：futures
+工作项ID：BUG-123</code></pre>
             </article>
 
             <article class="usage-card">

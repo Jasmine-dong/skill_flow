@@ -77,6 +77,7 @@
 
 `bugs/<bug-id>.md` 必须包含：
 
+- 外部来源：platform、url、project_key、work_item_id、fetch_status；如果来自 Meegle MCP，记录使用的 MCP 工具和读取状态
 - 缺陷来源、严重级别、状态和关联功能
 - 复现步骤、期望结果、实际结果和证据
 - Triage 结论：归属、理由、建议修复范围、建议复测点、需要使用者确认的问题

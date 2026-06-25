@@ -33,8 +33,9 @@ tasks:
       - brief.md
       - test/coverage.md
     steps: |
-      读取 PRD、用户描述与上下文；如果用户用“需求文档：...，接口文档：...，测试case：...，设计稿：...”提供素材，先归档到 source-materials.md。
-      将需求文档整理进 brief.md；将接口文档整理进 api.openapi.yaml；将测试 case 整理进 test/cases.md；将设计稿整理进 design/source.md。
+      读取 PRD、用户描述与上下文；如果用户用“需求文档：...，接口文档：...，测试case：...，设计稿：...，材料：...，整合材料：...”提供素材，先归档到 source-materials.md。
+      对“材料：”批量输入先做类型识别；对“整合材料：”先做章节/内容拆分；识别或拆分不确定时向使用者确认，不要猜测归档。
+      将需求文档或识别出的需求部分整理进 brief.md；将接口文档或识别出的接口部分整理进 api.openapi.yaml；将测试 case 或识别出的测试部分整理进 test/cases.md；将设计稿或识别出的设计说明整理进 design/source.md。
       如果当前项目只有前端，但用户提供了接口文档，仍需整理 api.openapi.yaml，并供 FE 后续读取。
       先判断需求是否足够进入技术拆解；不完整时向使用者发起澄清。
       完成功能包 brief.md、验收标准、待确认项与测试覆盖说明。
@@ -51,7 +52,7 @@ tasks:
       - source-materials.md
       - brief.md
     steps: |
-      如果用户用“需求文档：...，接口文档：...，测试case：...，设计稿：...”提供素材，先归档到 source-materials.md。
+      如果用户用“需求文档：...，接口文档：...，测试case：...，设计稿：...，材料：...，整合材料：...”提供素材，先归档到 source-materials.md，并对批量/整合材料先做材料识别。
       梳理背景、范围、验收标准和待确认问题。
       仅产出文档，不进入研发实现。
       完成后直接推进到 done。
@@ -208,6 +209,7 @@ tasks:
       - bugs
     steps: |
       读取 bugs/ 下新增或待处理的 Bug 记录、brief.md、接口契约、实现交接和既有测试报告。
+      如果 Bug 来自 Bug链接 或 external_issue，先检查 external_issue.fetch_status；只有 fetched 或使用者已补充正文时，才进入归属判断。
       复核缺陷来源、严重级别、复现步骤、期望结果、实际结果、截图或日志证据。
       判断缺陷归属：后端问题设 phase=backend_fix_needed,next=backend-agent；前端功能问题设 phase=frontend_fix_needed,next=frontend-agent；UI/交互走查问题设 phase=ui_fix_needed,next=frontend-agent。
       如果归属不确定、复现信息不足或需求规则不明确，写入 blockers，向使用者确认，不推进到修复阶段。
