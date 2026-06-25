@@ -27,6 +27,7 @@
 - `features/<feature-id>/test/cases.md`
 - `features/<feature-id>/design/source.md`
 - `features/<feature-id>/confirmations/development-confirmation.md`
+- `features/<feature-id>/activity.md`
 - `features/<feature-id>/status.yaml`
 - `pipeline.project.yaml` 中 `knowledge.project_details` 指向的项目画像文件
 
@@ -72,6 +73,7 @@
 - 关键用户路径或业务流程
 - 验收标准
 - 待确认问题
+- `## Handoff`：按 `COMMON.md` 的 Handoff 标准补充交接信息，重点说明 `requirement_scope`、`open_questions_resolved`、`acceptance_criteria`
 
 `test/coverage.md` 必须包含：
 
@@ -110,6 +112,7 @@
 - Frontend TODO 适用性：适用时记录 `frontend/todo.md` 路径和摘要；不适用时记录不适用原因
 - 使用者提出的补充、调整或限制
 - 是否允许进入 `development_ready`
+- `## Handoff`：说明已确认的开发输入、仍需关注的范围和下一角色建议
 
 ## 推进条件
 

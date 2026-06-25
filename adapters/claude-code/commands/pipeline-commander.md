@@ -45,6 +45,7 @@ argument-hint: <feature-id>
 - 每次推进状态必须追加 `history`
 - 所有角色必须遵守 Chat Status Protocol：在聊天界面输出 `[开始]`、`[阻塞]`、`[完成]` 三类状态事件；不输出百分比或进度条
 - 输出 `[阻塞]` 或 `[完成]` 时，必须同步追加 `features/<feature-id>/activity.md`
+- 所有角色完成任务时，必须在自己的主要产物中写入 `## Handoff`，并在 `[完成]` 状态中摘出简版交接
 
 ## 项目首次使用
 

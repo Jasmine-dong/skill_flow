@@ -22,6 +22,7 @@
 - `features/<feature-id>/api.openapi.yaml`
 - `features/<feature-id>/backend/todo.md`
 - `features/<feature-id>/backend/notes.md`
+- `features/<feature-id>/activity.md`
 - `features/<feature-id>/status.yaml`
 - `pipeline.project.yaml` 中 `knowledge.project_details` 指向的项目画像文件
 
@@ -62,6 +63,7 @@
 - 影响范围：可能受影响的接口、服务、数据表、缓存、任务、权限、消息、外部依赖或前端联调点
 - 扩测建议：是否建议扩大测试范围；如果建议扩大，说明原因和扩测边界；如果不建议扩大，说明判断依据
 - 风险与遗留：未覆盖项、需要产品/前端/测试确认的问题
+- `## Handoff`：按 `COMMON.md` 的 Handoff 标准补充交接信息，重点说明 `api_changes`、`data_changes`、`contract_notes`
 
 `backend/todo.md` 必须包含：
 

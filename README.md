@@ -49,6 +49,7 @@ curl -fsSL https://raw.githubusercontent.com/Jasmine-dong/skill_flow/main/instal
 - 多角色不拆成多个 skill，只用角色卡片约束边界
 - 所有角色遇到问题或不确定时必须向使用者确认，确认或补充后再继续
 - 所有角色在聊天界面输出 `[开始]`、`[阻塞]`、`[完成]` 状态事件
+- 所有角色完成任务时，在自己的主要产物中写入 `## Handoff`
 - 状态机保持轻量，用 `workflow + phase + next + task_map`
 - 用户只需要给功能 ID，由 Commander 判断下一步
 - 具体任务仍落到功能包文件，不依赖聊天历史
@@ -256,6 +257,32 @@ Phase：requirement_confirmed
 ```
 
 输出 `[阻塞]` 或 `[完成]` 时，必须同步追加 `features/<feature-id>/activity.md`，保证聊天反馈和文件记录一致。
+
+完成任务时，每个角色还必须在自己的主要产物中写入 `## Handoff`。文件里保存完整交接，聊天里的 `[完成]` 只摘出摘要：
+
+```yaml
+handoff:
+  role: frontend-agent
+  state: completed
+  summary: 完成登录页 UI、表单校验和验证码接口联调
+  deliverables:
+    - frontend/integration.md
+  changed_files:
+    - src/pages/login/index.tsx
+  impact_scope:
+    - 登录页
+    - Auth API 调用
+    - 表单校验
+  suggested_tests:
+    - 验证验证码倒计时
+    - 验证接口异常提示
+  known_risks:
+    - 未覆盖弱网场景
+  blockers: []
+  next_recommended:
+    role: designer-agent
+    reason: 前端已完成，需要先做 UI 验收
+```
 
 如果开发中发现项目画像与真实代码、命令或目录结构冲突，当前流程必须停止，feature 状态进入：
 

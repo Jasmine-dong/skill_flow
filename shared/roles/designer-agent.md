@@ -18,6 +18,7 @@
 ## 可写
 
 - `features/<feature-id>/design/ui-review.md`
+- `features/<feature-id>/activity.md`
 - `features/<feature-id>/status.yaml`
 - `pipeline.project.yaml` 中 `knowledge.project_details` 指向的项目画像文件
 
@@ -54,6 +55,7 @@
 - 问题列表：级别、位置、现象、影响、建议
 - 状态覆盖：loading、empty、error、disabled、权限、响应式等检查结果
 - 未覆盖风险：未能访问的页面、缺失设计稿或无法确认的交互
+- `## Handoff`：按 `COMMON.md` 的 Handoff 标准补充交接信息，重点说明 `ui_findings`、`severity_summary`、`pass_or_fix_needed`
 
 ## 推进条件
 

@@ -14,6 +14,9 @@
   - <path>
 - 需要使用者确认：
   - <question>
+- Handoff 摘要：
+  - 影响范围：<impact scope>
+  - 建议测试点：<suggested tests>
+  - 已知风险：<known risks>
 - 下一步：<next role or phase>
 ```
-

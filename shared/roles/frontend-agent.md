@@ -29,6 +29,7 @@
 - `apps.frontend.path`
 - `features/<feature-id>/frontend/todo.md`
 - `features/<feature-id>/frontend/integration.md`
+- `features/<feature-id>/activity.md`
 - `features/<feature-id>/status.yaml`
 - `pipeline.project.yaml` 中 `knowledge.project_details` 指向的项目画像文件
 
@@ -73,6 +74,7 @@
 - 影响范围：可能受影响的页面、路由、组件、接口、状态管理、缓存、权限、埋点或公共能力
 - 扩测建议：是否建议扩大测试范围；如果建议扩大，说明原因和扩测边界；如果不建议扩大，说明判断依据
 - 风险与遗留：未覆盖项、依赖后端/设计/产品确认的问题
+- `## Handoff`：按 `COMMON.md` 的 Handoff 标准补充交接信息，重点说明 `changed_views`、`api_dependencies`、`ui_states`
 
 `frontend/todo.md` 必须包含：
 

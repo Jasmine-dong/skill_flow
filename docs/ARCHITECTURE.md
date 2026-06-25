@@ -16,7 +16,7 @@ flowchart TD
   Tasks["tasks.yaml\ntasks + workflows + next_task_map"]
   Common["roles/COMMON.md\n确认 / 阻塞 / 状态 / Chat Status Protocol"]
   Role["roles/<agent>.md\n角色边界卡片"]
-  Feature["features.root/<feature-id>/\nbrief / api / todos / confirmations / test / notes / design"]
+  Feature["features.root/<feature-id>/\nbrief / api / todos / confirmations / test / notes / design / handoff"]
 
   Install --> Shared
   Install --> Adapters
@@ -80,6 +80,7 @@ sequenceDiagram
   end
   C->>S: 检查 done_requires
   alt 门禁通过
+    C->>F: 在本角色主要产物写入 ## Handoff
     C->>S: 更新 phase / next / history
     C->>A: 追加完成事件
     C-->>U: 输出 [完成] role / 产物 / 下一步
@@ -209,6 +210,7 @@ Commander 每次执行前先读 pipeline.project.yaml 和 project-details.md；
 tasks.yaml 按 workflow 决定下一个角色；
 角色卡限制职责边界；
 功能包保存所有交接产物；
+角色主要产物通过 ## Handoff 标准化交接；
 聊天界面输出 [开始] / [阻塞] / [完成] 状态事件；
 activity.md 记录关键流程事件；
 项目画像错误时中止当前流程，重扫确认后重新开启。

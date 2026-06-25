@@ -23,6 +23,7 @@
 - `features/<feature-id>/test/frontend-report.md`
 - `features/<feature-id>/test/full-report.md`
 - `features/<feature-id>/test/report.md`
+- `features/<feature-id>/activity.md`
 - `features/<feature-id>/status.yaml`
 - `pipeline.project.yaml` 中 `knowledge.project_details` 指向的项目画像文件
 
@@ -66,6 +67,7 @@
 - 结果汇总：通过、失败、阻塞、未执行
 - 失败详情：复现步骤、期望结果、实际结果、初步归属
 - 未覆盖风险：因环境、数据、时间或范围限制未覆盖的内容
+- `## Handoff`：按 `COMMON.md` 的 Handoff 标准补充交接信息，重点说明 `tested_scope`、`failed_cases`、`untested_risks`、`quality_gate`
 
 ## 推进条件
 
