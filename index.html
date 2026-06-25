@@ -529,6 +529,57 @@
         gap: 22px;
       }
 
+      .role-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 22px;
+      }
+
+      .role-card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        padding: 24px;
+      }
+
+      .role-card b {
+        display: inline-flex;
+        min-height: 28px;
+        align-items: center;
+        margin-bottom: 14px;
+        color: var(--brand-dark);
+        font-size: 13px;
+      }
+
+      .role-card h3 {
+        margin: 0 0 12px;
+        font-size: 20px;
+      }
+
+      .role-card p {
+        margin: 0 0 16px;
+        color: var(--muted);
+        line-height: 1.68;
+      }
+
+      .role-card ul {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .role-card li::before {
+        content: "✓";
+        margin-right: 8px;
+        color: var(--brand-dark);
+        font-weight: 820;
+      }
+
       .usage-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -669,6 +720,7 @@
 
         .feature-grid,
         .targets,
+        .role-grid,
         .usage-grid {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
@@ -721,6 +773,7 @@
 
         .feature-grid,
         .targets,
+        .role-grid,
         .usage-grid {
           grid-template-columns: 1fr;
         }
@@ -768,6 +821,7 @@
           <div class="nav-links">
             <a href="#why">设计目标</a>
             <a href="#workflow">工作流</a>
+            <a href="#roles">角色能力</a>
             <a href="#usage">使用示范</a>
             <a href="#project">项目画像</a>
             <a href="#install">安装</a>
@@ -935,6 +989,87 @@
           </section>
         </div>
 
+        <section id="roles">
+          <div class="section-head">
+            <h2>每个角色都有清晰边界，Commander 只在合适状态调起它。</h2>
+            <p>
+              使用者不用记角色名；这里说明它们分别能处理什么，以及会把哪些结论沉淀到功能包。
+            </p>
+          </div>
+          <div class="role-grid">
+            <article class="role-card">
+              <b>入口调度</b>
+              <h3>Commander</h3>
+              <p>读取项目画像和 status.yaml，判断当前功能下一步该由谁处理。</p>
+              <ul>
+                <li>识别 feature、材料、Bug 链接和提交意图</li>
+                <li>按 phase / next 门禁调度角色</li>
+                <li>发现项目画像冲突时停止并要求重扫</li>
+              </ul>
+            </article>
+            <article class="role-card">
+              <b>需求入口</b>
+              <h3>Product</h3>
+              <p>把需求材料变成可开发输入，不够清楚时先向使用者澄清。</p>
+              <ul>
+                <li>整理 PRD、验收标准和需求边界</li>
+                <li>拆分整合材料，归档 source-materials.md</li>
+                <li>汇总接口、前后端 TODO 并发起开发确认</li>
+              </ul>
+            </article>
+            <article class="role-card">
+              <b>接口与服务</b>
+              <h3>Backend</h3>
+              <p>负责接口契约和后端实现，先把前后端协作边界讲清楚。</p>
+              <ul>
+                <li>输出 api.openapi.yaml 和 backend/todo.md</li>
+                <li>实现服务、数据、权限和错误处理</li>
+                <li>完成后给出影响范围和建议测试点</li>
+              </ul>
+            </article>
+            <article class="role-card">
+              <b>页面与交互</b>
+              <h3>Frontend</h3>
+              <p>负责前端 TODO、页面实现和接口联调；没有设计稿时不强行卡 UI 流程。</p>
+              <ul>
+                <li>输出 frontend/todo.md 和 integration.md</li>
+                <li>实现页面、状态、校验、接口接入和异常态</li>
+                <li>说明改动范围、跳过 UI 原因和建议测试点</li>
+              </ul>
+            </article>
+            <article class="role-card">
+              <b>UI 走查</b>
+              <h3>Designer</h3>
+              <p>在有设计稿或使用者单独要求时介入，检查实现与设计的一致性。</p>
+              <ul>
+                <li>读取 design/source.md 或设计链接</li>
+                <li>检查布局、视觉、交互、响应式和空态</li>
+                <li>输出 design/ui-review.md，阻塞问题交回前端</li>
+              </ul>
+            </article>
+            <article class="role-card">
+              <b>质量验证</b>
+              <h3>Test</h3>
+              <p>负责分段测试、全量测试和 Bug 分诊，不替实现角色做通过结论。</p>
+              <ul>
+                <li>后端完成先测接口，前端完成再测页面流程</li>
+                <li>根据影响范围决定是否扩大测试</li>
+                <li>真实送测 Bug 进入 bug_triage 后再分派修复</li>
+              </ul>
+            </article>
+            <article class="role-card">
+              <b>轻量提交</b>
+              <h3>Commit</h3>
+              <p>只在使用者明确要求提交时介入，整理提交范围并等待确认。</p>
+              <ul>
+                <li>生成 commit/notes.md 和 commit message</li>
+                <li>中途 checkpoint 只提示已完成内容</li>
+                <li>Bug 修复后可补充外部平台备注</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
         <section id="usage">
           <div class="section-head">
             <h2>使用示范：把材料交给 Commander，它判断下一步。</h2>
@@ -988,14 +1123,14 @@ Meegle项目：futures
             <article class="usage-card">
               <div class="usage-head">
                 <div>
-                  <strong>后补设计稿</strong>
-                  <span>开发阶段没设计稿时，后续可单独触发 UI 走查</span>
+                  <strong>提交当前进度</strong>
+                  <span>中途 checkpoint，只提示已完成</span>
                 </div>
-                <button class="mini-copy" type="button" data-copy-target="usage-ui">复制</button>
+                <button class="mini-copy" type="button" data-copy-target="usage-commit">复制</button>
               </div>
-              <pre><code id="usage-ui">推进 2026-06-25--login
-设计稿：https://figma.com/design/xxx
-请单独做 UI 验收</code></pre>
+              <pre><code id="usage-commit">推进 2026-06-25--login
+先提交一下当前进度
+已完成：登录页布局、表单校验</code></pre>
             </article>
           </div>
 

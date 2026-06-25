@@ -244,6 +244,25 @@ tasks:
       执行 API、页面或手工回归用例。
       写 test/report.md，列出通过项、失败项和未覆盖风险。
 
+  commit.note:
+    agent: commit-agent
+    title: 提交记录与可选提交
+    allowed_phase: [planned, requirements_ready, api_contract_ready, frontend_todo_ready, development_ready, backend_done, backend_tested, frontend_done, ui_reviewed, frontend_tested, full_tested, backend_fix_needed, frontend_fix_needed, ui_fix_needed, bug_triage, done]
+    requires_next: commit-agent
+    done_phase: keep_current
+    done_requires:
+      - commit/notes.md
+    steps: |
+      仅在使用者明确要求“提交代码、生成 commit、先 commit、提交当前进度、同步外部 Bug 备注”时执行。
+      读取 status.yaml、相关角色产物、测试报告、Bug 记录和当前 git status/diff。
+      判断提交类型：中途提交为 checkpoint，完成后提交为 final；不确定时向使用者确认。
+      生成 commit/notes.md，必须包含当前 phase/next、commit message、文件范围、已完成内容、验证情况和外部同步状态；中途提交只提示已完成内容。
+      提交前必须向使用者确认 commit message 和文件范围；未确认时只生成 notes，不执行 git commit。
+      如果使用者确认提交，执行 git commit 并记录 commit hash。
+      如果关联 bugs/<bug-id>.md，回写修复摘要、commit 信息和同步状态。
+      如果 external_issue 可写评论，提交后同步修复备注；同步失败不回滚本地 commit，记录失败原因和补偿动作。
+      默认不推进 phase/next，只追加 status.history；除非使用者明确要求继续流程。
+
 workflows:
   # 全链路：需求澄清 -> 接口文档/TODO -> 使用者确认 -> Backend/FE 同步开发 -> Backend 测试 / 条件 UI 验收 -> FE 测试 -> 全量测试 -> 产品验收通知
   full-stack:
@@ -276,6 +295,23 @@ workflows:
         frontend_done: test.frontend
         ui_reviewed: test.frontend
         frontend_tested: test.full
+      commit-agent:
+        planned: commit.note
+        requirements_ready: commit.note
+        api_contract_ready: commit.note
+        frontend_todo_ready: commit.note
+        development_ready: commit.note
+        backend_done: commit.note
+        backend_tested: commit.note
+        frontend_done: commit.note
+        ui_reviewed: commit.note
+        frontend_tested: commit.note
+        full_tested: commit.note
+        backend_fix_needed: commit.note
+        frontend_fix_needed: commit.note
+        ui_fix_needed: commit.note
+        bug_triage: commit.note
+        done: commit.note
     done_next:
       project.rescan: product-agent
       product.clarify: backend-agent
@@ -289,6 +325,7 @@ workflows:
       test.bug_triage: test-agent
       test.frontend: test-agent
       test.full: product-agent
+      commit.note: commit-agent
     final_requires:
       - brief.md
       - api.openapi.yaml
@@ -319,6 +356,17 @@ workflows:
         bug_triage: test.bug_triage
         backend_done: test.backend
         backend_tested: test.full
+      commit-agent:
+        planned: commit.note
+        requirements_ready: commit.note
+        api_contract_ready: commit.note
+        development_ready: commit.note
+        backend_done: commit.note
+        backend_tested: commit.note
+        full_tested: commit.note
+        backend_fix_needed: commit.note
+        bug_triage: commit.note
+        done: commit.note
     done_next:
       project.rescan: product-agent
       product.clarify: backend-agent
@@ -328,6 +376,7 @@ workflows:
       test.bug_triage: test-agent
       test.backend: test-agent
       test.full: product-agent
+      commit.note: commit-agent
     final_requires:
       - brief.md
       - api.openapi.yaml
@@ -362,6 +411,19 @@ workflows:
         frontend_done: test.frontend
         ui_reviewed: test.frontend
         frontend_tested: test.full
+      commit-agent:
+        planned: commit.note
+        requirements_ready: commit.note
+        frontend_todo_ready: commit.note
+        development_ready: commit.note
+        frontend_done: commit.note
+        ui_reviewed: commit.note
+        frontend_tested: commit.note
+        full_tested: commit.note
+        frontend_fix_needed: commit.note
+        ui_fix_needed: commit.note
+        bug_triage: commit.note
+        done: commit.note
     done_next:
       project.rescan: product-agent
       product.clarify: frontend-agent
@@ -372,6 +434,7 @@ workflows:
       test.bug_triage: test-agent
       test.frontend: test-agent
       test.full: product-agent
+      commit.note: commit-agent
     final_requires:
       - brief.md
       - frontend/todo.md
@@ -388,8 +451,12 @@ workflows:
       product-agent:
         project_rescan_required: project.rescan
         planned: product.document
+      commit-agent:
+        planned: commit.note
+        done: commit.note
     done_next:
       project.rescan: product-agent
+      commit.note: commit-agent
     final_requires:
       - brief.md
 
@@ -407,9 +474,14 @@ workflows:
       product-agent:
         project_rescan_required: project.rescan
         ui_reviewed: product.accept
+      commit-agent:
+        planned: commit.note
+        ui_reviewed: commit.note
+        done: commit.note
     done_next:
       project.rescan: designer-agent
       designer.review: product-agent
+      commit.note: commit-agent
     final_requires:
       - design/ui-review.md
 
@@ -422,8 +494,12 @@ workflows:
         project_rescan_required: project.rescan
       test-agent:
         planned: test.regression
+      commit-agent:
+        planned: commit.note
+        done: commit.note
     done_next:
       project.rescan: test-agent
+      commit.note: commit-agent
     final_requires:
       - test/report.md
 
@@ -435,7 +511,11 @@ workflows:
       product-agent:
         project_rescan_required: project.rescan
         planned: product.document
+      commit-agent:
+        planned: commit.note
+        done: commit.note
     done_next:
       project.rescan: product-agent
+      commit.note: commit-agent
     final_requires:
       - brief.md

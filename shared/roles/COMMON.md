@@ -136,6 +136,7 @@ handoff:
 - `frontend-agent` 写入 `frontend/integration.md` 的 `## Handoff`
 - `designer-agent` 写入 `design/ui-review.md` 的 `## Handoff`
 - `test-agent` 写入对应测试报告的 `## Handoff`
+- `commit-agent` 写入 `commit/notes.md` 的 `## Handoff`
 
 ### 角色重点字段
 
@@ -144,3 +145,4 @@ handoff:
 - Frontend 重点补充 `changed_views`、`api_dependencies`、`ui_states`
 - Designer 重点补充 `ui_findings`、`severity_summary`、`pass_or_fix_needed`
 - Test 重点补充 `tested_scope`、`failed_cases`、`untested_risks`、`quality_gate`
+- Commit 重点补充 `commit_type`、`commit_message`、`completed_scope`、`external_sync`

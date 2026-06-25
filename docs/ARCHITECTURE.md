@@ -204,18 +204,21 @@ flowchart LR
   Test["test-agent\n分段 / 全量测试报告"]
   Frontend["frontend-agent\n页面 / 联调"]
   Designer["designer-agent\nUI 走查"]
+  Commit["commit-agent\ncommit notes / 可选提交"]
 
   Commander --> Product
   Commander --> Backend
   Commander --> Test
   Commander --> Frontend
   Commander --> Designer
+  Commander --> Commit
 
   Product --> Brief["brief.md\napi.openapi.yaml\ntest/coverage.md"]
   Backend --> BackendNotes["backend/notes.md"]
   Test --> TestReports["test/backend-report.md\ntest/frontend-report.md\ntest/full-report.md"]
   Frontend --> FrontendNotes["frontend/integration.md"]
   Designer --> DesignNotes["design/ui-review.md"]
+  Commit --> CommitNotes["commit/notes.md"]
 ```
 
 ## 一句话理解
@@ -229,6 +232,7 @@ tasks.yaml 按 workflow 决定下一个角色；
 功能包保存所有交接产物；
 送测 Bug 先写入 bugs/<bug-id>.md，再进入 bug_triage；
 前端没有设计材料时可跳过 UI 验收，后补设计稿可单独调用 UI 走查；
+用户明确要求提交时临时调用 commit-agent，不默认推进流程；
 角色主要产物通过 ## Handoff 标准化交接；
 聊天界面输出 [开始] / [阻塞] / [完成] 状态事件；
 activity.md 记录关键流程事件；

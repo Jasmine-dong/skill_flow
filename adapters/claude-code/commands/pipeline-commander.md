@@ -20,6 +20,7 @@ argument-hint: <feature-id>
 - `assets/feature-template/brief.md`：功能说明模板
 - `assets/feature-template/activity.md`：功能流程事件记录模板
 - `assets/feature-template/bugs/BUG-001.md`：送测 Bug 记录模板
+- `assets/feature-template/commit/notes.md`：提交记录模板
 
 ## 执行规则
 
@@ -49,6 +50,8 @@ argument-hint: <feature-id>
 - 输出 `[阻塞]` 或 `[完成]` 时，必须同步追加 `features/<feature-id>/activity.md`
 - 所有角色完成任务时，必须在自己的主要产物中写入 `## Handoff`，并在 `[完成]` 状态中摘出简版交接
 - 用户提交送测 Bug 时，先写入 `features/<feature-id>/bugs/<bug-id>.md`，再将 `status.phase` 设为 `bug_triage`、`status.next` 设为 `test-agent`，交由 Test 分诊；不要直接让实现角色修复未分诊 Bug
+- 用户明确要求“提交代码、生成 commit、先 commit、提交当前进度、同步外部 Bug 备注”时，临时使用 `commit-agent`；这是可插入动作，不默认推进 `phase / next`
+- `commit-agent` 提交前必须让使用者确认 commit message 和文件范围；checkpoint 提交只提示已完成内容
 
 ## 项目首次使用
 
@@ -61,6 +64,7 @@ argument-hint: <feature-id>
 5. 参考 `~/.claude/pipeline-commander/assets/feature-template/status.yaml` 创建 `status.yaml`
 6. 参考 `~/.claude/pipeline-commander/assets/feature-template/brief.md` 创建 `brief.md`
 7. 参考 `~/.claude/pipeline-commander/assets/feature-template/activity.md` 创建 `activity.md`
+8. 需要提交代码时，参考 `~/.claude/pipeline-commander/assets/feature-template/commit/notes.md` 创建 `commit/notes.md`
 
 不要把示例里的路径当成真实项目路径；必须按当前仓库调整。
 
@@ -110,3 +114,19 @@ Bug平台：meegle
 ```
 
 先识别平台和工作项 ID，并写入 `bugs/<bug-id>.md` 的 `external_issue`。如果是 Meegle 且当前环境存在 Meegle MCP，优先调用 MCP 读取工作项详情和评论。读取成功后进入 `bug_triage`；读取失败时写入 `fetch_status` 和 blockers，向使用者索要授权、project_key/work_item_id 或 Bug 正文。
+
+## 提交代码
+
+```text
+先提交一下当前进度
+```
+
+```text
+测试通过了，生成 commit 信息
+```
+
+```text
+提交并同步 Meegle Bug 备注
+```
+
+当用户要求提交代码时，写入 `commit/notes.md`。中途提交使用 `checkpoint`，只标注已完成内容，不推进流程；完成后提交使用 `final`，必须记录验证报告和交付范围。Bug 修复提交时，回写 `bugs/<bug-id>.md`；外部平台可写时同步修复备注，同步失败只记录失败原因，不回滚本地提交。

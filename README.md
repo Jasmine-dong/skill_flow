@@ -74,6 +74,7 @@ agent-pipeline-commander/
       brief.md
       activity.md
       bugs/BUG-001.md
+      commit/notes.md
       development-confirmation.md
   adapters/
     codex/
@@ -390,6 +391,36 @@ external_issue:
 ```
 
 这时需要使用者重新授权 MCP、补充 `project_key / work_item_id`，或直接提供 Bug 正文。
+
+## 提交代码
+
+提交代码是可选动作，不是默认流程节点。使用者明确要求时，Commander 临时使用 `commit-agent`：
+
+```text
+先提交一下当前进度
+```
+
+```text
+测试通过了，生成 commit 信息
+```
+
+```text
+提交并同步 Meegle Bug 备注
+```
+
+`commit-agent` 会写入：
+
+```text
+features/<feature-id>/commit/notes.md
+```
+
+轻量规则：
+
+- 中途提交是 `checkpoint`，只提示已完成内容，不推进流程
+- 完成后提交是 `final`，必须记录验证报告和交付范围
+- 真正执行 git commit 前，必须让使用者确认文件范围和 commit message
+- Bug 修复提交后，必须回写 `bugs/<bug-id>.md`
+- 外部平台可写时同步修复备注；同步失败只记录失败原因，不回滚本地 commit
 
 ## 支持的流程类型
 
