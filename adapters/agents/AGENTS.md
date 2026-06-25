@@ -13,6 +13,7 @@
 - `.agent-pipeline-commander/assets/project-details.md`：项目画像模板
 - `.agent-pipeline-commander/assets/feature-template/status.yaml`：功能包状态模板
 - `.agent-pipeline-commander/assets/feature-template/brief.md`：功能说明模板
+- `.agent-pipeline-commander/assets/feature-template/activity.md`：功能流程事件记录模板
 
 ## 执行规则
 
@@ -37,6 +38,8 @@
 - 每次执行 feature 前必须读取项目画像；发现项目画像与真实项目冲突时，进入 `project_rescan_required` 并停止当前流程
 - 遇到阻塞时写入 `blockers`，不要强行推进
 - 每次推进状态必须追加 `history`
+- 所有角色必须遵守 Chat Status Protocol：在聊天界面输出 `[开始]`、`[阻塞]`、`[完成]` 三类状态事件；不输出百分比或进度条
+- 输出 `[阻塞]` 或 `[完成]` 时，必须同步追加 `features/<feature-id>/activity.md`
 
 ## 项目首次使用
 
@@ -48,6 +51,7 @@
 4. 使用者确认项目画像后，创建功能包目录：`<features.root>/<feature-id>/`
 5. 参考 `.agent-pipeline-commander/assets/feature-template/status.yaml` 创建 `status.yaml`
 6. 参考 `.agent-pipeline-commander/assets/feature-template/brief.md` 创建 `brief.md`
+7. 参考 `.agent-pipeline-commander/assets/feature-template/activity.md` 创建 `activity.md`
 
 ## 素材输入格式
 

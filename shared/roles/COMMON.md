@@ -29,3 +29,69 @@
 - 只有当前角色职责内的产物完成，且门禁满足时，才能推进 `status.yaml`
 - 遇到阻塞或验证失败时，不要强行推进
 - 每次修改 `status.yaml` 都必须追加 `history`
+
+## Chat Status Protocol
+
+所有角色在聊天界面必须输出状态事件，让使用者能直接看到当前流程进展。
+
+### 开始任务时
+
+执行角色任务前，先输出：
+
+```text
+[开始] <role>
+Feature：<feature-id>
+Phase：<current-phase>
+本轮目标：<本次要完成的事情>
+状态处理：
+- 已读取 COMMON.md、角色卡、pipeline.project.yaml、项目画像和 status.yaml
+- 将按当前 phase / next 门禁执行
+```
+
+### 遇到阻塞时
+
+遇到问题或不确定，且需要使用者确认后才能继续时，输出：
+
+```text
+[阻塞] <role>
+Feature：<feature-id>
+Phase：<current-phase>
+阻塞原因：<为什么无法继续>
+需要使用者确认：
+1. <问题一>
+2. <问题二>
+状态处理：
+- 已写入 status.yaml blockers
+- 已追加 activity.md
+- 不推进 phase / next
+```
+
+### 完成任务时
+
+当前角色任务完成，且门禁检查通过或已明确下一步时，输出：
+
+```text
+[完成] <role>
+Feature：<feature-id>
+Phase：<new-or-current-phase>
+完成内容：
+- <完成项一>
+- <完成项二>
+产物：
+- <产物路径一>
+- <产物路径二>
+下一步：
+- <下一角色或下一状态>
+状态处理：
+- 已追加 activity.md
+- 已更新 status.yaml history
+- next = <next-role-or-none>
+```
+
+### 记录要求
+
+- 不输出百分比或进度条；只输出开始、阻塞、完成三类状态事件
+- 每次输出 `[阻塞]` 或 `[完成]` 时，都必须同步追加 `features/<feature-id>/activity.md`
+- 如果当前 feature 还没有 `activity.md`，先创建再追加
+- `[开始]` 事件推荐追加到 `activity.md`；如果只是读取上下文且未进入实际任务，可以只在聊天界面输出
+- 状态事件必须反映真实文件变更；不能声称已写入未实际写入的文件

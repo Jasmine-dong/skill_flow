@@ -12,8 +12,9 @@ flowchart TD
   Config["pipeline.project.yaml\n项目目录 / 文档目录 / URL"]
   ProjectDetails["project-details.md\n项目画像 / 技术栈 / 目录 / 命令 / 约定 / 坑点"]
   Status["features.root/<feature-id>/status.yaml\nworkflow / phase / owner / next / blockers / history"]
+  Activity["features.root/<feature-id>/activity.md\n开始 / 阻塞 / 完成事件"]
   Tasks["tasks.yaml\ntasks + workflows + next_task_map"]
-  Common["roles/COMMON.md\n确认 / 阻塞 / 状态通用规则"]
+  Common["roles/COMMON.md\n确认 / 阻塞 / 状态 / Chat Status Protocol"]
   Role["roles/<agent>.md\n角色边界卡片"]
   Feature["features.root/<feature-id>/\nbrief / api / todos / confirmations / test / notes / design"]
 
@@ -25,6 +26,7 @@ flowchart TD
   Config --> ProjectDetails
   Commander --> ProjectDetails
   Commander --> Status
+  Commander --> Activity
   Commander --> Tasks
   Tasks --> Role
   Commander --> Common
@@ -44,6 +46,7 @@ sequenceDiagram
   participant P as pipeline.project.yaml
   participant K as project-details.md
   participant S as status.yaml
+  participant A as activity.md
   participant T as tasks.yaml
   participant G as COMMON.md
   participant R as role card
@@ -62,8 +65,11 @@ sequenceDiagram
   T-->>C: 返回任务 key 与 agent
   C->>G: 读取通用确认与阻塞规则
   C->>R: 读取 roles/<agent>.md
+  C-->>U: 输出 [开始] role / feature / phase / 本轮目标
   C->>F: 按任务步骤读写产物
   alt 遇到问题或不确定
+    C->>S: 写入 blockers，不推进 phase / next
+    C->>A: 追加阻塞事件
     C-->>U: 发起确认
     U-->>C: 确认或补充
     C->>F: 继续执行并记录确认内容
@@ -75,10 +81,12 @@ sequenceDiagram
   C->>S: 检查 done_requires
   alt 门禁通过
     C->>S: 更新 phase / next / history
-    C-->>U: 汇报已推进到下一阶段
+    C->>A: 追加完成事件
+    C-->>U: 输出 [完成] role / 产物 / 下一步
   else 门禁失败
     C->>S: 写入或保留 blockers
-    C-->>U: 汇报阻塞项和当前应处理角色
+    C->>A: 追加阻塞事件
+    C-->>U: 输出 [阻塞] role / 原因 / 需要确认的问题
   end
 ```
 
@@ -201,5 +209,7 @@ Commander 每次执行前先读 pipeline.project.yaml 和 project-details.md；
 tasks.yaml 按 workflow 决定下一个角色；
 角色卡限制职责边界；
 功能包保存所有交接产物；
+聊天界面输出 [开始] / [阻塞] / [完成] 状态事件；
+activity.md 记录关键流程事件；
 项目画像错误时中止当前流程，重扫确认后重新开启。
 ```

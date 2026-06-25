@@ -48,6 +48,7 @@ curl -fsSL https://raw.githubusercontent.com/Jasmine-dong/skill_flow/main/instal
 - 只有一个工作流入口：`pipeline-commander`
 - 多角色不拆成多个 skill，只用角色卡片约束边界
 - 所有角色遇到问题或不确定时必须向使用者确认，确认或补充后再继续
+- 所有角色在聊天界面输出 `[开始]`、`[阻塞]`、`[完成]` 状态事件
 - 状态机保持轻量，用 `workflow + phase + next + task_map`
 - 用户只需要给功能 ID，由 Commander 判断下一步
 - 具体任务仍落到功能包文件，不依赖聊天历史
@@ -70,6 +71,7 @@ agent-pipeline-commander/
     feature-template/
       status.yaml
       brief.md
+      activity.md
       development-confirmation.md
   adapters/
     codex/
@@ -128,6 +130,7 @@ lightweight-pipeline/project-details.md
 lightweight-pipeline/features/2026-05-25--greeting/
   status.yaml
   brief.md
+  activity.md
 ```
 
 `status.yaml` 示例：
@@ -207,6 +210,52 @@ Commander 执行：
 7. 完成后补充可复用项目事实，并按门禁推进 `status.yaml`
 
 所有角色执行前都必须读取 `roles/COMMON.md` 和项目画像。遇到需求、接口、设计、测试、环境、权限、数据或验收标准不确定时，先向使用者发起确认；使用者确认或补充后再继续。
+
+所有角色必须遵守 Chat Status Protocol，在聊天界面输出三类状态事件，不输出百分比或进度条：
+
+```text
+[开始] product-agent
+Feature：2026-05-25--greeting
+Phase：requirement_clarification
+本轮目标：整理需求边界、验收标准和待确认问题
+状态处理：
+- 已读取 COMMON.md、角色卡、pipeline.project.yaml、项目画像和 status.yaml
+- 将按当前 phase / next 门禁执行
+```
+
+```text
+[阻塞] product-agent
+Feature：2026-05-25--greeting
+Phase：requirement_clarification
+阻塞原因：需求文档缺少错误态处理规则
+需要使用者确认：
+1. 接口异常时是否展示后端 message？
+2. 是否需要重试入口？
+状态处理：
+- 已写入 status.yaml blockers
+- 已追加 activity.md
+- 不推进 phase / next
+```
+
+```text
+[完成] product-agent
+Feature：2026-05-25--greeting
+Phase：requirement_confirmed
+完成内容：
+- 已整理需求边界和验收标准
+- 已确认无剩余 P0 待确认问题
+产物：
+- brief.md
+- source-materials.md
+下一步：
+- backend-agent 输出接口文档与后端 TODO
+状态处理：
+- 已追加 activity.md
+- 已更新 status.yaml history
+- next = backend-agent
+```
+
+输出 `[阻塞]` 或 `[完成]` 时，必须同步追加 `features/<feature-id>/activity.md`，保证聊天反馈和文件记录一致。
 
 如果开发中发现项目画像与真实代码、命令或目录结构冲突，当前流程必须停止，feature 状态进入：
 
