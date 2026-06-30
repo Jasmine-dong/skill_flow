@@ -936,7 +936,7 @@
             <article class="feature-card">
               <span class="icon">04</span>
               <h3>分段验收</h3>
-              <p>Backend 完成先测后端，FE 完成后按是否有设计材料决定是否先走 UI 验收。</p>
+              <p>Backend 完成先测后端，FE 完成后按是否有可验收 UI 设计材料决定是否先走 UI 验收。</p>
             </article>
             <article class="feature-card">
               <span class="icon">05</span>
@@ -956,7 +956,7 @@
             <div class="section-head">
               <h2>真实开发流：先确认，再实现，最后全量验证。</h2>
               <p>
-                full-stack 需求会经过需求澄清、接口文档、TODO 确认、分段验收和全量测试；没有设计材料时 UI 验收不会卡住前端测试。
+                full-stack 需求会经过需求澄清、接口文档、TODO 确认、分段验收和全量测试；没有可用于 UI 验收的设计材料时，UI 验收不会卡住前端测试。
               </p>
             </div>
             <div class="flow" aria-label="全链路工作流">
@@ -1031,7 +1031,7 @@
             <article class="role-card">
               <b>页面与交互</b>
               <h3>Frontend</h3>
-              <p>负责前端 TODO、页面实现和接口联调；没有设计稿时不强行卡 UI 流程。</p>
+              <p>负责前端 TODO、页面实现和接口联调；没有可验收 UI 设计稿时不强行卡 UI 流程。</p>
               <ul>
                 <li>输出 frontend/todo.md 和 integration.md</li>
                 <li>实现页面、状态、校验、接口接入和异常态</li>
@@ -1042,9 +1042,10 @@
             <article class="role-card">
               <b>UI 走查</b>
               <h3>Designer</h3>
-              <p>在有设计稿或使用者单独要求时介入，检查实现与设计的一致性。</p>
+              <p>在有可验收 UI 设计稿或使用者单独要求时介入，检查实现与设计的一致性。</p>
               <ul>
-                <li>读取 design/source.md 或设计链接</li>
+                <li>读取 design/source.md 和 source-materials.md</li>
+                <li>区分 UI 设计稿与产品示意图</li>
                 <li>检查布局、视觉、交互、响应式和空态</li>
                 <li>输出 design/ui-review.md，阻塞问题交回前端</li>
               </ul>
@@ -1084,7 +1085,7 @@
               <div class="usage-head">
                 <div>
                   <strong>启动一个功能</strong>
-                  <span>需求、接口、测试 case 和设计稿一起归档</span>
+                  <span>需求、接口、测试 case、设计稿和产品示意图一起归档</span>
                 </div>
                 <button class="mini-copy" type="button" data-copy-target="usage-start">复制</button>
               </div>
@@ -1092,7 +1093,8 @@
 需求文档：docs/login-prd.md
 接口文档：docs/login-api.md
 测试case：docs/login-cases.md
-设计稿：https://figma.com/design/xxx</code></pre>
+设计稿：https://figma.com/design/xxx
+产品示意图：docs/login-flow.png</code></pre>
             </article>
 
             <article class="usage-card">

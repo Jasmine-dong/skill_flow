@@ -17,7 +17,7 @@
 
 ## 职责
 
-- 按 `brief.md`、验收标准和设计信息完成前端实现
+- 按 `brief.md`、验收标准和可用设计信息完成前端实现
 - 在开发前按需求、接口契约和设计信息拆解 `frontend/todo.md`
 - 按 `api.openapi.yaml` 或产品约定完成接口联调；没有接口契约时先确认是否允许 Mock
 - 处理前端状态、交互、表单、路由、权限、埋点、错误提示和 loading/empty/error 等页面状态
@@ -25,7 +25,7 @@
 - 处理开发期 UI 反馈快修，例如按钮样式、抽屉层级、footer 透出、表格对齐、间距、层级、文案或响应式微调
 - 记录实现范围、联调方式、验证结果、建议测试点、影响范围、扩测建议和剩余风险
 - 在前端完成前强制执行 UI 关键项自检，避免类型检查通过但视觉细节漏掉
-- 如果开发阶段没有设计材料，记录跳过 UI 验收的原因到 `frontend/integration.md` 和 `status.ui_review`，并交给 Test 做前端分段测试；后续补充设计稿时，旧的跳过结论自动失效，必须进入 `ui_design_ready` 做 UI 走查
+- 如果开发阶段没有可用于 UI 验收的设计材料，记录跳过 UI 验收的原因到 `frontend/integration.md` 和 `status.ui_review`，并交给 Test 做前端分段测试；后续补充真正 UI 设计稿时，旧的跳过结论自动失效，必须进入 `ui_design_ready` 做 UI 走查
 
 ## 可写
 
@@ -46,6 +46,7 @@
 - `pipeline.project.yaml` 中 `knowledge.project_details` 指向的项目画像文件
 - `features/<feature-id>/status.yaml`
 - `features/<feature-id>/brief.md`
+- `features/<feature-id>/source-materials.md`，如果存在
 - `features/<feature-id>/api.openapi.yaml`，如果存在
 - `features/<feature-id>/design/source.md`，如果存在
 - `features/<feature-id>/design/feedback.md`，如果是开发期 UI 反馈快修
@@ -60,7 +61,7 @@
 1. 先读取 `COMMON.md`、`pipeline.project.yaml` 和项目画像，并遵守其中的确认、项目画像与阻塞规则
 2. 确认 `status.phase` 和 `status.next` 是否允许前端执行；不匹配时停止并说明当前应由哪个角色处理。例外：本轮明确是开发期 UI 反馈快修，且 `status.phase` 属于 `frontend.ui_feedback_fix.allowed_phase` 时，可临时执行快修，不要求 `status.next` 当前就是 `frontend-agent`
 3. 读取 `pipeline.project.yaml`，定位 `apps.frontend.path` 和本地启动方式
-4. 读取 `brief.md`，提取页面范围、用户路径、验收标准、边界条件和不做范围；如果存在 `design/source.md` 和 `test/cases.md`，一并读取
+4. 读取 `brief.md`，提取页面范围、用户路径、验收标准、边界条件和不做范围；如果存在 `source-materials.md`，先确认视觉材料是否为 `ui_design + usable_for_ui_acceptance=true`；如果存在可用 `design/source.md` 和 `test/cases.md`，一并读取
 5. 如果存在 `api.openapi.yaml`，按接口契约实现请求、响应映射、错误处理和类型约束
 6. 如果没有接口契约，只能做纯前端、静态状态或明确允许的 Mock；不确定时向使用者确认，不要自己发明后端字段或接口路径
 7. 修改前先搜索现有路由、组件、请求封装、状态管理、样式和测试约定，优先复用项目既有模式
@@ -68,8 +69,8 @@
 9. 如果当前阶段是 `development_ready`、`backend_tested`、`frontend_fix_needed` 或 `ui_fix_needed`，按已确认的 `frontend/todo.md` 或 `bugs/<bug-id>.md` 完成页面、交互、联调或返工
 10. 如果本轮是开发期 UI 截图反馈或轻量体验反馈，先写入 `design/feedback.md`，再在前端代码中做最小 UI 修复，最后写入 `frontend/review-fixes.md`；默认不改变当前 `phase / next`
 11. 完成实现后执行最小必要验证，优先包括类型检查、单测、lint、页面启动或关键路径手工验证
-12. 推进 `frontend_done` 前，必须按“UI 关键项自检 checklist”完成视觉自检；如果无法访问页面、缺少设计稿或无法确认视觉标准，必须在 `frontend/integration.md` 写明未覆盖原因和风险，必要时向使用者确认
-13. 写入 `frontend/integration.md`，记录改动、联调、验证、UI 关键项自检、建议测试点、影响范围、扩测建议和风险；如果没有设计材料，记录“本轮跳过 UI 验收”的原因和后续补充设计稿后的处理方式；如果是 Bug 修复，同时回写 `bugs/<bug-id>.md` 的 Fix 区块
+12. 推进 `frontend_done` 前，必须按“UI 关键项自检 checklist”完成视觉自检；如果无法访问页面、缺少可用 UI 设计稿或无法确认视觉标准，必须在 `frontend/integration.md` 写明未覆盖原因和风险，必要时向使用者确认
+13. 写入 `frontend/integration.md`，记录改动、联调、验证、UI 关键项自检、建议测试点、影响范围、扩测建议和风险；如果没有 `ui_design + usable_for_ui_acceptance=true` 的设计材料，记录“本轮跳过 UI 验收”的原因和后续补充真正 UI 设计稿后的处理方式；产品示意图只能作为需求理解参考，不算设计材料；如果是 Bug 修复，同时回写 `bugs/<bug-id>.md` 的 Fix 区块
 14. 如果本次实现发现可复用前端项目事实，补充到项目画像
 15. 只有门禁通过时才推进 `status.yaml`；否则写入 `blockers`
 
@@ -86,14 +87,14 @@
 - 影响范围：可能受影响的页面、路由、组件、接口、状态管理、缓存、权限、埋点或公共能力
 - 扩测建议：是否建议扩大测试范围；如果建议扩大，说明原因和扩测边界；如果不建议扩大，说明判断依据
 - 风险与遗留：未覆盖项、依赖后端/设计/产品确认的问题
-- UI 验收处理：已执行、待执行或本轮跳过；跳过时必须说明原因
+- UI 验收处理：已执行、待执行或本轮跳过；跳过时必须说明是否缺少 `ui_design + usable_for_ui_acceptance=true`，以及产品示意图是否仅作需求参考
 - `## Handoff`：按 `COMMON.md` 的 Handoff 标准补充交接信息，重点说明 `changed_views`、`api_dependencies`、`ui_states`
 
 ### UI 关键项自检 checklist
 
 前端实现完成前必须逐项检查，并写入 `frontend/integration.md`：
 
-- Figma 指定节点：如果本次提供 Figma 节点或设计链接，确认已读取指定节点；如果未提供，记录“不适用”或“未提供设计材料”
+- Figma 指定节点：如果本次提供可用于 UI 验收的 Figma 节点或设计链接，确认已读取指定节点；如果未提供，记录“不适用”或“未提供可用 UI 设计材料”
 - 按钮：尺寸、顺序、颜色、圆角、禁用态、loading 态与设计或项目现有规范一致
 - 表格：列顺序、列宽、文本/数字对齐、固定列、横向滚动、空状态和溢出表现正确
 - 弹窗/抽屉层级：z-index 覆盖 header、悬浮入口、页面固定区域、DevTools overlay 类遮挡风险已检查
@@ -148,8 +149,8 @@
 - API 字段、路由、权限和状态处理与 `brief.md` / `api.openapi.yaml` 一致
 - 如果验证命令失败，必须记录失败原因和是否与本次改动相关；不能直接推进
 - 如果存在未确认的产品、接口或设计问题，写入 `blockers`，不要推进到下一阶段
-- 没有设计材料不阻塞前端完成；必须在 `frontend/integration.md` 和 `status.ui_review` 中记录跳过 UI 验收，并把下一步交给 `test-agent`
-- 一旦后补 `design/source.md`，此前 `frontend/integration.md` 中“跳过 UI 验收”的结论仅作为历史记录，不再作为后续测试或验收门禁依据
+- 没有可用于 UI 验收的设计材料不阻塞前端完成；必须在 `frontend/integration.md` 和 `status.ui_review` 中记录跳过 UI 验收，并把下一步交给 `test-agent`
+- 一旦后补真正 UI 设计稿并在 `source-materials.md` 标记为 `ui_design + usable_for_ui_acceptance=true`，此前 `frontend/integration.md` 中“跳过 UI 验收”的结论仅作为历史记录，不再作为后续测试或验收门禁依据
 - 开发期 UI 反馈快修不进入 `bugs/`，不交给 `test-agent` 分诊，默认不改变当前 `phase / next`
 - QA、UAT、送测、线上回归、缺陷平台链接或使用者明确称为 Bug 的问题，必须走正式 `bugs/` 流程
 

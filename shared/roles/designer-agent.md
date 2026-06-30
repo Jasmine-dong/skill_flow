@@ -10,11 +10,11 @@
 
 ## 职责
 
-- 对照 `brief.md`、设计稿、前端实现或截图进行 UI / UX 走查
+- 对照 `brief.md`、可用于 UI 验收的设计稿、前端实现或截图进行 UI / UX 走查
 - 检查主要状态、文案、布局、响应式、交互反馈和视觉一致性
 - 输出 P0/P1/P2 问题、影响说明和建议修正方向
 - 判断是否允许进入前端分段测试
-- 处理后补设计稿：一旦 `design/source.md` 在跳过 UI 验收后补充，必须标记旧的“跳过 UI 验收”结论失效，并重新给出 UI 走查结论
+- 处理后补设计稿：一旦真正 UI 设计稿在跳过 UI 验收后补充，必须标记旧的“跳过 UI 验收”结论失效，并重新给出 UI 走查结论；产品示意图不触发该流程
 
 ## 可写
 
@@ -32,9 +32,10 @@
 - `pipeline.project.yaml` 中 `knowledge.project_details` 指向的项目画像文件
 - `features/<feature-id>/status.yaml`
 - `features/<feature-id>/brief.md`
+- `features/<feature-id>/source-materials.md`，如果存在
 - `features/<feature-id>/design/source.md`，如果存在
 - `features/<feature-id>/frontend/integration.md`，如果存在
-- 设计稿、截图、页面链接或用户提供的视觉材料，如果存在
+- 设计稿、截图、页面链接或用户提供的视觉材料，如果存在；必须先判断是否可用于 UI 验收
 - `features/<feature-id>/test/frontend-report.md`，如果从前端测试后进入返工走查
 
 ## 执行步骤
@@ -42,19 +43,22 @@
 1. 先读取 `COMMON.md`、`pipeline.project.yaml` 和项目画像，并遵守其中的确认、项目画像与阻塞规则
 2. 确认 `status.phase` 和 `status.next` 是否允许设计角色执行；不匹配时停止并说明当前应由哪个角色处理。后补设计稿进入 `ui_design_ready` 时，必须执行 UI 走查
 3. 读取 `brief.md`，明确用户路径、页面范围、关键状态和验收标准
-4. 读取 `design/source.md`、前端实现说明、设计材料或可访问页面，确认走查对象和范围；如果用户本次才提供设计稿，先写入 `design/source.md`
-5. 如果此前 `frontend/integration.md`、`status.ui_review`、`test/frontend-report.md` 或 `test/full-report.md` 记录“无设计材料，跳过 UI 验收”，必须在 `design/ui-review.md` 和 `status.ui_review` 中标记这些结论对 UI 门禁失效；必要时在 `frontend/integration.md` 补充备注
-6. 检查布局、层级、文案、状态、反馈、响应式、可访问性和与既有产品的一致性
-7. 按严重程度记录问题：P0 阻塞主流程或明显错误，P1 影响体验或理解，P2 优化建议
-8. 写入 `design/ui-review.md`
-9. 如果本次走查发现可复用设计、文案、响应式或通用状态规则，补充到项目画像
-10. 没有 P0/P1 阻塞问题时才允许推进 `status.yaml` 到 `ui_reviewed`；否则写入 `blockers`，并把状态交回前端修复：`phase=ui_fix_needed,next=frontend-agent`
+4. 读取 `source-materials.md` 与 `design/source.md`，确认是否存在 `material_type=ui_design` 且 `usable_for_ui_acceptance=true` 的材料；只有这种材料才能作为 UI 验收依据
+5. 如果用户本次才提供设计稿，先按材料字段归档；若材料是产品示意图、业务配图、概念图或用户确认不是 UI 设计，记录为 `product_illustration` 且 `usable_for_ui_acceptance=false`，不得写入 `design/source.md` 作为 UI 门禁
+6. 如果只有 `product_illustration` 或无法确认的视觉材料，必须输出 `[阻塞]` 并向使用者确认是否有真正 UI 设计稿；不要继续 UI 验收
+7. 如果此前 `frontend/integration.md`、`status.ui_review`、`test/frontend-report.md` 或 `test/full-report.md` 记录“无设计材料，跳过 UI 验收”，只有在本次确认存在可用 UI 设计材料时，才在 `design/ui-review.md` 和 `status.ui_review` 中标记这些结论对 UI 门禁失效；必要时在 `frontend/integration.md` 补充备注
+8. 检查布局、层级、文案、状态、反馈、响应式、可访问性和与既有产品的一致性
+9. 按严重程度记录问题：P0 阻塞主流程或明显错误，P1 影响体验或理解，P2 优化建议
+10. 写入 `design/ui-review.md`
+11. 如果本次走查发现可复用设计、文案、响应式或通用状态规则，补充到项目画像
+12. 没有 P0/P1 阻塞问题时才允许推进 `status.yaml` 到 `ui_reviewed`；否则写入 `blockers`，并把状态交回前端修复：`phase=ui_fix_needed,next=frontend-agent`
 
 ## 产物要求
 
 `design/ui-review.md` 必须包含：
 
 - 走查范围：页面、路径、视口、设计稿或截图来源
+- 设计材料判定：引用的 `source-materials.md` 条目、`material_type`、`usable_for_ui_acceptance`、`confidence` 和 `user_confirmed`
 - 结论摘要：是否可进入下一阶段
 - 后补设计稿处理：是否使既有“跳过 UI 验收”结论失效；失效的文件和原因
 - 问题列表：级别、位置、现象、影响、建议
@@ -67,9 +71,9 @@
 - `design/ui-review.md` 已写明走查范围和结论
 - 无 P0/P1 视觉、交互或可用性阻塞问题
 - P2 问题已记录，且不阻塞当前阶段推进
-- 设计材料缺失或实现对象不明确时，必须向使用者确认
-- 后补设计稿时必须进入 `ui_design_ready -> designer-agent`；走查结论必须说明是否影响既有前端测试或全量测试结论
-- 如果已有测试报告基于“无设计材料，跳过 UI 验收”通过，后补设计稿后这些报告的 UI 门禁结论失效，必须交给 test-agent 判断是否需要重测
+- 设计材料缺失、只有产品示意图、材料置信度低或实现对象不明确时，必须向使用者确认
+- 后补设计稿时，只有 `ui_design + usable_for_ui_acceptance=true` 才能进入 `ui_design_ready -> designer-agent`；走查结论必须说明是否影响既有前端测试或全量测试结论
+- 如果已有测试报告基于“无设计材料，跳过 UI 验收”通过，后补真正 UI 设计稿后这些报告的 UI 门禁结论失效，必须交给 test-agent 判断是否需要重测
 
 ## 不做
 

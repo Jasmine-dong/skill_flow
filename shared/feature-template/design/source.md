@@ -7,6 +7,12 @@
 - 链接:
 - 文件:
 - 说明:
+- material_type: ui_design
+- usable_for_ui_acceptance: true
+- confidence:
+- user_confirmed: false
+
+仅当材料是可用于 UI 验收的真正 UI 设计稿时才填写本文件。产品示意图、业务配图或概念图请记录到 `source-materials.md` / `brief.md`，不要用作 UI 门禁。
 
 ## 页面范围
 

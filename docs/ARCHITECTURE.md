@@ -162,9 +162,9 @@ stateDiagram-v2
   backend_tested --> frontend_done: frontend.implement
   frontend_done --> ui_reviewed: designer.review / has design
   frontend_done --> frontend_tested: test.frontend / no design
-  frontend_tested --> ui_design_ready: design/source.md added after UI skipped
-  full_tested --> ui_design_ready: design/source.md added after UI skipped
-  done --> ui_design_ready: design/source.md added after UI skipped
+  frontend_tested --> ui_design_ready: ui_design usable_for_ui_acceptance=true added after UI skipped
+  full_tested --> ui_design_ready: ui_design usable_for_ui_acceptance=true added after UI skipped
+  done --> ui_design_ready: ui_design usable_for_ui_acceptance=true added after UI skipped
   ui_design_ready --> ui_reviewed: designer.review
   ui_reviewed --> frontend_tested: test.frontend
   frontend_tested --> full_tested: test.full
@@ -198,7 +198,7 @@ stateDiagram-v2
     f_development_ready --> f_frontend_done: frontend.implement
     f_frontend_done --> f_ui_reviewed: designer.review / has design
     f_frontend_done --> f_frontend_tested: test.frontend / no design
-    f_frontend_tested --> f_ui_design_ready: design/source.md added after UI skipped
+    f_frontend_tested --> f_ui_design_ready: ui_design usable_for_ui_acceptance=true added after UI skipped
     f_ui_design_ready --> f_ui_reviewed: designer.review
     f_ui_reviewed --> f_frontend_tested: test.frontend
     f_frontend_tested --> f_full_tested: test.full
@@ -252,7 +252,7 @@ tasks.yaml 按 workflow 决定下一个角色；
 功能包保存所有交接产物；
 送测 Bug 先写入 bugs/<bug-id>.md，再进入 bug_triage；
 开发期 UI 截图反馈先写入 design/feedback.md 和 frontend/review-fixes.md，不进入 bug_triage；
-前端没有设计材料时可跳过 UI 验收；后补设计稿会使旧跳过结论失效，并进入 ui_design_ready -> designer-agent；
+前端没有可用于 UI 验收的设计材料时可跳过 UI 验收；只有后补 `ui_design + usable_for_ui_acceptance=true` 的真正 UI 设计稿，才会使旧跳过结论失效，并进入 ui_design_ready -> designer-agent；产品示意图不触发 UI 验收；
 用户明确要求提交时临时调用 commit-agent，不默认推进流程；
 角色主要产物通过 ## Handoff 标准化交接；
 聊天界面输出 [开始] / [阻塞] / [完成] 状态事件；

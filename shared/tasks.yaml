@@ -7,7 +7,8 @@
 # 注意：full-stack 在 development_ready 后允许 Backend / FE 并行推进；单代理执行时默认先进入 Backend。
 # 使用者在开发前确认节点明确“OK、继续、确认推进”时，确认完成后应自动衔接到 done_next 对应开发角色。
 # 开发期 UI 反馈快修是显式轻量通道，可临时使用 frontend.ui_feedback_fix，不按普通 next_task_map 分诊。
-# 后补设计稿进入 design/source.md 时，若此前已记录跳过 UI 验收，跳过结论自动失效，phase 进入 ui_design_ready，next 进入 designer-agent。
+# 后补真正 UI 设计稿进入 design/source.md 时，若此前已记录跳过 UI 验收，跳过结论自动失效，phase 进入 ui_design_ready，next 进入 designer-agent。
+# 产品示意图、业务配图和概念图必须记录为 product_illustration，不能触发 UI 验收。
 
 tasks:
   project.rescan:
@@ -38,9 +39,10 @@ tasks:
       - test/coverage.md
     steps: |
       如果 status.workflow_detection.status 不是 confirmed，先根据项目画像的前后端能力和本次需求意图建议 workflow，写入 workflow_detection，并向使用者确认；确认前不得进入下游接口/TODO/开发任务。
-      读取 PRD、用户描述与上下文；如果用户用“需求文档：...，接口文档：...，测试case：...，设计稿：...，材料：...，整合材料：...”提供素材，先归档到 source-materials.md。
-      对“材料：”批量输入先做类型识别；对“整合材料：”先做章节/内容拆分；识别或拆分不确定时向使用者确认，不要猜测归档。
-      将需求文档或识别出的需求部分整理进 brief.md；将接口文档或识别出的接口部分整理进 api.openapi.yaml；将测试 case 或识别出的测试部分整理进 test/cases.md；将设计稿或识别出的设计说明整理进 design/source.md。
+      读取 PRD、用户描述与上下文；如果用户用“需求文档：...，接口文档：...，测试case：...，设计稿：...，产品示意图：...，材料：...，整合材料：...”提供素材，先归档到 source-materials.md。
+      对“材料：”批量输入先做类型识别；对“整合材料：”先做章节/内容拆分；每项都记录 material_type、usable_for_ui_acceptance、confidence、user_confirmed；识别或拆分不确定时向使用者确认，不要猜测归档。
+      将需求文档或识别出的需求部分整理进 brief.md；将接口文档或识别出的接口部分整理进 api.openapi.yaml；将测试 case 或识别出的测试部分整理进 test/cases.md；只有 ui_design 且 usable_for_ui_acceptance=true 的设计材料才能整理进 design/source.md。
+      产品示意图、业务配图或用户已确认不是 UI 设计的视觉材料，记录为 product_illustration 且 usable_for_ui_acceptance=false，只能辅助 brief.md，不得触发 UI 验收。
       如果当前项目只有前端，但用户提供了接口文档，仍需整理 api.openapi.yaml，并供 FE 后续读取。
       先判断需求是否足够进入技术拆解；不完整时向使用者发起澄清。
       完成功能包 brief.md、验收标准、待确认项与测试覆盖说明。
@@ -57,7 +59,8 @@ tasks:
       - source-materials.md
       - brief.md
     steps: |
-      如果用户用“需求文档：...，接口文档：...，测试case：...，设计稿：...，材料：...，整合材料：...”提供素材，先归档到 source-materials.md，并对批量/整合材料先做材料识别。
+      如果用户用“需求文档：...，接口文档：...，测试case：...，设计稿：...，产品示意图：...，材料：...，整合材料：...”提供素材，先归档到 source-materials.md，并对批量/整合材料先做材料识别。
+      材料识别必须区分 ui_design 和 product_illustration；只有 ui_design + usable_for_ui_acceptance=true 可用于 UI 验收。
       梳理背景、范围、验收标准和待确认问题。
       仅产出文档，不进入研发实现。
       完成后直接推进到 done。
@@ -139,10 +142,10 @@ tasks:
       在 apps.frontend.path 内完成页面、交互或联调。
       写 frontend/integration.md，必须包含建议测试点、影响范围和是否建议扩大测试范围。
       推进 frontend_done 前必须完成 UI 关键项自检，并在 frontend/integration.md 记录 checklist 结果；类型检查、lint 或单测通过不能替代视觉自检。
-      前端完成后检查是否存在 design/source.md，或使用者是否明确要求 UI 验收。
-      如果有设计材料或明确要求 UI 验收，next 设为 designer-agent，先进入 UI 验收。
-      如果没有设计材料且使用者未要求 UI 验收，next 设为 test-agent，直接进入前端分段测试；在 frontend/integration.md、status.ui_review 和 status.history 中记录“本轮跳过 UI 验收”的原因。
-      后续补充设计稿时，可以显式把 next 设为 designer-agent，单独调用 UI 走查。
+      前端完成后检查 source-materials.md 是否存在 ui_design + usable_for_ui_acceptance=true 的设计材料，或使用者是否明确要求 UI 验收。
+      如果有可用于 UI 验收的设计材料或明确要求 UI 验收，next 设为 designer-agent，先进入 UI 验收。
+      如果没有可用 UI 设计材料且使用者未要求 UI 验收，next 设为 test-agent，直接进入前端分段测试；在 frontend/integration.md、status.ui_review 和 status.history 中记录“本轮跳过 UI 验收”的原因。
+      产品示意图不算 UI 设计材料；后续补充真正 UI 设计稿时，可以显式把 next 设为 designer-agent，单独调用 UI 走查。
 
   frontend.ui_feedback_fix:
     agent: frontend-agent
@@ -156,7 +159,7 @@ tasks:
     steps: |
       仅在使用者于开发过程中提供 UI 截图反馈或轻量体验反馈时执行，例如按钮样式、抽屉层级、footer 透出、表格对齐、间距、层级、文案、颜色、图标、响应式微调。
       如果反馈来自 QA、UAT、送测、线上回归、缺陷平台链接，或使用者明确说 Bug，则不得走本任务，必须进入正式 bugs/ 流程。
-      读取 brief.md、frontend/todo.md、frontend/integration.md、design/source.md（如果存在）和用户本轮截图/反馈。
+      读取 brief.md、frontend/todo.md、frontend/integration.md、source-materials.md、design/source.md（如果存在）和用户本轮截图/反馈。
       先把反馈原文、截图或链接、页面区域、期望效果、处理状态写入 design/feedback.md。
       仅修复前端 UI 范围内的小改动；如果涉及产品范围、接口契约、数据规则、主流程阻塞或验收标准变化，写入 blockers 并向使用者确认，不要快修。
       在 apps.frontend.path 内完成最小 UI 修复。
@@ -187,9 +190,10 @@ tasks:
     done_requires:
       - design/ui-review.md
     steps: |
-      对照 brief.md、design/source.md、frontend/todo.md 与 frontend/integration.md 做 UI/交互验收。
-      如果是后补设计稿或单独调用 UI 走查，先归档设计稿来源到 design/source.md，再限定本次走查范围。
-      如果此前 frontend/integration.md、status.ui_review 或测试报告记录过“无设计材料，跳过 UI 验收”，必须在 design/ui-review.md、status.ui_review 和 status.history 中标记该跳过结论已失效。
+      对照 brief.md、source-materials.md、design/source.md、frontend/todo.md 与 frontend/integration.md 做 UI/交互验收。
+      UI 验收前必须确认存在 ui_design + usable_for_ui_acceptance=true 的设计材料；产品示意图、业务配图或概念图不能作为 UI 验收依据。
+      如果是后补设计稿或单独调用 UI 走查，先按材料字段归档设计稿来源；只有真正 UI 设计稿才能写入 design/source.md 并限定本次走查范围。
+      如果此前 frontend/integration.md、status.ui_review 或测试报告记录过“无设计材料，跳过 UI 验收”，只有本次补充真正 UI 设计稿时，才在 design/ui-review.md、status.ui_review 和 status.history 中标记该跳过结论已失效。
       写 design/ui-review.md。
       通过后 test-agent 可以进入前端部分测试；如果此前已经完成过 frontend/full 测试，test-agent 必须基于 UI 走查影响范围判断是否需要重测。
       有 P0/P1 阻塞问题时写 blockers，并把 phase 设为 ui_fix_needed，next 设为 frontend-agent。
@@ -204,7 +208,7 @@ tasks:
       - test/frontend-report.md
     steps: |
       读取 test/coverage.md、frontend/integration.md；如有 api.openapi.yaml，也读取接口契约。
-      如果存在 design/ui-review.md，则一并读取并纳入测试范围；如果本轮没有设计材料或 UI 验收被明确跳过，记录原因，不把 design/ui-review.md 作为门禁。若 design/source.md 是后补且已使跳过 UI 验收结论失效，则必须等待 ui_reviewed 后再执行前端分段测试。
+      如果存在 design/ui-review.md，则一并读取并纳入测试范围；如果本轮没有可用于 UI 验收的设计材料或 UI 验收被明确跳过，记录原因，不把 design/ui-review.md 作为门禁。若真正 UI 设计稿后补且已使跳过 UI 验收结论失效，则必须等待 ui_reviewed 后再执行前端分段测试。
       先读取 FE 提供的建议测试点、影响范围和扩测建议，判断是否需要扩大测试范围，并在报告中记录判断。
       测试前端主流程、交互状态、接口联调、权限、异常、空状态和回归风险。
       写 test/frontend-report.md。
@@ -221,7 +225,7 @@ tasks:
     steps: |
       读取当前 workflow 要求的所有产物。
       确认当前 workflow 要求的 Backend 分段测试和 FE 分段测试已经通过。
-      如果本轮存在设计材料或已执行 UI 验收，则确认 UI 验收已通过；如果没有设计材料且已记录跳过原因，则 UI 验收不作为全量测试门禁。若后补 design/source.md 已使跳过 UI 验收结论失效，则必须等待 ui_reviewed 和必要的前端复测后再执行全量测试。
+      如果本轮存在可用于 UI 验收的设计材料或已执行 UI 验收，则确认 UI 验收已通过；如果没有可用 UI 设计材料且已记录跳过原因，则 UI 验收不作为全量测试门禁。若后补真正 UI 设计稿已使跳过 UI 验收结论失效，则必须等待 ui_reviewed 和必要的前端复测后再执行全量测试。
       执行全量回归或端到端验证。
       写 test/full-report.md。
       通过后推进到 full_tested；失败时按归属写 blockers，并把 phase 设为 backend_fix_needed、frontend_fix_needed 或 ui_fix_needed。

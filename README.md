@@ -207,6 +207,7 @@ $agent-pipeline
 接口文档：docs/greeting-api.md
 测试case：docs/greeting-test-cases.md
 设计稿：https://www.figma.com/design/xxx
+产品示意图：docs/greeting-flow.png
 当前项目仅有前端部分，不需要后端实现，但前端需要按接口文档联调。
 ```
 
@@ -219,6 +220,7 @@ $agent-pipeline
 - docs/greeting-api.md：接口文档
 - docs/greeting-cases.md：测试case
 - https://www.figma.com/design/xxx：设计稿
+- docs/greeting-flow.png：产品示意图
 ```
 
 ```text
@@ -226,7 +228,13 @@ $agent-pipeline
 整合材料：docs/greeting-all-in-one.md
 ```
 
-`材料：` 会先逐项识别类型；`整合材料：` 会先按章节、标题和内容语义拆分。识别或拆分不确定时，Commander 必须先向使用者确认，不会猜测归档。
+`材料：` 会先逐项识别类型；`整合材料：` 会先按章节、标题和内容语义拆分。每项材料都会记录 `material_type`、`usable_for_ui_acceptance`、`confidence` 和 `user_confirmed`。识别或拆分不确定时，Commander 必须先向使用者确认，不会猜测归档。
+
+产品示意图和 UI 设计稿会被严格区分：
+
+- `ui_design`：Figma、Sketch、蓝湖或明确的 UI 页面设计稿，可设置 `usable_for_ui_acceptance=true`，用于 UI 验收。
+- `product_illustration`：产品示意图、流程配图、概念图或用户明确说明“不是 UI 设计”的视觉材料，只辅助理解需求，`usable_for_ui_acceptance=false`，不会触发 UI 验收。
+- 用户纠正优先级最高；一旦使用者确认“这是产品示意图，不是 UI 设计”，后续不得再把它当成设计稿。
 
 素材会被整理到：
 
@@ -235,7 +243,8 @@ $agent-pipeline
 | `需求文档：` | `features/<feature-id>/brief.md` |
 | `接口文档：` | `features/<feature-id>/api.openapi.yaml` |
 | `测试case：` | `features/<feature-id>/test/cases.md` |
-| `设计稿：` | `features/<feature-id>/design/source.md` |
+| `设计稿：` | `features/<feature-id>/design/source.md`，仅限可 UI 验收的设计材料 |
+| `产品示意图：` | `features/<feature-id>/source-materials.md` 和需求说明，不进入 UI 验收 |
 | `材料：` | 先写入 `source-materials.md` 的材料识别，再按类型分发 |
 | `整合材料：` | 先写入 `source-materials.md` 的整合材料拆分，再按内容分发 |
 | 调用原文和处理状态 | `features/<feature-id>/source-materials.md` |
@@ -333,7 +342,7 @@ handoff:
   blockers: []
   next_recommended:
     role: test-agent
-    reason: 当前未提供设计材料，已记录跳过 UI 验收，下一步进入前端分段测试；如果后续补充设计稿，可单独交给 designer-agent
+    reason: 当前未提供可用于 UI 验收的设计材料，已记录跳过 UI 验收，下一步进入前端分段测试；如果后续补充真正 UI 设计稿，可单独交给 designer-agent
 ```
 
 如果开发中发现项目画像与真实代码、命令或目录结构冲突，当前流程必须停止，feature 状态进入：
@@ -502,7 +511,7 @@ workflow 确认后，`next` 应与该 workflow 的 `start` 任务所属角色一
 
 常规开发不会在拿到需求文档后立刻写代码。Product 先做需求澄清；如果有 Backend 介入，Backend 先出 `api.openapi.yaml` 和 `backend/todo.md`，FE 基于接口契约拆 `frontend/todo.md`；使用者确认接口文档和开发 TODO 后才进入开发阶段。如果使用者在开发前确认节点说“OK 继续推进”或“确认，可以开始开发”，Commander 会写入确认记录，推进到 `development_ready`，并立即衔接默认开发角色。full-stack 单代理执行默认先 Backend，除非使用者明确要求先前端；frontend-only 默认进入 Frontend。
 
-开发过程中允许分段验收：Backend 完成后必须在 `backend/notes.md` 里提供建议测试点、影响范围和扩测建议，再由 Test 测后端部分；FE 完成前必须做 UI 关键项自检，并在 `frontend/integration.md` 记录 Figma 节点、按钮、表格、弹窗/抽屉层级、footer 固定区域、disabled/loading/error/empty 状态和响应式等检查结果。类型检查、lint 或单测通过不能替代视觉自检。FE 完成后还必须提供建议测试点、影响范围和扩测建议。当前 feature 有 `design/source.md` 或使用者明确要求 UI 验收时，FE 完成后先由 Designer 做 UI 验收，UI 通过后 Test 测前端部分；如果开发阶段没有设计材料，FE 在 `frontend/integration.md` 记录跳过 UI 验收的原因，然后直接进入前端分段测试。后续一旦补充设计稿并写入 `design/source.md`，此前“跳过 UI 验收”的结论自动失效，状态进入 `ui_design_ready`，下一步交给 `designer-agent`；UI 走查有 P0/P1 时进入 `ui_fix_needed -> frontend-agent`，通过后交给 Test 判断是否需要重测前端或全量。Test 需要依据 Backend / FE / UI 走查提供的信息判断是否扩大测试范围，并在报告中记录采纳或不采纳原因。所有开发与分段验收完成后，Test 执行全量测试。发现问题时进入对应修复阶段，修复后回到对应的 Test 或 UI 验收。全量测试通过后状态改为 `done`，并通知使用者。所有阶段都必须有文档记录。
+开发过程中允许分段验收：Backend 完成后必须在 `backend/notes.md` 里提供建议测试点、影响范围和扩测建议，再由 Test 测后端部分；FE 完成前必须做 UI 关键项自检，并在 `frontend/integration.md` 记录 Figma 节点、按钮、表格、弹窗/抽屉层级、footer 固定区域、disabled/loading/error/empty 状态和响应式等检查结果。类型检查、lint 或单测通过不能替代视觉自检。FE 完成后还必须提供建议测试点、影响范围和扩测建议。当前 feature 有 `ui_design + usable_for_ui_acceptance=true` 的设计材料或使用者明确要求 UI 验收时，FE 完成后先由 Designer 做 UI 验收，UI 通过后 Test 测前端部分；如果开发阶段没有可用 UI 设计材料，FE 在 `frontend/integration.md` 记录跳过 UI 验收的原因，然后直接进入前端分段测试。产品示意图、业务配图或概念图不算 UI 设计材料。后续一旦补充真正 UI 设计稿并写入 `design/source.md`，此前“跳过 UI 验收”的结论自动失效，状态进入 `ui_design_ready`，下一步交给 `designer-agent`；UI 走查有 P0/P1 时进入 `ui_fix_needed -> frontend-agent`，通过后交给 Test 判断是否需要重测前端或全量。Test 需要依据 Backend / FE / UI 走查提供的信息判断是否扩大测试范围，并在报告中记录采纳或不采纳原因。所有开发与分段验收完成后，Test 执行全量测试。发现问题时进入对应修复阶段，修复后回到对应的 Test 或 UI 验收。全量测试通过后状态改为 `done`，并通知使用者。所有阶段都必须有文档记录。
 
 如果后续才提供设计稿，可以单独调用 UI 走查：
 
@@ -512,9 +521,9 @@ workflow 确认后，`next` 应与该 workflow 的 `start` 任务所属角色一
 请单独做 UI 验收
 ```
 
-Commander 会先把设计稿归档到 `design/source.md`，再把 `next` 指向 `designer-agent` 执行 UI 走查。也可以创建 `design-review-only` 类型的功能包，只做 UI/UX 验收。
+Commander 会先把真正 UI 设计稿归档到 `design/source.md`，再把 `next` 指向 `designer-agent` 执行 UI 走查。也可以创建 `design-review-only` 类型的功能包，只做 UI/UX 验收。
 
-如果这个 feature 此前因为没有设计材料跳过过 UI 验收，后补设计稿不是普通的“可选走查”，而是强制状态迁移：
+如果这个 feature 此前因为没有可用 UI 设计材料跳过过 UI 验收，后补真正 UI 设计稿不是普通的“可选走查”，而是强制状态迁移：
 
 ```yaml
 phase: ui_design_ready

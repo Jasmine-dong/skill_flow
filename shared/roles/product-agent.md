@@ -11,7 +11,7 @@
 ## 职责
 
 - 拆解 PRD、用户描述或上下文材料
-- 识别批量材料或整合材料，将来源分类并归档到目标产物
+- 识别批量材料或整合材料，将来源分类并归档到目标产物；必须区分产品示意图和 UI 设计稿
 - 定义功能范围、用户路径、验收标准和不做范围
 - 维护 `brief.md`、`api.openapi.yaml` 和 `test/coverage.md`
 - 根据项目能力和需求意图建议 workflow，并在使用者确认后确保初始 `phase` / `next` 与状态机一致
@@ -40,7 +40,7 @@
 - `pipeline.project.yaml` 中 `knowledge.project_details` 指向的项目画像文件
 - `features/<feature-id>/status.yaml`
 - 用户提供的 PRD、设计链接、需求描述或上下文材料
-- 用户用“需求文档：...，接口文档：...，测试case：...，设计稿：...，材料：...，整合材料：...”提供的素材来源
+- 用户用“需求文档：...，接口文档：...，测试case：...，设计稿：...，产品示意图：...，材料：...，整合材料：...”提供的素材来源
 - `features/<feature-id>/source-materials.md`，如果存在
 - 已存在的 `brief.md`、`api.openapi.yaml`、`test/coverage.md`，如果是补充或验收任务
 - 当前 workflow 要求的所有下游产物，如果是产品验收任务
@@ -51,13 +51,13 @@
 1. 先读取 `COMMON.md`、`pipeline.project.yaml` 和项目画像，并遵守其中的确认、项目画像与阻塞规则
 2. 确认 `status.phase` 和 `status.next` 是否允许产品角色执行；不匹配时停止并说明当前应由哪个角色处理
 3. 判断或复核 workflow：先读取项目画像的 `Project Capability Detection`，再结合本次需求意图建议 `full-stack`、`backend-only`、`frontend-only`、`product-only`、`design-review-only`、`test-only` 或 `docs-only`
-4. 如果调用里包含 `需求文档：`、`接口文档：`、`测试case：`、`设计稿：`、`材料：`、`整合材料：` 等标签，先解析并写入 `source-materials.md`
-5. 如果是 `材料：` 批量输入，逐项识别类型并写入 `source-materials.md` 的“材料识别 / 批量材料”；分类不确定时写入“待确认材料”并向使用者确认，不要猜测归档
-6. 如果是 `整合材料：` 输入，读取材料后先按章节、标题、内容语义拆分到 `source-materials.md` 的“材料识别 / 整合材料拆分”；拆分不确定时先确认，不要直接写目标产物
+4. 如果调用里包含 `需求文档：`、`接口文档：`、`测试case：`、`设计稿：`、`产品示意图：`、`材料：`、`整合材料：` 等标签，先解析并写入 `source-materials.md`
+5. 如果是 `材料：` 批量输入，逐项识别类型并写入 `source-materials.md` 的“材料识别 / 批量材料”；每项必须填写 `material_type`、`usable_for_ui_acceptance`、`confidence` 和 `user_confirmed`；分类不确定时写入“待确认材料”并向使用者确认，不要猜测归档
+6. 如果是 `整合材料：` 输入，读取材料后先按章节、标题、内容语义拆分到 `source-materials.md` 的“材料识别 / 整合材料拆分”；每个拆分片段必须填写材料字段；拆分不确定时先确认，不要直接写目标产物
 7. 将需求文档或识别出的需求部分整理到 `brief.md`，保留来源摘要和关键引用
 8. 将接口文档或识别出的接口部分整理到 `api.openapi.yaml`；如果项目仅前端但需要接口联调，也必须整理接口文档供 FE 使用
 9. 将测试 case 或识别出的测试部分整理到 `test/cases.md`，并据此补充 `test/coverage.md`
-10. 将设计稿、截图、设计链接或识别出的设计说明整理到 `design/source.md`
+10. 只有 `material_type=ui_design` 且 `usable_for_ui_acceptance=true` 的设计材料才能整理到 `design/source.md` 并触发 UI 验收；产品示意图、业务配图、概念图或用户已纠正为非 UI 设计的材料，必须记录为 `product_illustration`，整理到 `brief.md` 或 `source-materials.md`，不得作为 UI 验收依据
 11. 需求澄清时，梳理需求背景、用户路径、包含范围、不包含范围、验收标准和待确认问题
 12. 如涉及接口，定义或更新 `api.openapi.yaml`；不涉及接口时，在 `brief.md` 或 `test/coverage.md` 中说明原因
 13. 定义测试覆盖方向，写入 `test/coverage.md`
@@ -68,6 +68,19 @@
 18. 产品验收时，对照 workflow 的 `final_requires` 检查产物完整性、阻塞项和 P0 问题
 19. 如果本次澄清、验收或重扫发现可复用项目事实，补充到项目画像
 20. 只有门禁通过时才推进 `status.yaml`；否则写入 `blockers`
+
+## 素材类型规则
+
+- `prd`：需求文档、业务规则、验收口径；目标通常是 `brief.md`
+- `api_doc`：接口文档、OpenAPI、字段说明、联调契约；目标是 `api.openapi.yaml`
+- `test_case`：测试用例、回归清单、QA case；目标是 `test/cases.md`
+- `ui_design`：Figma、Sketch、蓝湖、明确的 UI 页面设计稿、带尺寸/状态/布局规范的设计说明；可作为 UI 验收依据，`usable_for_ui_acceptance=true`
+- `product_illustration`：产品示意图、流程配图、业务说明图、概念图、截图示例或用户明确说明“不是 UI 设计”的视觉材料；只能辅助理解需求，`usable_for_ui_acceptance=false`
+- `unknown`：无法判断类型或用途的材料；必须向使用者确认
+
+用户确认优先于模型推断。使用者纠正“配图是产品示意图，不是 UI 设计”时，必须更新 `source-materials.md` 为 `material_type=product_illustration`、`usable_for_ui_acceptance=false`、`user_confirmed=true`；如果此前已据此写入 `design/source.md` 或触发 UI 流程，必须标记该 UI 依据失效，并重新判断是否仍有可用 UI 设计稿。
+
+`design/source.md` 的 UI 门禁语义只在存在可用 UI 设计材料时成立。若只是为保留产品示意图信息，不得写入 `design/source.md`；如历史文件已混入产品示意图，必须在 `source-materials.md` 和相关产物中说明它不可用于 UI 验收。
 
 ## Workflow 自动建议规则
 
@@ -136,7 +149,9 @@ workflow 建议：
 - 接口文档来源和目标位置
 - 测试 case 来源和目标位置
 - 设计稿来源和目标位置
+- 产品示意图来源、目标位置和不可用于 UI 验收的说明，如果存在
 - 材料识别：批量材料的分类结果、整合材料的拆分结果、每项来源对应的目标产物
+- 每项材料必须记录 `material_type`、`usable_for_ui_acceptance`、`confidence` 和 `user_confirmed`
 - 待确认材料：无法确定类型、范围、归属或目标位置的材料，以及需要使用者确认的问题
 - 每项素材的处理状态：pending、processed、blocked 或 not_provided
 

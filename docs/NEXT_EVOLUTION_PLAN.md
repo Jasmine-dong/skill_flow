@@ -366,6 +366,7 @@ workspace:
 接口文档：docs/login-api.md
 测试case：docs/login-test-cases.md
 设计稿：https://www.figma.com/design/xxx
+产品示意图：docs/login-flow.png
 当前项目仅有前端部分，不需要后端实现，但前端需要按接口文档联调。
 ```
 
@@ -378,6 +379,8 @@ api.openapi.yaml
 test/cases.md
 design/source.md
 ```
+
+视觉材料需要区分置信度和用途：真正 UI 设计稿归档为 `ui_design`，且只有 `usable_for_ui_acceptance=true` 时才进入 `design/source.md` 并触发 UI 验收；产品示意图、业务配图或概念图归档为 `product_illustration`，`usable_for_ui_acceptance=false`，只辅助需求理解，不触发 UI 流程。用户纠正优先级最高。
 
 ### 下一步建议
 
@@ -418,8 +421,20 @@ intake:
     status: processed
   design:
     source: https://www.figma.com/design/xxx
+    material_type: ui_design
+    usable_for_ui_acceptance: true
+    confidence: high
+    user_confirmed: false
     target: design/source.md
     status: processed
+  product_illustrations:
+    - source: docs/login-flow.png
+      material_type: product_illustration
+      usable_for_ui_acceptance: false
+      confidence: high
+      user_confirmed: true
+      target: brief.md
+      status: processed
   user_notes:
     - 当前项目仅有前端部分，不需要后端实现
     - 前端需要按接口文档联调
