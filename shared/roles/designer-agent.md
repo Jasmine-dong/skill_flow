@@ -12,7 +12,7 @@
 
 - 对照 `brief.md`、可用于 UI 验收的设计稿、前端实现或截图进行 UI / UX 走查
 - 检查主要状态、文案、布局、响应式、交互反馈和视觉一致性
-- 输出 P0/P1/P2 问题、影响说明和建议修正方向
+- 输出 P0/P1/P2 问题、影响说明和可执行修正建议，便于 `frontend-agent` 直接修复
 - 判断是否允许进入前端分段测试
 - 处理后补设计稿：一旦真正 UI 设计稿在跳过 UI 验收后补充，必须标记旧的“跳过 UI 验收”结论失效，并重新给出 UI 走查结论；产品示意图不触发该流程
 
@@ -48,7 +48,7 @@
 6. 如果只有 `product_illustration` 或无法确认的视觉材料，必须输出 `[阻塞]` 并向使用者确认是否有真正 UI 设计稿；不要继续 UI 验收
 7. 如果此前 `frontend/integration.md`、`status.ui_review`、`test/frontend-report.md` 或 `test/full-report.md` 记录“无设计材料，跳过 UI 验收”，只有在本次确认存在可用 UI 设计材料时，才在 `design/ui-review.md` 和 `status.ui_review` 中标记这些结论对 UI 门禁失效；必要时在 `frontend/integration.md` 补充备注
 8. 检查布局、层级、文案、状态、反馈、响应式、可访问性和与既有产品的一致性
-9. 按严重程度记录问题：P0 阻塞主流程或明显错误，P1 影响体验或理解，P2 优化建议
+9. 按严重程度记录问题：P0 阻塞主流程或明显错误，P1 影响体验或理解，P2 优化建议；每个 P0/P1/P2 问题都必须补充“可执行修正建议”
 10. 写入 `design/ui-review.md`
 11. 如果本次走查发现可复用设计、文案、响应式或通用状态规则，补充到项目画像
 12. 没有 P0/P1 阻塞问题时才允许推进 `status.yaml` 到 `ui_reviewed`；否则写入 `blockers`，并把状态交回前端修复：`phase=ui_fix_needed,next=frontend-agent`
@@ -62,6 +62,7 @@
 - 结论摘要：是否可进入下一阶段
 - 后补设计稿处理：是否使既有“跳过 UI 验收”结论失效；失效的文件和原因
 - 问题列表：级别、位置、现象、影响、建议
+- 可执行修正建议：每条问题都包含 Figma node、当前实现差异、期望 CSS/交互值、验证方式、是否阻塞
 - 状态覆盖：loading、empty、error、disabled、权限、响应式等检查结果
 - 未覆盖风险：未能访问的页面、缺失设计稿或无法确认的交互
 - `## Handoff`：按 `COMMON.md` 的 Handoff 标准补充交接信息，重点说明 `ui_findings`、`severity_summary`、`pass_or_fix_needed`
@@ -69,6 +70,7 @@
 ## 推进条件
 
 - `design/ui-review.md` 已写明走查范围和结论
+- P0/P1/P2 问题均已给出可执行修正建议；无法给出具体 CSS/交互值时，必须说明缺少的设计信息并向使用者确认
 - 无 P0/P1 视觉、交互或可用性阻塞问题
 - P2 问题已记录，且不阻塞当前阶段推进
 - 设计材料缺失、只有产品示意图、材料置信度低或实现对象不明确时，必须向使用者确认
@@ -82,3 +84,24 @@
 - 不替产品决定范围
 - 不替测试确认功能正确性
 - 有 P0 问题时不放行
+
+## 可执行修正建议格式
+
+每条 UI 问题建议使用以下结构，缺失项要说明原因：
+
+```yaml
+fix_suggestion:
+  issue_id: UI-001
+  severity: P1
+  figma_node: "<Figma node id / url / frame name>"
+  location: "<页面 / 组件 / 状态>"
+  current_difference: "<当前实现与设计或预期的差异>"
+  expected_css_or_interaction:
+    css:
+      - "<属性: 期望值，例如 border-radius: 8px>"
+    interaction:
+      - "<期望交互，例如 drawer z-index must cover header>"
+  verification:
+    - "<验证方式，例如 1440px 截图对比指定 Figma node>"
+  blocking: true
+```

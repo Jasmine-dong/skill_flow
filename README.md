@@ -75,6 +75,7 @@ agent-pipeline-commander/
       activity.md
       bugs/BUG-001.md
       commit/notes.md
+      design/ui-review.md
       design/feedback.md
       frontend/review-fixes.md
       development-confirmation.md
@@ -337,6 +338,14 @@ handoff:
   suggested_tests:
     - 验证验证码倒计时
     - 验证接口异常提示
+  validation_evidence:
+    - pnpm typecheck
+    - 登录页 1440px 截图核对
+  user_feedback_fixes:
+    - feedback_id: UI-FB-001
+      summary: 调整按钮高度和表格金额列右对齐
+      status: fixed
+      validation: 登录页截图核对通过
   known_risks:
     - 未覆盖弱网场景
   blockers: []
@@ -513,7 +522,7 @@ workflow 确认后，`next` 应与该 workflow 的 `start` 任务所属角色一
 
 常规开发不会在拿到需求文档后立刻写代码。Product 先做需求澄清；如果有 Backend 介入，Backend 先出 `api.openapi.yaml` 和 `backend/todo.md`，FE 基于接口契约拆 `frontend/todo.md`；使用者确认接口文档和开发 TODO 后才进入开发阶段。如果使用者在开发前确认节点说“OK 继续推进”或“确认，可以开始开发”，Commander 会写入确认记录，推进到 `development_ready`，并立即衔接默认开发角色。full-stack 单代理执行默认先 Backend，除非使用者明确要求先前端；frontend-only 默认进入 Frontend。
 
-开发过程中允许分段验收：Backend 完成后必须在 `backend/notes.md` 里提供建议测试点、影响范围和扩测建议，再由 Test 测后端部分；FE 完成前必须做 UI 关键项自检，并在 `frontend/integration.md` 记录 Figma 节点、按钮、表格、弹窗/抽屉层级、footer 固定区域、disabled/loading/error/empty 状态和响应式等检查结果。验证采用分层档位：基础必跑 type-check/构建期检查和定向 lint；建议跑 dev 页面 200 或页面可达；UI 变更必跑浏览器截图或人工截图核对；接口行为变更必跑 Network 请求数量、路径、方法和关键参数核对。类型检查、lint 或单测通过不能替代视觉自检、浏览器截图核对或 Network 核对，尤其是 Figma 驱动页面。FE 完成后还必须提供建议测试点、影响范围和扩测建议。当前 feature 有 `ui_design + usable_for_ui_acceptance=true` 的设计材料或使用者明确要求 UI 验收时，FE 完成后先由 Designer 做 UI 验收，UI 通过后 Test 测前端部分；如果开发阶段没有可用 UI 设计材料，FE 在 `frontend/integration.md` 记录跳过 UI 验收的原因，然后直接进入前端分段测试。产品示意图、业务配图或概念图不算 UI 设计材料。后续一旦补充真正 UI 设计稿并写入 `design/source.md`，此前“跳过 UI 验收”的结论自动失效，状态进入 `ui_design_ready`，下一步交给 `designer-agent`；UI 走查有 P0/P1 时进入 `ui_fix_needed -> frontend-agent`，通过后交给 Test 判断是否需要重测前端或全量。Test 需要依据 Backend / FE / UI 走查提供的信息判断是否扩大测试范围，并在报告中记录采纳或不采纳原因。所有开发与分段验收完成后，Test 执行全量测试。发现问题时进入对应修复阶段，修复后回到对应的 Test 或 UI 验收。全量测试通过后状态改为 `done`，并通知使用者。所有阶段都必须有文档记录。
+开发过程中允许分段验收：Backend 完成后必须在 `backend/notes.md` 里提供建议测试点、影响范围和扩测建议，再由 Test 测后端部分；FE 完成前必须做 UI 关键项自检，并在 `frontend/integration.md` 记录 Figma 节点、按钮、表格、弹窗/抽屉层级、footer 固定区域、disabled/loading/error/empty 状态和响应式等检查结果。验证采用分层档位：基础必跑 type-check/构建期检查和定向 lint；建议跑 dev 页面 200 或页面可达；UI 变更必跑浏览器截图或人工截图核对；接口行为变更必跑 Network 请求数量、路径、方法和关键参数核对。类型检查、lint 或单测通过不能替代视觉自检、浏览器截图核对或 Network 核对，尤其是 Figma 驱动页面。FE 完成后还必须提供建议测试点、影响范围和扩测建议。当前 feature 有 `ui_design + usable_for_ui_acceptance=true` 的设计材料或使用者明确要求 UI 验收时，FE 完成后先由 Designer 做 UI 验收；Designer 默认不改代码，但 `design/ui-review.md` 的每条问题都要给出可执行修正建议，包括 Figma node、当前实现差异、期望 CSS/交互值、验证方式和是否阻塞。UI 通过后 Test 测前端部分；如果开发阶段没有可用 UI 设计材料，FE 在 `frontend/integration.md` 记录跳过 UI 验收的原因，然后直接进入前端分段测试。产品示意图、业务配图或概念图不算 UI 设计材料。后续一旦补充真正 UI 设计稿并写入 `design/source.md`，此前“跳过 UI 验收”的结论自动失效，状态进入 `ui_design_ready`，下一步交给 `designer-agent`；UI 走查有 P0/P1 时进入 `ui_fix_needed -> frontend-agent`，通过后交给 Test 判断是否需要重测前端或全量。Test 需要依据 Backend / FE / UI 走查提供的信息判断是否扩大测试范围，并在报告中记录采纳或不采纳原因。所有开发与分段验收完成后，Test 执行全量测试。发现问题时进入对应修复阶段，修复后回到对应的 Test 或 UI 验收。全量测试通过后状态改为 `done`，并通知使用者。所有阶段都必须有文档记录。
 
 如果后续才提供设计稿，可以单独调用 UI 走查：
 

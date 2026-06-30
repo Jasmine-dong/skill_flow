@@ -16,6 +16,7 @@
 - `.agent-pipeline-commander/assets/feature-template/activity.md`：功能流程事件记录模板
 - `.agent-pipeline-commander/assets/feature-template/bugs/BUG-001.md`：送测 Bug 记录模板
 - `.agent-pipeline-commander/assets/feature-template/commit/notes.md`：提交记录模板
+- `.agent-pipeline-commander/assets/feature-template/design/ui-review.md`：UI 走查与可执行修正建议模板
 - `.agent-pipeline-commander/assets/feature-template/design/feedback.md`：开发期 UI 反馈记录模板
 - `.agent-pipeline-commander/assets/feature-template/frontend/review-fixes.md`：开发期 UI 快修记录模板
 
@@ -48,6 +49,7 @@
 - 所有角色必须遵守 Chat Status Protocol：在聊天界面输出 `[开始]`、`[阻塞]`、`[完成]` 三类状态事件；不输出百分比或进度条
 - 输出 `[阻塞]` 或 `[完成]` 时，必须同步追加 `features/<feature-id>/activity.md`
 - 所有角色完成任务时，必须在自己的主要产物中写入 `## Handoff`，并在 `[完成]` 状态中摘出简版交接
+- Handoff 必须包含 `user_feedback_fixes`；没有后续用户反馈修复时写空数组，开发期 UI 快修必须记录 Feedback ID、修复摘要、状态和验证证据
 - 用户提交送测 Bug 时，先写入 `features/<feature-id>/bugs/<bug-id>.md`，再将 `status.phase` 设为 `bug_triage`、`status.next` 设为 `test-agent`，交由 Test 分诊；不要直接让实现角色修复未分诊 Bug
 - 用户在开发过程中通过截图或描述反馈按钮样式、抽屉层级、footer 透出、表格对齐、间距、文案、颜色、响应式等 UI 小问题时，使用 `frontend.ui_feedback_fix` 轻量通道：写入 `design/feedback.md` 和 `frontend/review-fixes.md`，默认不进入 `bugs/`、不交给 `test-agent` 分诊、不改变当前 `phase / next`
 - 开发期 UI 反馈快修是显式轻量通道；即使当前 `status.next` 已经是 `test-agent` 或 `designer-agent`，只要当前 `phase` 在 `frontend.ui_feedback_fix.allowed_phase` 内，也可临时交给 `frontend-agent` 快修

@@ -34,6 +34,13 @@ handoff:
   changed_files: []
   impact_scope: []
   suggested_tests: []
+  validation_evidence: []
+  user_feedback_fixes:
+    - feedback_id: UI-FB-001
+      summary: ""
+      status: pending
+      validation: ""
+      notes: ""
   known_risks: []
   blockers: []
   next_recommended:

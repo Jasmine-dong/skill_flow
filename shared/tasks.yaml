@@ -197,7 +197,7 @@ tasks:
       UI 验收前必须确认存在 ui_design + usable_for_ui_acceptance=true 的设计材料；产品示意图、业务配图或概念图不能作为 UI 验收依据。
       如果是后补设计稿或单独调用 UI 走查，先按材料字段归档设计稿来源；只有真正 UI 设计稿才能写入 design/source.md 并限定本次走查范围。
       如果此前 frontend/integration.md、status.ui_review 或测试报告记录过“无设计材料，跳过 UI 验收”，只有本次补充真正 UI 设计稿时，才在 design/ui-review.md、status.ui_review 和 status.history 中标记该跳过结论已失效。
-      写 design/ui-review.md。
+      写 design/ui-review.md；每条问题必须包含可执行修正建议：Figma node、当前实现差异、期望 CSS/交互值、验证方式、是否阻塞。
       通过后 test-agent 可以进入前端部分测试；如果此前已经完成过 frontend/full 测试，test-agent 必须基于 UI 走查影响范围判断是否需要重测。
       有 P0/P1 阻塞问题时写 blockers，并把 phase 设为 ui_fix_needed，next 设为 frontend-agent。
 

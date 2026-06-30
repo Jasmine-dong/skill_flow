@@ -143,7 +143,7 @@
 - 修改文件
 - 验证方式：命令、页面、视口或手工检查
 - 影响范围和未覆盖风险
-- `## Handoff`：按 `COMMON.md` 的 Handoff 标准补充交接信息
+- `## Handoff`：按 `COMMON.md` 的 Handoff 标准补充交接信息，必须填写 `user_feedback_fixes`
 
 ## 推进条件
 

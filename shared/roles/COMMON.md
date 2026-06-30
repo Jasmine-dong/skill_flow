@@ -144,6 +144,8 @@ handoff:
     - <建议下游或 Test 优先验证的点>
   validation_evidence:
     - <已执行验证证据，例如命令、页面 URL、截图路径、Network 请求路径；没有则说明原因>
+  user_feedback_fixes:
+    - <后续用户反馈修复记录；没有则为空数组。开发期反馈需包含 Feedback ID、修复摘要、状态和验证证据>
   known_risks:
     - <未覆盖项、环境限制、数据限制、待观察风险；没有则为空数组>
   blockers:
@@ -166,7 +168,7 @@ handoff:
 
 - Product 重点补充 `requirement_scope`、`open_questions_resolved`、`acceptance_criteria`
 - Backend 重点补充 `api_changes`、`data_changes`、`contract_notes`
-- Frontend 重点补充 `changed_views`、`api_dependencies`、`ui_states`
+- Frontend 重点补充 `changed_views`、`api_dependencies`、`ui_states`、`user_feedback_fixes`
 - Designer 重点补充 `ui_findings`、`severity_summary`、`pass_or_fix_needed`
 - Test 重点补充 `tested_scope`、`failed_cases`、`untested_risks`、`quality_gate`
 - Commit 重点补充 `commit_type`、`commit_message`、`completed_scope`、`external_sync`
