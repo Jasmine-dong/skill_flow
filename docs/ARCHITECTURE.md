@@ -85,7 +85,8 @@ sequenceDiagram
     C-->>U: 输出 [完成] commander / 已进入 Bug 分诊
   else 用户提交开发期 UI 截图反馈
     C->>UI: 归档 UI 反馈并记录快修
-    C->>S: 追加 history，默认不改变 phase/next
+    C->>A: 追加阶段内修正记录
+    Note over C,S: 默认不修改 status.yaml；反馈收口后再统一推进
     C-->>U: 输出 [完成] frontend-agent / UI 快修记录
   end
   alt 遇到问题或不确定
@@ -251,7 +252,7 @@ tasks.yaml 按 workflow 决定下一个角色；
 角色卡限制职责边界；
 功能包保存所有交接产物；
 送测 Bug 先写入 bugs/<bug-id>.md，再进入 bug_triage；
-开发期 UI 截图反馈先写入 design/feedback.md 和 frontend/review-fixes.md，不进入 bug_triage；
+开发期 UI 截图反馈先写入 design/feedback.md 和 frontend/review-fixes.md，不进入 bug_triage，也不逐条推进 status.yaml；
 前端没有可用于 UI 验收的设计材料时可跳过 UI 验收；只有后补 `ui_design + usable_for_ui_acceptance=true` 的真正 UI 设计稿，才会使旧跳过结论失效，并进入 ui_design_ready -> designer-agent；产品示意图不触发 UI 验收；
 用户明确要求提交时临时调用 commit-agent，不默认推进流程；
 角色主要产物通过 ## Handoff 标准化交接；

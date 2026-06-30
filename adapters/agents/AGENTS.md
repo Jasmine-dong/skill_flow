@@ -51,6 +51,7 @@
 - 用户提交送测 Bug 时，先写入 `features/<feature-id>/bugs/<bug-id>.md`，再将 `status.phase` 设为 `bug_triage`、`status.next` 设为 `test-agent`，交由 Test 分诊；不要直接让实现角色修复未分诊 Bug
 - 用户在开发过程中通过截图或描述反馈按钮样式、抽屉层级、footer 透出、表格对齐、间距、文案、颜色、响应式等 UI 小问题时，使用 `frontend.ui_feedback_fix` 轻量通道：写入 `design/feedback.md` 和 `frontend/review-fixes.md`，默认不进入 `bugs/`、不交给 `test-agent` 分诊、不改变当前 `phase / next`
 - 开发期 UI 反馈快修是显式轻量通道；即使当前 `status.next` 已经是 `test-agent` 或 `designer-agent`，只要当前 `phase` 在 `frontend.ui_feedback_fix.allowed_phase` 内，也可临时交给 `frontend-agent` 快修
+- 开发期即时反馈属于阶段内修正：连续小反馈默认只追加 `activity.md`、`design/feedback.md` 或 `frontend/review-fixes.md`，不要求每个小点都修改 `status.yaml` 或追加 `status.history`；等使用者明确“收口 / 继续推进 / 可以下一步”时再统一检查门禁并推进状态
 - 材料归档必须区分 `ui_design` 和 `product_illustration`；产品示意图、业务配图、概念图或用户确认不是 UI 设计的材料，只能辅助需求理解，不得写入 `design/source.md` 作为 UI 验收依据
 - 只有 `source-materials.md` 中存在 `material_type=ui_design` 且 `usable_for_ui_acceptance=true` 的材料，才能触发 UI 验收或 `ui_design_ready`
 - 如果前端曾因无设计材料跳过 UI 验收，后续一旦用户补充真正 UI 设计稿并写入 `design/source.md`，必须自动标记旧的“跳过 UI 验收”结论失效，将 `status.phase` 设为 `ui_design_ready`、`status.next` 设为 `designer-agent`，进入 UI 走查；不得继续沿用旧的前端测试或全量测试 UI 门禁结论
@@ -98,7 +99,7 @@
 
 前端开发阶段 UI 验收是条件流程：有 `ui_design + usable_for_ui_acceptance=true` 的设计材料或使用者明确要求 UI 验收时，前端完成后先交给 `designer-agent`；没有可用 UI 设计材料时，前端完成后直接交给 `test-agent` 做前端分段测试，并在 `frontend/integration.md` 记录跳过原因。后续补充真正 UI 设计稿时，必须先归档到 `design/source.md`，标记此前“跳过 UI 验收”结论失效，并把状态设为 `phase=ui_design_ready,next=designer-agent`；UI 走查有 P0/P1 时进入 `ui_fix_needed -> frontend-agent`，通过后再由 test-agent 判断是否需要重测。
 
-开发期 UI 截图反馈使用轻量通道：先归档到 `design/feedback.md`，再由 `frontend-agent` 快修并写入 `frontend/review-fixes.md`；不进入 `bugs/`。QA、UAT、送测、线上回归、缺陷平台链接或明确 Bug 才进入正式 Bug 流程。
+开发期 UI 截图反馈使用轻量通道：先归档到 `design/feedback.md`，再由 `frontend-agent` 快修并写入 `frontend/review-fixes.md`；不进入 `bugs/`，不逐条推进 `status.yaml`。QA、UAT、送测、线上回归、缺陷平台链接或明确 Bug 才进入正式 Bug 流程。
 
 ## 送测 Bug 输入格式
 

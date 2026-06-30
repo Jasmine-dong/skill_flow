@@ -5,12 +5,15 @@
 - Feature:
 - Trigger: development_ui_feedback
 - Status: draft | fixed | blocked | skipped
+- Fix mode: in_phase_fix
+- Feedback round: open | partially_fixed | closed
+- Status handling: keep current `phase / next`; update `status.yaml` only when the feedback round is closed or workflow is blocked.
 
 ## Fix Items
 
-| Feedback ID | Fix Summary | Files Changed | Validation | Status | Notes |
-|---|---|---|---|---|---|
-| UI-FB-001 |  |  |  | pending |  |
+| Feedback ID | Fix Summary | Files Changed | Validation | In-Phase Fix | Status | Notes |
+|---|---|---|---|---|---|---|
+| UI-FB-001 |  |  |  | true | pending |  |
 
 ## Validation
 

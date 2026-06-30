@@ -23,6 +23,7 @@
 - 处理前端状态、交互、表单、路由、权限、埋点、错误提示和 loading/empty/error 等页面状态
 - 处理 UI 验收、前端分段测试、全量测试或产品验收反馈中属于前端职责的返工项
 - 处理开发期 UI 反馈快修，例如按钮样式、抽屉层级、footer 透出、表格对齐、间距、层级、文案或响应式微调
+- 对开发期即时反馈采用阶段内修正：只记录和修复，不把每个小反馈都推进成新的流程状态
 - 记录实现范围、联调方式、分层验证结果、建议测试点、影响范围、扩测建议和剩余风险
 - 在前端完成前强制执行 UI 关键项自检，避免类型检查通过但视觉细节漏掉
 - 如果开发阶段没有可用于 UI 验收的设计材料，记录跳过 UI 验收的原因到 `frontend/integration.md` 和 `status.ui_review`，并交给 Test 做前端分段测试；后续补充真正 UI 设计稿时，旧的跳过结论自动失效，必须进入 `ui_design_ready` 做 UI 走查
@@ -67,7 +68,7 @@
 7. 修改前先搜索现有路由、组件、请求封装、状态管理、样式和测试约定，优先复用项目既有模式
 8. 如果当前阶段是 `requirements_ready` 或 `api_contract_ready`，只拆解 `frontend/todo.md`，不要写业务代码
 9. 如果当前阶段是 `development_ready`、`backend_tested`、`frontend_fix_needed` 或 `ui_fix_needed`，按已确认的 `frontend/todo.md` 或 `bugs/<bug-id>.md` 完成页面、交互、联调或返工
-10. 如果本轮是开发期 UI 截图反馈或轻量体验反馈，先写入 `design/feedback.md`，再在前端代码中做最小 UI 修复，最后写入 `frontend/review-fixes.md`；默认不改变当前 `phase / next`
+10. 如果本轮是开发期 UI 截图反馈或轻量体验反馈，先写入 `design/feedback.md`，再在前端代码中做最小 UI 修复，最后写入 `frontend/review-fixes.md`；按阶段内修正规则处理，默认不改变当前 `phase / next`，不要求每个小点都追加 `status.history`
 11. 完成实现后按 `COMMON.md` 的“分层验证档位”执行验证：基础必跑 type-check/构建期检查和定向 lint；建议跑 dev 页面 200 或页面可达；UI 变更必跑浏览器截图或人工截图核对；接口行为变更必跑 Network 请求数量、路径、方法和关键参数核对
 12. 推进 `frontend_done` 前，必须按“UI 关键项自检 checklist”完成视觉自检；如果无法访问页面、缺少可用 UI 设计稿或无法确认视觉标准，必须在 `frontend/integration.md` 写明未覆盖原因和风险，必要时向使用者确认
 13. 写入 `frontend/integration.md`，记录改动、联调、分层验证、UI 关键项自检、建议测试点、影响范围、扩测建议和风险；如果没有 `ui_design + usable_for_ui_acceptance=true` 的设计材料，记录“本轮跳过 UI 验收”的原因和后续补充真正 UI 设计稿后的处理方式；产品示意图只能作为需求理解参考，不算设计材料；如果是 Bug 修复，同时回写 `bugs/<bug-id>.md` 的 Fix 区块
@@ -131,11 +132,14 @@
 - 页面、组件或区域
 - 期望效果
 - 是否属于开发期 UI 反馈；如果不是，说明为什么转入正式 Bug 流程
+- 是否属于阶段内修正；如果不是，说明为什么需要转入正式流程
 - 处理状态：pending、fixed、blocked 或 skipped
 
 开发期 UI 反馈快修时，`frontend/review-fixes.md` 必须包含：
 
 - Feedback ID 对应的修复摘要
+- 修正类型：in_phase_fix 或 workflow_blocking
+- 本轮反馈状态：open、partially_fixed 或 closed
 - 修改文件
 - 验证方式：命令、页面、视口或手工检查
 - 影响范围和未覆盖风险
@@ -153,7 +157,8 @@
 - 如果存在未确认的产品、接口或设计问题，写入 `blockers`，不要推进到下一阶段
 - 没有可用于 UI 验收的设计材料不阻塞前端完成；必须在 `frontend/integration.md` 和 `status.ui_review` 中记录跳过 UI 验收，并把下一步交给 `test-agent`
 - 一旦后补真正 UI 设计稿并在 `source-materials.md` 标记为 `ui_design + usable_for_ui_acceptance=true`，此前 `frontend/integration.md` 中“跳过 UI 验收”的结论仅作为历史记录，不再作为后续测试或验收门禁依据
-- 开发期 UI 反馈快修不进入 `bugs/`，不交给 `test-agent` 分诊，默认不改变当前 `phase / next`
+- 开发期 UI 反馈快修不进入 `bugs/`，不交给 `test-agent` 分诊，默认不改变当前 `phase / next`，不要求每个小点都追加 `status.history`
+- 使用者连续反馈期间保持当前阶段；只有用户明确反馈收口或要求继续推进时，才统一检查门禁并推进 `status.yaml`
 - QA、UAT、送测、线上回归、缺陷平台链接或使用者明确称为 Bug 的问题，必须走正式 `bugs/` 流程
 
 ## 不做

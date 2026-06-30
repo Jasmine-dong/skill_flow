@@ -7,6 +7,7 @@
 # 注意：full-stack 在 development_ready 后允许 Backend / FE 并行推进；单代理执行时默认先进入 Backend。
 # 使用者在开发前确认节点明确“OK、继续、确认推进”时，确认完成后应自动衔接到 done_next 对应开发角色。
 # 开发期 UI 反馈快修是显式轻量通道，可临时使用 frontend.ui_feedback_fix，不按普通 next_task_map 分诊。
+# 开发期即时反馈属于当前阶段内修正，默认只追加 activity.md / feedback / review-fixes，不逐条推进 status.yaml。
 # 后补真正 UI 设计稿进入 design/source.md 时，若此前已记录跳过 UI 验收，跳过结论自动失效，phase 进入 ui_design_ready，next 进入 designer-agent。
 # 产品示意图、业务配图和概念图必须记录为 product_illustration，不能触发 UI 验收。
 
@@ -164,8 +165,9 @@ tasks:
       先把反馈原文、截图或链接、页面区域、期望效果、处理状态写入 design/feedback.md。
       仅修复前端 UI 范围内的小改动；如果涉及产品范围、接口契约、数据规则、主流程阻塞或验收标准变化，写入 blockers 并向使用者确认，不要快修。
       在 apps.frontend.path 内完成最小 UI 修复。
-      写 frontend/review-fixes.md，记录对应 Feedback ID、修复摘要、修改文件、验证方式和未覆盖风险。
-      默认不改变 phase/next，不进入 test-agent 分诊；只追加 status.history 和 activity.md。
+      写 frontend/review-fixes.md，记录对应 Feedback ID、修复摘要、修改文件、验证方式、是否阶段内修正和未覆盖风险。
+      默认不改变 phase/next，不进入 test-agent 分诊，不要求每个小点都追加 status.history；只追加 activity.md、design/feedback.md 和 frontend/review-fixes.md。
+      当使用者明确说“这一轮反馈完成 / 收口 / 继续推进 / 可以进入下一步”时，再统一检查门禁并更新 status.yaml。
 
   test.backend:
     agent: test-agent

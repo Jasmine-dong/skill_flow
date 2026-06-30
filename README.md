@@ -373,8 +373,10 @@ Commander 会使用 `frontend.ui_feedback_fix` 轻量通道：
 1. 记录反馈到 `features/<feature-id>/design/feedback.md`
 2. 由 `frontend-agent` 做最小 UI 修复
 3. 记录修复到 `features/<feature-id>/frontend/review-fixes.md`
-4. 追加 `activity.md` 和 `status.history`
-5. 默认不改变当前 `phase / next`，不进入 `bugs/`，不交给 `test-agent` 分诊
+4. 追加 `activity.md`
+5. 默认不改变当前 `phase / next`，不进入 `bugs/`，不交给 `test-agent` 分诊，也不要求每个小点都追加 `status.history`
+
+连续小反馈会保持在当前阶段内修正。等使用者明确说“这一轮反馈收口 / 继续推进 / 可以下一步”时，Commander 再统一检查门禁并推进 `status.yaml`。
 
 只有这些情况才走正式 Bug 流程：
 
