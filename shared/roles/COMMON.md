@@ -8,6 +8,7 @@
 - `pipeline.project.yaml` 必须通过 `knowledge.project_details` 指向项目画像文件，例如 `lightweight-pipeline/project-details.md`
 - 如果项目画像文件不存在，不能进入 feature 开发流程；必须先扫描项目并生成项目画像，交由使用者确认后再继续
 - 所有角色执行前都必须读取项目画像，并以它作为项目结构、技术栈、命令、封装方式、测试入口和已知坑点的事实源
+- 项目画像必须记录项目能力识别结果：是否检测到可开发后端、是否检测到可开发前端、对应路径、证据和置信度
 - 项目画像只记录可复用项目事实，不记录一次性需求细节、未验证猜测或临时调试过程
 - 每次开发、测试或验收结束后，如果发现新的可复用项目事实，必须补充到项目画像的对应章节和 Update Log
 - 如果开发中发现项目画像与真实代码、命令或项目结构冲突，必须废弃当前推进步骤，不得继续开发
@@ -133,7 +134,7 @@ handoff:
 
 - `product-agent` 写入 `brief.md`、`confirmations/development-confirmation.md` 或产品验收记录中的 `## Handoff`
 - `backend-agent` 写入 `backend/notes.md` 的 `## Handoff`
-- `frontend-agent` 写入 `frontend/integration.md` 的 `## Handoff`
+- `frontend-agent` 写入 `frontend/integration.md` 的 `## Handoff`；开发期 UI 反馈快修写入 `frontend/review-fixes.md` 的 `## Handoff`
 - `designer-agent` 写入 `design/ui-review.md` 的 `## Handoff`
 - `test-agent` 写入对应测试报告的 `## Handoff`
 - `commit-agent` 写入 `commit/notes.md` 的 `## Handoff`

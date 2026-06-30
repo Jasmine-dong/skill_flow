@@ -2,9 +2,11 @@
 
 # tasks 只描述任务本身：谁做、允许什么状态、做完到哪里、需要哪些产物。
 # workflows 决定不同需求类型走哪几步。
+# workflow 为 pending 或 workflow_detection.status 未 confirmed 时，不查普通 workflow map，先由 product-agent 执行 product.clarify 做 workflow 建议与确认。
 # workflows.done_next 是默认下一角色；任务 steps 写明条件分支时，以条件分支设置的 next 为准。
-# 注意：full-stack 在 development_ready 后允许 Backend / FE 并行推进。
-# 如果当前工具只能单步执行，Commander 必须询问使用者先推进哪个分支。
+# 注意：full-stack 在 development_ready 后允许 Backend / FE 并行推进；单代理执行时默认先进入 Backend。
+# 使用者在开发前确认节点明确“OK、继续、确认推进”时，确认完成后应自动衔接到 done_next 对应开发角色。
+# 开发期 UI 反馈快修是显式轻量通道，可临时使用 frontend.ui_feedback_fix，不按普通 next_task_map 分诊。
 
 tasks:
   project.rescan:
@@ -18,6 +20,7 @@ tasks:
     steps: |
       读取 pipeline.project.yaml 中的 knowledge.project_details。
       根据 blockers 中记录的项目画像冲突原因，重新扫描项目结构、技术栈、命令、前后端约定和测试入口。
+      同步更新项目能力识别：可开发后端、可开发前端、路径、证据和置信度。
       更新 project-details.md，只记录可复用项目事实，不记录一次性需求细节。
       向使用者确认新的项目画像。
       使用者确认后，在 status.history 记录重扫原因和确认结果，将 phase 重置为 planned，重新开启当前 feature 流程。
@@ -33,6 +36,7 @@ tasks:
       - brief.md
       - test/coverage.md
     steps: |
+      如果 status.workflow_detection.status 不是 confirmed，先根据项目画像的前后端能力和本次需求意图建议 workflow，写入 workflow_detection，并向使用者确认；确认前不得进入下游接口/TODO/开发任务。
       读取 PRD、用户描述与上下文；如果用户用“需求文档：...，接口文档：...，测试case：...，设计稿：...，材料：...，整合材料：...”提供素材，先归档到 source-materials.md。
       对“材料：”批量输入先做类型识别；对“整合材料：”先做章节/内容拆分；识别或拆分不确定时向使用者确认，不要猜测归档。
       将需求文档或识别出的需求部分整理进 brief.md；将接口文档或识别出的接口部分整理进 api.openapi.yaml；将测试 case 或识别出的测试部分整理进 test/cases.md；将设计稿或识别出的设计说明整理进 design/source.md。
@@ -104,7 +108,8 @@ tasks:
       向使用者确认需求、接口文档和技术 TODO 是否可以进入开发。
       使用者确认前不得推进。
       使用者确认后写 confirmations/development-confirmation.md 记录确认内容，并推进到 development_ready。
-      full-stack 进入 development_ready 后，Backend 和 FE 可以同步开始；如果当前工具只能单步执行，询问使用者先推进哪个分支。
+      如果本轮输入已经包含使用者明确确认继续（例如“OK 继续推进”“确认，可以开始开发”），不要停在 development_ready；写入确认记录并更新 status 后，立即按 workflows.done_next[product.confirm_development] 衔接到开发角色。
+      full-stack 进入 development_ready 后，Backend 和 FE 可以同步开始；单代理执行时默认先衔接 backend-agent，除非使用者明确要求先前端。
 
   backend.implement:
     agent: backend-agent
@@ -136,6 +141,25 @@ tasks:
       如果有设计材料或明确要求 UI 验收，next 设为 designer-agent，先进入 UI 验收。
       如果没有设计材料且使用者未要求 UI 验收，next 设为 test-agent，直接进入前端分段测试；在 frontend/integration.md 和 status.history 中记录“本轮跳过 UI 验收”的原因。
       后续补充设计稿时，可以显式把 next 设为 designer-agent，单独调用 UI 走查。
+
+  frontend.ui_feedback_fix:
+    agent: frontend-agent
+    title: 开发期 UI 反馈快修
+    allowed_phase: [development_ready, backend_tested, frontend_done, ui_reviewed, frontend_tested, frontend_fix_needed, ui_fix_needed]
+    requires_next: frontend-agent
+    done_phase: keep_current
+    done_requires:
+      - design/feedback.md
+      - frontend/review-fixes.md
+    steps: |
+      仅在使用者于开发过程中提供 UI 截图反馈或轻量体验反馈时执行，例如按钮样式、抽屉层级、footer 透出、表格对齐、间距、层级、文案、颜色、图标、响应式微调。
+      如果反馈来自 QA、UAT、送测、线上回归、缺陷平台链接，或使用者明确说 Bug，则不得走本任务，必须进入正式 bugs/ 流程。
+      读取 brief.md、frontend/todo.md、frontend/integration.md、design/source.md（如果存在）和用户本轮截图/反馈。
+      先把反馈原文、截图或链接、页面区域、期望效果、处理状态写入 design/feedback.md。
+      仅修复前端 UI 范围内的小改动；如果涉及产品范围、接口契约、数据规则、主流程阻塞或验收标准变化，写入 blockers 并向使用者确认，不要快修。
+      在 apps.frontend.path 内完成最小 UI 修复。
+      写 frontend/review-fixes.md，记录对应 Feedback ID、修复摘要、修改文件、验证方式和未覆盖风险。
+      默认不改变 phase/next，不进入 test-agent 分诊；只追加 status.history 和 activity.md。
 
   test.backend:
     agent: test-agent
@@ -325,6 +349,7 @@ workflows:
       test.bug_triage: test-agent
       test.frontend: test-agent
       test.full: product-agent
+      frontend.ui_feedback_fix: frontend-agent
       commit.note: commit-agent
     final_requires:
       - brief.md
@@ -434,6 +459,7 @@ workflows:
       test.bug_triage: test-agent
       test.frontend: test-agent
       test.full: product-agent
+      frontend.ui_feedback_fix: frontend-agent
       commit.note: commit-agent
     final_requires:
       - brief.md

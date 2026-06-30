@@ -16,6 +16,8 @@
 - `.agent-pipeline-commander/assets/feature-template/activity.md`：功能流程事件记录模板
 - `.agent-pipeline-commander/assets/feature-template/bugs/BUG-001.md`：送测 Bug 记录模板
 - `.agent-pipeline-commander/assets/feature-template/commit/notes.md`：提交记录模板
+- `.agent-pipeline-commander/assets/feature-template/design/feedback.md`：开发期 UI 反馈记录模板
+- `.agent-pipeline-commander/assets/feature-template/frontend/review-fixes.md`：开发期 UI 快修记录模板
 
 ## 执行规则
 
@@ -24,7 +26,7 @@
 3. 读取 `knowledge.project_details` 指向的项目画像；不存在时先扫描项目并生成项目画像，使用者确认后再进入 feature 流程
 4. 读取 `features.root/<feature-id>/status.yaml`
 5. 读取 `.agent-pipeline-commander/references/tasks.yaml`
-6. 用 `status.workflow + status.phase + status.next` 查找下一步任务
+6. 如果 `status.workflow` 是 `pending` 或 `workflow_detection.status` 未 confirmed，先由 `product-agent` 执行 `product.clarify` 做 workflow 建议与确认；确认后再用 `status.workflow + status.phase + status.next` 查找下一步任务
 7. 读取任务指定的 `.agent-pipeline-commander/references/roles/<agent>.md`
 8. 临时扮演该角色完成任务
 9. 完成后补充可复用项目事实，检查门禁，再推进 `status.yaml`
@@ -41,10 +43,15 @@
 - 遇到阻塞时写入 `blockers`，不要强行推进
 - 每次推进状态必须追加 `history`
 - `workflows.done_next` 是默认下一角色；任务步骤写明条件分支时，以条件分支设置的 `next` 为准
+- 新功能包如果未确认 workflow，必须先由 `product-agent` 根据项目能力和需求意图给出 workflow 建议，并获得使用者确认；确认前不得进入开发流程。仓库只有前端但提供了接口文档时，默认建议 `frontend-only`，接口文档作为 FE 联调契约
+- 开发前确认节点收到使用者明确“OK、继续、确认推进、可以开始开发”时，`product-agent` 写入确认记录并推进到 `development_ready` 后，不要停住；立即按 `done_next` 衔接到开发角色。full-stack 单代理执行默认先 `backend-agent`，除非使用者明确要求先前端
 - 所有角色必须遵守 Chat Status Protocol：在聊天界面输出 `[开始]`、`[阻塞]`、`[完成]` 三类状态事件；不输出百分比或进度条
 - 输出 `[阻塞]` 或 `[完成]` 时，必须同步追加 `features/<feature-id>/activity.md`
 - 所有角色完成任务时，必须在自己的主要产物中写入 `## Handoff`，并在 `[完成]` 状态中摘出简版交接
 - 用户提交送测 Bug 时，先写入 `features/<feature-id>/bugs/<bug-id>.md`，再将 `status.phase` 设为 `bug_triage`、`status.next` 设为 `test-agent`，交由 Test 分诊；不要直接让实现角色修复未分诊 Bug
+- 用户在开发过程中通过截图或描述反馈按钮样式、抽屉层级、footer 透出、表格对齐、间距、文案、颜色、响应式等 UI 小问题时，使用 `frontend.ui_feedback_fix` 轻量通道：写入 `design/feedback.md` 和 `frontend/review-fixes.md`，默认不进入 `bugs/`、不交给 `test-agent` 分诊、不改变当前 `phase / next`
+- 开发期 UI 反馈快修是显式轻量通道；即使当前 `status.next` 已经是 `test-agent` 或 `designer-agent`，只要当前 `phase` 在 `frontend.ui_feedback_fix.allowed_phase` 内，也可临时交给 `frontend-agent` 快修
+- 如果反馈来自 QA、UAT、送测、线上回归、缺陷平台链接，或使用者明确说 Bug，则必须走正式 `bugs/` 流程，不得使用 UI 快修通道
 - 用户明确要求“提交代码、生成 commit、先 commit、提交当前进度、同步外部 Bug 备注”时，临时使用 `commit-agent`；这是可插入动作，不默认推进 `phase / next`
 - `commit-agent` 提交前必须让使用者确认 commit message 和文件范围；checkpoint 提交只提示已完成内容
 
@@ -60,6 +67,9 @@
 6. 参考 `.agent-pipeline-commander/assets/feature-template/brief.md` 创建 `brief.md`
 7. 参考 `.agent-pipeline-commander/assets/feature-template/activity.md` 创建 `activity.md`
 8. 需要提交代码时，参考 `.agent-pipeline-commander/assets/feature-template/commit/notes.md` 创建 `commit/notes.md`
+9. 需要记录开发期 UI 反馈时，参考 `.agent-pipeline-commander/assets/feature-template/design/feedback.md` 创建 `design/feedback.md`，参考 `.agent-pipeline-commander/assets/feature-template/frontend/review-fixes.md` 创建 `frontend/review-fixes.md`
+
+新功能包可以先使用 `workflow: pending` 和 `workflow_detection.status: pending`。Product 根据项目能力与需求意图给出建议并获得使用者确认后，再写入真实 workflow。
 
 ## 素材输入格式
 
@@ -82,6 +92,8 @@
 `材料：` 表示批量材料，必须先逐项识别类型并写入 `source-materials.md` 的“材料识别 / 批量材料”。`整合材料：` 表示单个文件或长文本中混合了需求、接口、测试或设计内容，必须先拆分并写入“材料识别 / 整合材料拆分”。分类或拆分不确定时，先向使用者确认，不要猜测归档。
 
 前端开发阶段 UI 验收是条件流程：有 `design/source.md` 或使用者明确要求 UI 验收时，前端完成后先交给 `designer-agent`；没有设计材料时，前端完成后直接交给 `test-agent` 做前端分段测试，并在 `frontend/integration.md` 记录跳过原因。后续补充设计稿时，可以显式调用 `designer-agent` 或使用 `design-review-only` 单独做 UI 走查。
+
+开发期 UI 截图反馈使用轻量通道：先归档到 `design/feedback.md`，再由 `frontend-agent` 快修并写入 `frontend/review-fixes.md`；不进入 `bugs/`。QA、UAT、送测、线上回归、缺陷平台链接或明确 Bug 才进入正式 Bug 流程。
 
 ## 送测 Bug 输入格式
 

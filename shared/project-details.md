@@ -32,6 +32,22 @@
 - docs:
 - tests:
 
+## Project Capability Detection
+
+- detected_backend: unknown
+- backend_path:
+- backend_evidence:
+  - 
+- backend_confidence: low | medium | high
+- detected_frontend: unknown
+- frontend_path:
+- frontend_evidence:
+  - 
+- frontend_confidence: low | medium | high
+- docs_only: false
+- notes:
+  - 
+
 ## Development Commands
 
 - install:

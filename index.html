@@ -926,7 +926,7 @@
             <article class="feature-card">
               <span class="icon">02</span>
               <h3>项目画像</h3>
-              <p>首次扫描项目，后续开发前必读，开发后补充，让项目知识越用越准。</p>
+              <p>首次扫描项目，识别前后端能力，后续开发前必读，开发后补充。</p>
             </article>
             <article class="feature-card">
               <span class="icon">03</span>
@@ -1012,6 +1012,7 @@
               <h3>Product</h3>
               <p>把需求材料变成可开发输入，不够清楚时先向使用者澄清。</p>
               <ul>
+                <li>根据项目能力和需求意图建议 workflow</li>
                 <li>整理 PRD、验收标准和需求边界</li>
                 <li>拆分整合材料，归档 source-materials.md</li>
                 <li>汇总接口、前后端 TODO 并发起开发确认</li>
@@ -1034,6 +1035,7 @@
               <ul>
                 <li>输出 frontend/todo.md 和 integration.md</li>
                 <li>实现页面、状态、校验、接口接入和异常态</li>
+                <li>开发期 UI 截图反馈可快修并记录</li>
                 <li>说明改动范围、跳过 UI 原因和建议测试点</li>
               </ul>
             </article>
@@ -1123,6 +1125,18 @@ Meegle项目：futures
             <article class="usage-card">
               <div class="usage-head">
                 <div>
+                  <strong>开发期 UI 快修</strong>
+                  <span>截图反馈，不进入正式 Bug 流</span>
+                </div>
+                <button class="mini-copy" type="button" data-copy-target="usage-ui-feedback">复制</button>
+              </div>
+              <pre><code id="usage-ui-feedback">推进 2026-06-25--login
+截图里按钮太高，抽屉层级压住 footer，表格金额列没有右对齐</code></pre>
+            </article>
+
+            <article class="usage-card">
+              <div class="usage-head">
+                <div>
                   <strong>提交当前进度</strong>
                   <span>中途 checkpoint，只提示已完成</span>
                 </div>
@@ -1160,7 +1174,7 @@ Meegle项目：futures
               <ul class="check-list">
                 <li>
                   <span class="check-mark">✓</span>
-                  <span><b>首次使用先扫描。</b> 生成 project-details.md，使用者确认后才能开发。</span>
+                  <span><b>首次使用先扫描。</b> 生成 project-details.md，识别前端/后端能力，使用者确认后才能开发。</span>
                 </li>
                 <li>
                   <span class="check-mark">✓</span>
@@ -1203,7 +1217,7 @@ apps:
           <div class="targets">
             <div class="target">
               <strong>Codex</strong>
-              <span>安装 pipeline-commander skill。</span>
+              <span>安装 agent-pipeline skill，搜索位置更靠前。</span>
             </div>
             <div class="target">
               <strong>Claude Code</strong>

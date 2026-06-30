@@ -91,7 +91,11 @@ copy_dir() {
 
 install_codex() {
   local codex_home="${CODEX_HOME:-$HOME/.codex}"
-  local dest="$codex_home/skills/pipeline-commander"
+  local dest="$codex_home/skills/agent-pipeline"
+  local legacy_dest="$codex_home/skills/pipeline-commander"
+  if [ "$legacy_dest" != "$dest" ] && [ -d "$legacy_dest" ]; then
+    rm -rf "$legacy_dest"
+  fi
   mkdir -p "$dest/references" "$dest/assets"
   cp "$SRC_DIR/adapters/codex/SKILL.md" "$dest/SKILL.md"
   copy_dir "$SRC_DIR/adapters/codex/agents" "$dest/agents"

@@ -17,13 +17,13 @@ features:
 
 apps:
   backend:
-    path: services/api
+    path: null
     dev:
-      base_url: http://localhost:3000/api
+      base_url:
   frontend:
-    path: packages/web
+    path: null
     dev:
-      base_url: http://localhost:5173
+      base_url:
 
 bug_sources:
   - platform: meegle

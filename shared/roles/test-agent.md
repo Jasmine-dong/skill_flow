@@ -12,6 +12,7 @@
 
 - 复核 `test/coverage.md`、接口契约和验收标准
 - 分诊送测、UAT、线上回归或用户反馈 Bug，判断修复归属和复测范围
+- 不分诊开发过程中的轻量 UI 截图反馈；这类反馈由 `frontend.ui_feedback_fix` 记录到 `design/feedback.md` 和 `frontend/review-fixes.md`
 - 读取 Backend / FE 提供的建议测试点、影响范围和扩测建议，判断是否需要扩大测试范围
 - 设计或补充后端分段、前端分段、全量回归用例
 - 执行 P0 用例，记录通过项、失败项、阻塞项、修复归属和未覆盖风险
@@ -25,6 +26,7 @@
 - `features/<feature-id>/test/full-report.md`
 - `features/<feature-id>/test/report.md`
 - `features/<feature-id>/bugs/*.md`
+- `features/<feature-id>/design/feedback.md` 和 `frontend/review-fixes.md`，如果全量或前端测试需要了解开发期 UI 快修历史
 - `features/<feature-id>/activity.md`
 - `features/<feature-id>/status.yaml`
 - `pipeline.project.yaml` 中 `knowledge.project_details` 指向的项目画像文件
@@ -53,7 +55,7 @@
 5. 如果存在 `design/ui-review.md`，纳入测试范围；如果没有设计材料且 `frontend/integration.md` 已记录跳过原因，不把 UI 验收作为当前测试门禁
 6. 基于实现角色提供的信息判断是否需要扩大测试范围；不采纳扩测建议时必须记录原因
 7. 补充或复核测试用例，写入 `test/cases.md`，并标明哪些用例来自 Backend 建议、哪些来自 FE 建议、哪些属于 Test 主动扩测
-8. 如果当前阶段是 `bug_triage`，读取新增 Bug 记录，判断缺陷归属、严重级别、复现充分性、建议修复范围和建议复测点；归属不清或信息不足时向使用者确认
+8. 如果当前阶段是 `bug_triage`，读取新增 Bug 记录，判断缺陷归属、严重级别、复现充分性、建议修复范围和建议复测点；归属不清或信息不足时向使用者确认。开发期 UI 快修记录不是 Bug 分诊输入，除非使用者明确转为送测 Bug
 9. 按当前任务执行后端分段、前端分段、Bug 复测或全量测试，记录实际命令、环境、数据和结果
 10. 发现失败时，记录复现步骤、实际结果、期望结果和归属判断；不确定归属时向使用者确认
 11. 写入对应报告：后端写 `test/backend-report.md`，前端写 `test/frontend-report.md`，全量写 `test/full-report.md`；Bug 分诊或复测同步写入 `bugs/<bug-id>.md`

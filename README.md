@@ -12,7 +12,7 @@ curl -fsSL https://raw.githubusercontent.com/Jasmine-dong/skill_flow/main/instal
 
 默认 `auto` 规则：
 
-- 检测到 Codex：安装到 `${CODEX_HOME:-~/.codex}/skills/pipeline-commander`
+- 检测到 Codex：安装到 `${CODEX_HOME:-~/.codex}/skills/agent-pipeline`
 - 检测到 Claude Code：安装到 `~/.claude/commands/pipeline-commander.md`
 - 两者都没检测到：在当前项目安装 `AGENTS.md` 和 `.agent-pipeline-commander/`
 
@@ -35,7 +35,7 @@ curl -fsSL https://raw.githubusercontent.com/Jasmine-dong/skill_flow/main/instal
 
 | target | 适用工具 | 安装内容 |
 |---|---|---|
-| `codex` | Codex | `pipeline-commander` skill |
+| `codex` | Codex | `agent-pipeline` skill |
 | `claude` | Claude Code | `/pipeline-commander` slash command |
 | `agents` | 支持 `AGENTS.md` 的通用 AI 编程工具 | 项目级 `AGENTS.md` 和资源目录 |
 | `auto` | 自动检测 | 优先安装已检测到的工具，否则安装 `agents` |
@@ -75,6 +75,8 @@ agent-pipeline-commander/
       activity.md
       bugs/BUG-001.md
       commit/notes.md
+      design/feedback.md
+      frontend/review-fixes.md
       development-confirmation.md
   adapters/
     codex/
@@ -144,6 +146,12 @@ lightweight-pipeline/project-details.md
 
 项目画像需要由使用者确认后，才允许创建或推进 feature 流程。它记录长期可复用的项目事实，例如技术栈、目录职责、启动命令、测试命令、接口封装、路由规则、状态管理、权限、常见坑点和回归入口。
 
+项目画像还会记录项目能力识别结果：
+
+- 是否检测到可开发后端、后端路径、证据和置信度
+- 是否检测到可开发前端、前端路径、证据和置信度
+- BFF、mock、proxy、fixture、纯 OpenAPI 文档等低置信度情况
+
 然后创建功能包：
 
 ```text
@@ -158,7 +166,11 @@ lightweight-pipeline/features/2026-05-25--greeting/
 ```yaml
 feature: 2026-05-25--greeting
 title: Greeting
-workflow: backend-only
+workflow: pending
+workflow_detection:
+  status: pending
+  suggested:
+  confirmed_by_user: false
 phase: planned
 owner: product-agent
 next: product-agent
@@ -176,10 +188,10 @@ history:
 Codex：
 
 ```text
-$pipeline-commander
+$agent-pipeline
 ```
 
-也可以输入 `$` 后搜索 `项目工作流助手` 或 `pipeline-commander` 选择该 skill，再输入要推进的 feature：
+也可以输入 `$` 后搜索 `项目工作流助手`、`agent-pipeline` 或 `pipeline-commander` 选择该 skill，再输入要推进的 feature：
 
 ```text
 推进 2026-05-25--greeting
@@ -188,7 +200,7 @@ $pipeline-commander
 也可以在调用时直接提供素材来源，Commander 会先归档到功能包，再整理到目标位置：
 
 ```text
-$pipeline-commander
+$agent-pipeline
 
 功能：2026-05-25--greeting
 需求文档：docs/greeting-prd.md
@@ -336,6 +348,32 @@ blockers:
 
 重扫并更新项目画像，使用者确认后，才重新开启当前 feature 流程。
 
+## 开发期 UI 反馈快修
+
+开发过程中，使用者经常会直接贴截图指出 UI 小问题，例如按钮样式、抽屉层级、footer 透出、表格对齐、间距、颜色、文案或响应式细节。这类问题不需要走完整 `Bug -> test-agent 分诊 -> frontend-agent`。
+
+可以这样输入：
+
+```text
+推进 2026-05-25--greeting
+截图里按钮太高，抽屉层级压住 footer，表格金额列没有右对齐
+```
+
+Commander 会使用 `frontend.ui_feedback_fix` 轻量通道：
+
+1. 记录反馈到 `features/<feature-id>/design/feedback.md`
+2. 由 `frontend-agent` 做最小 UI 修复
+3. 记录修复到 `features/<feature-id>/frontend/review-fixes.md`
+4. 追加 `activity.md` 和 `status.history`
+5. 默认不改变当前 `phase / next`，不进入 `bugs/`，不交给 `test-agent` 分诊
+
+只有这些情况才走正式 Bug 流程：
+
+- QA、UAT、送测、线上回归发现的问题
+- 缺陷平台链接，例如 Meegle、Jira、GitLab Issue
+- 使用者明确说“这是 Bug”
+- 涉及接口、数据、权限、产品规则、主流程阻塞或验收标准变化
+
 ## 送测 Bug 流程
 
 真实送测、UAT、线上回归或用户反馈阶段发现 Bug 时，不需要新建一个完整需求流程，可以在关联 feature 下补一条 Bug 记录：
@@ -424,13 +462,15 @@ features/<feature-id>/commit/notes.md
 
 ## 支持的流程类型
 
-功能包通过 `status.yaml` 声明自己的流程类型：
+功能包通过 `status.yaml` 声明自己的流程类型。新功能包可以先用 `pending`，由 Product 自动建议并让使用者确认后再改成真实 workflow：
 
 ```yaml
-workflow: backend-only
+workflow: pending
+workflow_detection:
+  status: pending
 ```
 
-初始 `next` 应与该 workflow 的 `start` 任务所属角色一致。例如：
+workflow 确认后，`next` 应与该 workflow 的 `start` 任务所属角色一致。例如：
 
 | workflow | 初始 next |
 |---|---|
@@ -450,9 +490,17 @@ workflow: backend-only
 | `test-only` | 只有测试补充、回归验证、复测报告 | 测试回归 -> done |
 | `docs-only` | 只有说明文档、配置说明、流程文档 | 文档整理 -> done |
 
-不确定 workflow 时，Commander 应先判断或询问，不默认套全流程。
+不确定 workflow 时，Commander 应先自动建议并询问，不默认套全流程。建议必须同时看项目能力和本次需求意图：
 
-常规开发不会在拿到需求文档后立刻写代码。Product 先做需求澄清；如果有 Backend 介入，Backend 先出 `api.openapi.yaml` 和 `backend/todo.md`，FE 基于接口契约拆 `frontend/todo.md`；使用者确认接口文档和开发 TODO 后才进入开发阶段。进入 `development_ready` 后，Backend 和 FE 可以同步推进。
+- 仓库检测到前端和后端，且本次需求同时改接口/服务端和页面/交互：建议 `full-stack`
+- 仓库检测到后端，且本次只改接口、数据、权限、任务或消息：建议 `backend-only`
+- 仓库检测到前端，且本次只改页面、交互、样式、前端状态、前端联调或 Mock：建议 `frontend-only`
+- 仓库只有前端，即使提供了接口文档，也建议 `frontend-only`；接口文档作为 FE 联调契约
+- 只有需求、设计、测试或文档时，分别建议 `product-only`、`design-review-only`、`test-only` 或 `docs-only`
+
+建议输出必须包含检测证据、需求意图和判断理由；使用者确认后，才写入 `status.workflow` 并继续流程。
+
+常规开发不会在拿到需求文档后立刻写代码。Product 先做需求澄清；如果有 Backend 介入，Backend 先出 `api.openapi.yaml` 和 `backend/todo.md`，FE 基于接口契约拆 `frontend/todo.md`；使用者确认接口文档和开发 TODO 后才进入开发阶段。如果使用者在开发前确认节点说“OK 继续推进”或“确认，可以开始开发”，Commander 会写入确认记录，推进到 `development_ready`，并立即衔接默认开发角色。full-stack 单代理执行默认先 Backend，除非使用者明确要求先前端；frontend-only 默认进入 Frontend。
 
 开发过程中允许分段验收：Backend 完成后必须在 `backend/notes.md` 里提供建议测试点、影响范围和扩测建议，再由 Test 测后端部分；FE 完成后必须在 `frontend/integration.md` 里提供建议测试点、影响范围和扩测建议。当前 feature 有 `design/source.md` 或使用者明确要求 UI 验收时，FE 完成后先由 Designer 做 UI 验收，UI 通过后 Test 测前端部分；如果开发阶段没有设计材料，FE 在 `frontend/integration.md` 记录跳过 UI 验收的原因，然后直接进入前端分段测试。Test 需要依据 Backend / FE 提供的信息判断是否扩大测试范围，并在报告中记录采纳或不采纳原因。所有开发与分段验收完成后，Test 执行全量测试。发现问题时进入对应修复阶段，修复后回到对应的 Test 或 UI 验收。全量测试通过后状态改为 `done`，并通知使用者。所有阶段都必须有文档记录。
 
@@ -466,7 +514,7 @@ workflow: backend-only
 
 Commander 会先把设计稿归档到 `design/source.md`，再把 `next` 指向 `designer-agent` 执行 UI 走查。也可以创建 `design-review-only` 类型的功能包，只做 UI/UX 验收。
 
-真实送测后发现 Bug 时，先进入 `bug_triage`，由 Test 判断归属和复测范围，再接回对应修复阶段。
+开发期 UI 反馈用 `design/feedback.md` 和 `frontend/review-fixes.md` 快修；真实送测后发现 Bug 时，先进入 `bug_triage`，由 Test 判断归属和复测范围，再接回对应修复阶段。
 
 ## 最小心智模型
 

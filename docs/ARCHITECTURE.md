@@ -11,9 +11,10 @@ flowchart TD
   Commander["pipeline-commander\n唯一工作流入口"]
   Config["pipeline.project.yaml\n项目目录 / 文档目录 / URL"]
   ProjectDetails["project-details.md\n项目画像 / 技术栈 / 目录 / 命令 / 约定 / 坑点"]
-  Status["features.root/<feature-id>/status.yaml\nworkflow / phase / owner / next / blockers / history"]
+  Status["features.root/<feature-id>/status.yaml\nworkflow / workflow_detection / phase / owner / next / blockers / history"]
   Activity["features.root/<feature-id>/activity.md\n开始 / 阻塞 / 完成事件"]
   Bugs["features.root/<feature-id>/bugs/<bug-id>.md\n送测 Bug / Triage / Fix / Retest"]
+  UIFeedback["features.root/<feature-id>/design/feedback.md + frontend/review-fixes.md\n开发期 UI 反馈快修"]
   Tasks["tasks.yaml\ntasks + workflows + next_task_map"]
   Common["roles/COMMON.md\n确认 / 阻塞 / 状态 / Chat Status Protocol"]
   Role["roles/<agent>.md\n角色边界卡片"]
@@ -29,6 +30,7 @@ flowchart TD
   Commander --> Status
   Commander --> Activity
   Commander --> Bugs
+  Commander --> UIFeedback
   Commander --> Tasks
   Tasks --> Role
   Commander --> Common
@@ -50,6 +52,7 @@ sequenceDiagram
   participant S as status.yaml
   participant A as activity.md
   participant B as bugs/<bug-id>.md
+  participant UI as design/feedback.md + frontend/review-fixes.md
   participant T as tasks.yaml
   participant G as COMMON.md
   participant R as role card
@@ -64,6 +67,12 @@ sequenceDiagram
     U-->>C: 确认或补充
   end
   C->>S: 读取 workflow / phase / next
+  alt workflow 未确认
+    C->>K: 读取前后端能力识别
+    C->>S: 写入 workflow_detection 建议
+    C-->>U: 请求确认建议 workflow
+    U-->>C: 确认或补充
+  end
   C->>T: 查询 workflows[workflow].next_task_map[next][phase]
   T-->>C: 返回任务 key 与 agent
   C->>G: 读取通用确认与阻塞规则
@@ -74,6 +83,10 @@ sequenceDiagram
     C->>B: 归档 Bug 描述、复现步骤、期望/实际、证据
     C->>S: phase=bug_triage, next=test-agent
     C-->>U: 输出 [完成] commander / 已进入 Bug 分诊
+  else 用户提交开发期 UI 截图反馈
+    C->>UI: 归档 UI 反馈并记录快修
+    C->>S: 追加 history，默认不改变 phase/next
+    C-->>U: 输出 [完成] frontend-agent / UI 快修记录
   end
   alt 遇到问题或不确定
     C->>S: 写入 blockers，不推进 phase / next
@@ -123,7 +136,7 @@ flowchart TD
 
 ## 全流程状态机
 
-下图按单步推进展示主路径。实际 full-stack 开发在 `development_ready` 后允许 Backend 和 FE 同步推进；如果当前 AI 工具只能单步执行，Commander 需要先向使用者确认优先推进哪个分支。
+下图按主路径展示状态推进。实际 full-stack 开发在 `development_ready` 后允许 Backend 和 FE 同步推进；如果当前 AI 工具只能单代理执行，开发前确认收到使用者“OK 继续推进”后默认先衔接 Backend，除非使用者明确要求先前端。
 
 ```mermaid
 stateDiagram-v2
@@ -226,11 +239,13 @@ flowchart LR
 ```text
 用户只找 Commander；
 Commander 看 status.yaml 的 workflow、phase、next；
+workflow 未确认时先根据项目能力和需求意图建议，并等待使用者确认；
 Commander 每次执行前先读 pipeline.project.yaml 和 project-details.md；
 tasks.yaml 按 workflow 决定下一个角色；
 角色卡限制职责边界；
 功能包保存所有交接产物；
 送测 Bug 先写入 bugs/<bug-id>.md，再进入 bug_triage；
+开发期 UI 截图反馈先写入 design/feedback.md 和 frontend/review-fixes.md，不进入 bug_triage；
 前端没有设计材料时可跳过 UI 验收，后补设计稿可单独调用 UI 走查；
 用户明确要求提交时临时调用 commit-agent，不默认推进流程；
 角色主要产物通过 ## Handoff 标准化交接；

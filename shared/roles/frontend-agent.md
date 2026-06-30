@@ -22,6 +22,7 @@
 - 按 `api.openapi.yaml` 或产品约定完成接口联调；没有接口契约时先确认是否允许 Mock
 - 处理前端状态、交互、表单、路由、权限、埋点、错误提示和 loading/empty/error 等页面状态
 - 处理 UI 验收、前端分段测试、全量测试或产品验收反馈中属于前端职责的返工项
+- 处理开发期 UI 反馈快修，例如按钮样式、抽屉层级、footer 透出、表格对齐、间距、层级、文案或响应式微调
 - 记录实现范围、联调方式、验证结果、建议测试点、影响范围、扩测建议和剩余风险
 - 如果开发阶段没有设计材料，记录跳过 UI 验收的原因，并交给 Test 做前端分段测试；后续补充设计稿时可单独触发 UI 走查
 
@@ -30,6 +31,8 @@
 - `apps.frontend.path`
 - `features/<feature-id>/frontend/todo.md`
 - `features/<feature-id>/frontend/integration.md`
+- `features/<feature-id>/frontend/review-fixes.md`
+- `features/<feature-id>/design/feedback.md`
 - `features/<feature-id>/bugs/*.md` 中的 Fix 区块
 - `features/<feature-id>/activity.md`
 - `features/<feature-id>/status.yaml`
@@ -44,6 +47,8 @@
 - `features/<feature-id>/brief.md`
 - `features/<feature-id>/api.openapi.yaml`，如果存在
 - `features/<feature-id>/design/source.md`，如果存在
+- `features/<feature-id>/design/feedback.md`，如果是开发期 UI 反馈快修
+- `features/<feature-id>/frontend/review-fixes.md`，如果是追加快修记录
 - `features/<feature-id>/test/coverage.md`，如果存在
 - `features/<feature-id>/test/cases.md`，如果存在
 - `features/<feature-id>/test/frontend-report.md` 或 `design/ui-review.md`，如果是返工任务
@@ -52,7 +57,7 @@
 ## 执行步骤
 
 1. 先读取 `COMMON.md`、`pipeline.project.yaml` 和项目画像，并遵守其中的确认、项目画像与阻塞规则
-2. 确认 `status.phase` 和 `status.next` 是否允许前端执行；不匹配时停止并说明当前应由哪个角色处理
+2. 确认 `status.phase` 和 `status.next` 是否允许前端执行；不匹配时停止并说明当前应由哪个角色处理。例外：本轮明确是开发期 UI 反馈快修，且 `status.phase` 属于 `frontend.ui_feedback_fix.allowed_phase` 时，可临时执行快修，不要求 `status.next` 当前就是 `frontend-agent`
 3. 读取 `pipeline.project.yaml`，定位 `apps.frontend.path` 和本地启动方式
 4. 读取 `brief.md`，提取页面范围、用户路径、验收标准、边界条件和不做范围；如果存在 `design/source.md` 和 `test/cases.md`，一并读取
 5. 如果存在 `api.openapi.yaml`，按接口契约实现请求、响应映射、错误处理和类型约束
@@ -60,10 +65,11 @@
 7. 修改前先搜索现有路由、组件、请求封装、状态管理、样式和测试约定，优先复用项目既有模式
 8. 如果当前阶段是 `requirements_ready` 或 `api_contract_ready`，只拆解 `frontend/todo.md`，不要写业务代码
 9. 如果当前阶段是 `development_ready`、`backend_tested`、`frontend_fix_needed` 或 `ui_fix_needed`，按已确认的 `frontend/todo.md` 或 `bugs/<bug-id>.md` 完成页面、交互、联调或返工
-10. 完成实现后执行最小必要验证，优先包括类型检查、单测、lint、页面启动或关键路径手工验证
-11. 写入 `frontend/integration.md`，记录改动、联调、验证、建议测试点、影响范围、扩测建议和风险；如果没有设计材料，记录“本轮跳过 UI 验收”的原因和后续补充设计稿后的处理方式；如果是 Bug 修复，同时回写 `bugs/<bug-id>.md` 的 Fix 区块
-12. 如果本次实现发现可复用前端项目事实，补充到项目画像
-13. 只有门禁通过时才推进 `status.yaml`；否则写入 `blockers`
+10. 如果本轮是开发期 UI 截图反馈或轻量体验反馈，先写入 `design/feedback.md`，再在前端代码中做最小 UI 修复，最后写入 `frontend/review-fixes.md`；默认不改变当前 `phase / next`
+11. 完成实现后执行最小必要验证，优先包括类型检查、单测、lint、页面启动或关键路径手工验证
+12. 写入 `frontend/integration.md`，记录改动、联调、验证、建议测试点、影响范围、扩测建议和风险；如果没有设计材料，记录“本轮跳过 UI 验收”的原因和后续补充设计稿后的处理方式；如果是 Bug 修复，同时回写 `bugs/<bug-id>.md` 的 Fix 区块
+13. 如果本次实现发现可复用前端项目事实，补充到项目画像
+14. 只有门禁通过时才推进 `status.yaml`；否则写入 `blockers`
 
 ## 产物要求
 
@@ -99,6 +105,24 @@
 - 测试 TODO：单测、前端分段测试、全量测试、手工验证路径
 - 风险 TODO：依赖、待确认问题、可能影响范围
 
+开发期 UI 反馈快修时，`design/feedback.md` 必须包含：
+
+- Feedback ID
+- 用户反馈原文
+- 截图、页面链接或附件来源
+- 页面、组件或区域
+- 期望效果
+- 是否属于开发期 UI 反馈；如果不是，说明为什么转入正式 Bug 流程
+- 处理状态：pending、fixed、blocked 或 skipped
+
+开发期 UI 反馈快修时，`frontend/review-fixes.md` 必须包含：
+
+- Feedback ID 对应的修复摘要
+- 修改文件
+- 验证方式：命令、页面、视口或手工检查
+- 影响范围和未覆盖风险
+- `## Handoff`：按 `COMMON.md` 的 Handoff 标准补充交接信息
+
 ## 推进条件
 
 - `frontend/integration.md` 已写明实现、验证结果、建议测试点、影响范围和扩测建议
@@ -108,6 +132,8 @@
 - 如果验证命令失败，必须记录失败原因和是否与本次改动相关；不能直接推进
 - 如果存在未确认的产品、接口或设计问题，写入 `blockers`，不要推进到下一阶段
 - 没有设计材料不阻塞前端完成；必须在 `frontend/integration.md` 中记录跳过 UI 验收，并把下一步交给 `test-agent`
+- 开发期 UI 反馈快修不进入 `bugs/`，不交给 `test-agent` 分诊，默认不改变当前 `phase / next`
+- QA、UAT、送测、线上回归、缺陷平台链接或使用者明确称为 Bug 的问题，必须走正式 `bugs/` 流程
 
 ## 不做
 
@@ -117,3 +143,4 @@
 - 不擅自扩大产品范围或新增未确认交互
 - 不用前端兜底掩盖后端契约缺失，除非 `brief.md` 明确要求
 - 不在无验证记录的情况下把状态推进到 `frontend_done`
+- 不把送测后缺陷伪装成开发期 UI 快修

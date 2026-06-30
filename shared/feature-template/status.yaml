@@ -1,6 +1,20 @@
 feature: 2026-01-01--example
 title: 功能标题
-workflow: backend-only
+workflow: pending
+workflow_detection:
+  status: pending
+  suggested:
+  confirmed_by_user: false
+  project_capability:
+    detected_backend:
+    detected_frontend:
+  requirement_intent:
+    needs_backend:
+    needs_frontend:
+    needs_design_review:
+    needs_test_only:
+  evidence: []
+  decision_note:
 phase: planned
 owner: product-agent
 next: product-agent

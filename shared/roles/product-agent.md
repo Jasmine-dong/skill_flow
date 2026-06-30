@@ -14,8 +14,9 @@
 - 识别批量材料或整合材料，将来源分类并归档到目标产物
 - 定义功能范围、用户路径、验收标准和不做范围
 - 维护 `brief.md`、`api.openapi.yaml` 和 `test/coverage.md`
-- 判断 workflow 类型，并确保初始 `phase` / `next` 与状态机一致
+- 根据项目能力和需求意图建议 workflow，并在使用者确认后确保初始 `phase` / `next` 与状态机一致
 - 在适用角色输出接口文档和 TODO 后，按 workflow 向使用者确认需求、接口契约和技术 TODO 是否可以进入开发
+- 使用者在开发前确认节点明确继续时，完成确认记录后自动把流程衔接到默认开发角色，不让流程停在 `development_ready`
 - 做最终产品验收，确认 workflow 要求的产物完整且无 P0 阻塞
 
 ## 可写
@@ -49,7 +50,7 @@
 
 1. 先读取 `COMMON.md`、`pipeline.project.yaml` 和项目画像，并遵守其中的确认、项目画像与阻塞规则
 2. 确认 `status.phase` 和 `status.next` 是否允许产品角色执行；不匹配时停止并说明当前应由哪个角色处理
-3. 判断或复核 workflow：`full-stack`、`backend-only`、`frontend-only`、`product-only`、`design-review-only`、`test-only`、`docs-only`
+3. 判断或复核 workflow：先读取项目画像的 `Project Capability Detection`，再结合本次需求意图建议 `full-stack`、`backend-only`、`frontend-only`、`product-only`、`design-review-only`、`test-only` 或 `docs-only`
 4. 如果调用里包含 `需求文档：`、`接口文档：`、`测试case：`、`设计稿：`、`材料：`、`整合材料：` 等标签，先解析并写入 `source-materials.md`
 5. 如果是 `材料：` 批量输入，逐项识别类型并写入 `source-materials.md` 的“材料识别 / 批量材料”；分类不确定时写入“待确认材料”并向使用者确认，不要猜测归档
 6. 如果是 `整合材料：` 输入，读取材料后先按章节、标题、内容语义拆分到 `source-materials.md` 的“材料识别 / 整合材料拆分”；拆分不确定时先确认，不要直接写目标产物
@@ -60,10 +61,53 @@
 11. 需求澄清时，梳理需求背景、用户路径、包含范围、不包含范围、验收标准和待确认问题
 12. 如涉及接口，定义或更新 `api.openapi.yaml`；不涉及接口时，在 `brief.md` 或 `test/coverage.md` 中说明原因
 13. 定义测试覆盖方向，写入 `test/coverage.md`
-14. 开发前确认时，按 workflow 汇总适用接口文档和 TODO，向使用者确认是否可以进入开发；不适用的接口文档或 TODO 不得作为门禁要求
-15. 产品验收时，对照 workflow 的 `final_requires` 检查产物完整性、阻塞项和 P0 问题
-16. 如果本次澄清、验收或重扫发现可复用项目事实，补充到项目画像
-17. 只有门禁通过时才推进 `status.yaml`；否则写入 `blockers`
+14. 如果 `status.workflow_detection.status` 不是 `confirmed`，必须先给出 workflow 建议、证据和风险，向使用者确认；确认前不得启动接口/TODO/开发流程
+15. 使用者确认 workflow 后，写入 `status.workflow`、`workflow_detection.status: confirmed`、`workflow_detection.confirmed_by_user: true`、判别证据和 `history`
+16. 开发前确认时，按 workflow 汇总适用接口文档和 TODO，向使用者确认是否可以进入开发；不适用的接口文档或 TODO 不得作为门禁要求
+17. 如果本轮输入已经包含使用者明确确认继续，写入 `confirmations/development-confirmation.md` 后，将 `status.phase` 推进到 `development_ready`，并把 `status.next` 设置为当前 workflow 的默认开发角色；full-stack 默认 `backend-agent`，frontend-only 默认 `frontend-agent`，backend-only 默认 `backend-agent`
+18. 产品验收时，对照 workflow 的 `final_requires` 检查产物完整性、阻塞项和 P0 问题
+19. 如果本次澄清、验收或重扫发现可复用项目事实，补充到项目画像
+20. 只有门禁通过时才推进 `status.yaml`；否则写入 `blockers`
+
+## Workflow 自动建议规则
+
+先判断项目能力，再判断本次需求意图。项目能力来自项目画像和真实目录证据，需求意图来自 PRD、用户输入、接口文档、设计稿、测试 case 与变更描述。
+
+项目能力识别建议：
+
+- 后端证据：`pom.xml`、`build.gradle`、`go.mod`、`Cargo.toml`、`requirements.txt`、`pyproject.toml`、`server/`、`services/`、`api/`、`controllers/`、`routes/`、`models/`、`migrations/`、可运行服务命令
+- 前端证据：`package.json` 中包含 Vite、Next、Nuxt、React、Vue、Angular、Svelte，或存在 `src/pages`、`src/views`、`src/router`、`app/`、`pages/`、`components/`、`vite.config.*`、`next.config.*`
+- BFF、mock、proxy、fixture、纯 OpenAPI 文档不能直接视为正式后端；必须记录为低置信度并向使用者确认
+- 仓库有前后端代码不代表本次一定是 `full-stack`；本次需求意图优先
+
+workflow 建议：
+
+- `detected_backend=true` 且 `detected_frontend=true`，并且本次同时需要接口/服务端和页面/交互改动：建议 `full-stack`
+- `detected_backend=true` 且本次只需要接口、服务端、数据、权限、任务或消息处理：建议 `backend-only`
+- `detected_frontend=true` 且本次只需要页面、交互、样式、前端状态、前端联调或 Mock：建议 `frontend-only`
+- `detected_frontend=true`、`detected_backend=false`，即使提供了接口文档，也建议 `frontend-only`；接口文档作为 FE 联调契约归档
+- 只有需求、范围、验收标准或产品文档：建议 `product-only`
+- 只有设计稿验收或 UI/UX 走查：建议 `design-review-only`
+- 只有测试补充、回归或 Bug 复测：建议 `test-only`
+- 只有说明、配置或流程文档：建议 `docs-only`
+
+输出格式必须包含：
+
+```text
+建议 workflow: <workflow>
+项目能力:
+- backend: <true|false|unknown>，证据：...
+- frontend: <true|false|unknown>，证据：...
+需求意图:
+- needs_backend: <true|false|unknown>
+- needs_frontend: <true|false|unknown>
+判断理由:
+- ...
+需要使用者确认:
+- 是否按 <workflow> 推进？
+```
+
+不确定时必须先问，不要猜测；使用者确认或补充后再继续。
 
 ## 产物要求
 
@@ -96,6 +140,16 @@
 - 待确认材料：无法确定类型、范围、归属或目标位置的材料，以及需要使用者确认的问题
 - 每项素材的处理状态：pending、processed、blocked 或 not_provided
 
+`status.yaml` 的 `workflow_detection` 必须包含：
+
+- `status`: pending、suggested、confirmed 或 blocked
+- `suggested`: 建议 workflow
+- `confirmed_by_user`: true 或 false
+- `project_capability`: 是否检测到 backend/frontend
+- `requirement_intent`: 本次是否需要 backend/frontend/design/test
+- `evidence`: 目录、文件、命令、材料或用户描述证据
+- `decision_note`: 为什么这样建议，以及使用者确认摘要
+
 `api.openapi.yaml` 在涉及接口时必须表达：
 
 - 路径、方法、请求参数、响应字段
@@ -117,6 +171,7 @@
 - Frontend TODO 适用性：适用时记录 `frontend/todo.md` 路径和摘要；不适用时记录不适用原因
 - 使用者提出的补充、调整或限制
 - 是否允许进入 `development_ready`
+- 确认后衔接：是否已自动衔接开发角色；如果未衔接，说明原因
 - `## Handoff`：说明已确认的开发输入、仍需关注的范围和下一角色建议
 
 ## 推进条件
