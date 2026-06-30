@@ -502,7 +502,7 @@ workflow 确认后，`next` 应与该 workflow 的 `start` 任务所属角色一
 
 常规开发不会在拿到需求文档后立刻写代码。Product 先做需求澄清；如果有 Backend 介入，Backend 先出 `api.openapi.yaml` 和 `backend/todo.md`，FE 基于接口契约拆 `frontend/todo.md`；使用者确认接口文档和开发 TODO 后才进入开发阶段。如果使用者在开发前确认节点说“OK 继续推进”或“确认，可以开始开发”，Commander 会写入确认记录，推进到 `development_ready`，并立即衔接默认开发角色。full-stack 单代理执行默认先 Backend，除非使用者明确要求先前端；frontend-only 默认进入 Frontend。
 
-开发过程中允许分段验收：Backend 完成后必须在 `backend/notes.md` 里提供建议测试点、影响范围和扩测建议，再由 Test 测后端部分；FE 完成后必须在 `frontend/integration.md` 里提供建议测试点、影响范围和扩测建议。当前 feature 有 `design/source.md` 或使用者明确要求 UI 验收时，FE 完成后先由 Designer 做 UI 验收，UI 通过后 Test 测前端部分；如果开发阶段没有设计材料，FE 在 `frontend/integration.md` 记录跳过 UI 验收的原因，然后直接进入前端分段测试。Test 需要依据 Backend / FE 提供的信息判断是否扩大测试范围，并在报告中记录采纳或不采纳原因。所有开发与分段验收完成后，Test 执行全量测试。发现问题时进入对应修复阶段，修复后回到对应的 Test 或 UI 验收。全量测试通过后状态改为 `done`，并通知使用者。所有阶段都必须有文档记录。
+开发过程中允许分段验收：Backend 完成后必须在 `backend/notes.md` 里提供建议测试点、影响范围和扩测建议，再由 Test 测后端部分；FE 完成前必须做 UI 关键项自检，并在 `frontend/integration.md` 记录 Figma 节点、按钮、表格、弹窗/抽屉层级、footer 固定区域、disabled/loading/error/empty 状态和响应式等检查结果。类型检查、lint 或单测通过不能替代视觉自检。FE 完成后还必须提供建议测试点、影响范围和扩测建议。当前 feature 有 `design/source.md` 或使用者明确要求 UI 验收时，FE 完成后先由 Designer 做 UI 验收，UI 通过后 Test 测前端部分；如果开发阶段没有设计材料，FE 在 `frontend/integration.md` 记录跳过 UI 验收的原因，然后直接进入前端分段测试。Test 需要依据 Backend / FE 提供的信息判断是否扩大测试范围，并在报告中记录采纳或不采纳原因。所有开发与分段验收完成后，Test 执行全量测试。发现问题时进入对应修复阶段，修复后回到对应的 Test 或 UI 验收。全量测试通过后状态改为 `done`，并通知使用者。所有阶段都必须有文档记录。
 
 如果后续才提供设计稿，可以单独调用 UI 走查：
 

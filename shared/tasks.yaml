@@ -137,6 +137,7 @@ tasks:
       读取 brief.md、frontend/todo.md、confirmations/development-confirmation.md；如有 api.openapi.yaml，也读取接口契约。
       在 apps.frontend.path 内完成页面、交互或联调。
       写 frontend/integration.md，必须包含建议测试点、影响范围和是否建议扩大测试范围。
+      推进 frontend_done 前必须完成 UI 关键项自检，并在 frontend/integration.md 记录 checklist 结果；类型检查、lint 或单测通过不能替代视觉自检。
       前端完成后检查是否存在 design/source.md，或使用者是否明确要求 UI 验收。
       如果有设计材料或明确要求 UI 验收，next 设为 designer-agent，先进入 UI 验收。
       如果没有设计材料且使用者未要求 UI 验收，next 设为 test-agent，直接进入前端分段测试；在 frontend/integration.md 和 status.history 中记录“本轮跳过 UI 验收”的原因。
