@@ -940,8 +940,8 @@
             </article>
             <article class="feature-card">
               <span class="icon">05</span>
-              <h3>扩测建议</h3>
-              <p>Backend 和 FE 完成时都要给 Test 影响范围和建议测试点，帮助判断是否扩测。</p>
+              <h3>分层验证</h3>
+              <p>基础检查、页面可达、截图核对和 Network 核对按变更类型分档执行。</p>
             </article>
             <article class="feature-card">
               <span class="icon">06</span>
@@ -1035,6 +1035,7 @@
               <ul>
                 <li>输出 frontend/todo.md 和 integration.md</li>
                 <li>实现页面、状态、校验、接口接入和异常态</li>
+                <li>记录 type-check、lint、页面可达、截图和 Network 核对</li>
                 <li>开发期 UI 截图反馈可快修并记录</li>
                 <li>说明改动范围、跳过 UI 原因和建议测试点</li>
               </ul>
@@ -1057,6 +1058,7 @@
               <ul>
                 <li>后端完成先测接口，前端完成再测页面流程</li>
                 <li>根据影响范围决定是否扩大测试</li>
+                <li>复核 UI 变更截图证据和接口 Network 证据</li>
                 <li>真实送测 Bug 进入 bug_triage 后再分派修复</li>
               </ul>
             </article>
@@ -1157,7 +1159,7 @@ Meegle项目：futures
             </div>
             <div class="status-line">
               <b>[阻塞]</b>
-              <span>接口错误码缺失时先向使用者确认，写入 blockers，不推进 phase。</span>
+              <span>缺少 UI 截图核对或 Network 请求核对时，写入 blockers 或未覆盖风险，不直接推进。</span>
             </div>
             <div class="status-line">
               <b>[完成]</b>

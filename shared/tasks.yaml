@@ -140,8 +140,9 @@ tasks:
     steps: |
       读取 brief.md、frontend/todo.md、confirmations/development-confirmation.md；如有 api.openapi.yaml，也读取接口契约。
       在 apps.frontend.path 内完成页面、交互或联调。
-      写 frontend/integration.md，必须包含建议测试点、影响范围和是否建议扩大测试范围。
+      写 frontend/integration.md，必须包含建议测试点、影响范围、是否建议扩大测试范围和分层验证结果。
       推进 frontend_done 前必须完成 UI 关键项自检，并在 frontend/integration.md 记录 checklist 结果；类型检查、lint 或单测通过不能替代视觉自检。
+      验证按分层档位执行：基础必跑 type-check/构建期检查和定向 lint；建议跑 dev 页面 200 或页面可达；UI 变更必跑浏览器截图或人工截图核对；接口行为变更必跑 Network 请求数量、路径、方法和关键参数核对。
       前端完成后检查 source-materials.md 是否存在 ui_design + usable_for_ui_acceptance=true 的设计材料，或使用者是否明确要求 UI 验收。
       如果有可用于 UI 验收的设计材料或明确要求 UI 验收，next 设为 designer-agent，先进入 UI 验收。
       如果没有可用 UI 设计材料且使用者未要求 UI 验收，next 设为 test-agent，直接进入前端分段测试；在 frontend/integration.md、status.ui_review 和 status.history 中记录“本轮跳过 UI 验收”的原因。
@@ -211,6 +212,7 @@ tasks:
       如果存在 design/ui-review.md，则一并读取并纳入测试范围；如果本轮没有可用于 UI 验收的设计材料或 UI 验收被明确跳过，记录原因，不把 design/ui-review.md 作为门禁。若真正 UI 设计稿后补且已使跳过 UI 验收结论失效，则必须等待 ui_reviewed 后再执行前端分段测试。
       先读取 FE 提供的建议测试点、影响范围和扩测建议，判断是否需要扩大测试范围，并在报告中记录判断。
       测试前端主流程、交互状态、接口联调、权限、异常、空状态和回归风险。
+      复核 FE 分层验证：UI 变更必须有截图或人工核对证据；接口行为变更必须有 Network 请求数量/路径核对证据；缺失时记录为阻塞或未覆盖风险，不得直接写通过。
       写 test/frontend-report.md。
       通过则记录通过；失败则写 blockers，并把 phase 设为 frontend_fix_needed，next 设为 frontend-agent。
 
@@ -227,6 +229,7 @@ tasks:
       确认当前 workflow 要求的 Backend 分段测试和 FE 分段测试已经通过。
       如果本轮存在可用于 UI 验收的设计材料或已执行 UI 验收，则确认 UI 验收已通过；如果没有可用 UI 设计材料且已记录跳过原因，则 UI 验收不作为全量测试门禁。若后补真正 UI 设计稿已使跳过 UI 验收结论失效，则必须等待 ui_reviewed 和必要的前端复测后再执行全量测试。
       执行全量回归或端到端验证。
+      复核全量范围内的分层验证：页面可达、UI 证据和 Network 证据按变更类型覆盖；缺失时记录风险和是否阻塞。
       写 test/full-report.md。
       通过后推进到 full_tested；失败时按归属写 blockers，并把 phase 设为 backend_fix_needed、frontend_fix_needed 或 ui_fix_needed。
 

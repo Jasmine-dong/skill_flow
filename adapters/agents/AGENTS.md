@@ -54,6 +54,7 @@
 - 材料归档必须区分 `ui_design` 和 `product_illustration`；产品示意图、业务配图、概念图或用户确认不是 UI 设计的材料，只能辅助需求理解，不得写入 `design/source.md` 作为 UI 验收依据
 - 只有 `source-materials.md` 中存在 `material_type=ui_design` 且 `usable_for_ui_acceptance=true` 的材料，才能触发 UI 验收或 `ui_design_ready`
 - 如果前端曾因无设计材料跳过 UI 验收，后续一旦用户补充真正 UI 设计稿并写入 `design/source.md`，必须自动标记旧的“跳过 UI 验收”结论失效，将 `status.phase` 设为 `ui_design_ready`、`status.next` 设为 `designer-agent`，进入 UI 走查；不得继续沿用旧的前端测试或全量测试 UI 门禁结论
+- 前端和测试必须执行分层验证：基础必跑 type-check/构建期检查和定向 lint；建议跑 dev 页面 200 或页面可达；UI 变更必跑浏览器截图或人工截图核对；接口行为变更必跑 Network 请求数量、路径、方法和关键参数核对。Figma 驱动页面不能只用 TS/lint 作为通过依据
 - 如果反馈来自 QA、UAT、送测、线上回归、缺陷平台链接，或使用者明确说 Bug，则必须走正式 `bugs/` 流程，不得使用 UI 快修通道
 - 用户明确要求“提交代码、生成 commit、先 commit、提交当前进度、同步外部 Bug 备注”时，临时使用 `commit-agent`；这是可插入动作，不默认推进 `phase / next`
 - `commit-agent` 提交前必须让使用者确认 commit message 和文件范围；checkpoint 提交只提示已完成内容
