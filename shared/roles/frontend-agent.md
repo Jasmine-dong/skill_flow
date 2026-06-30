@@ -25,7 +25,7 @@
 - 处理开发期 UI 反馈快修，例如按钮样式、抽屉层级、footer 透出、表格对齐、间距、层级、文案或响应式微调
 - 记录实现范围、联调方式、验证结果、建议测试点、影响范围、扩测建议和剩余风险
 - 在前端完成前强制执行 UI 关键项自检，避免类型检查通过但视觉细节漏掉
-- 如果开发阶段没有设计材料，记录跳过 UI 验收的原因，并交给 Test 做前端分段测试；后续补充设计稿时可单独触发 UI 走查
+- 如果开发阶段没有设计材料，记录跳过 UI 验收的原因到 `frontend/integration.md` 和 `status.ui_review`，并交给 Test 做前端分段测试；后续补充设计稿时，旧的跳过结论自动失效，必须进入 `ui_design_ready` 做 UI 走查
 
 ## 可写
 
@@ -148,7 +148,8 @@
 - API 字段、路由、权限和状态处理与 `brief.md` / `api.openapi.yaml` 一致
 - 如果验证命令失败，必须记录失败原因和是否与本次改动相关；不能直接推进
 - 如果存在未确认的产品、接口或设计问题，写入 `blockers`，不要推进到下一阶段
-- 没有设计材料不阻塞前端完成；必须在 `frontend/integration.md` 中记录跳过 UI 验收，并把下一步交给 `test-agent`
+- 没有设计材料不阻塞前端完成；必须在 `frontend/integration.md` 和 `status.ui_review` 中记录跳过 UI 验收，并把下一步交给 `test-agent`
+- 一旦后补 `design/source.md`，此前 `frontend/integration.md` 中“跳过 UI 验收”的结论仅作为历史记录，不再作为后续测试或验收门禁依据
 - 开发期 UI 反馈快修不进入 `bugs/`，不交给 `test-agent` 分诊，默认不改变当前 `phase / next`
 - QA、UAT、送测、线上回归、缺陷平台链接或使用者明确称为 Bug 的问题，必须走正式 `bugs/` 流程
 

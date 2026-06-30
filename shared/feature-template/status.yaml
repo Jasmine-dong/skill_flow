@@ -24,6 +24,12 @@ project_details:
   snapshot_note:
 blockers: []
 active_bugs: []
+ui_review:
+  skipped: false
+  skip_reason:
+  skip_invalidated: false
+  skip_invalidated_at:
+  design_source:
 history:
   - at: "2026-01-01T00:00:00+08:00"
     phase: planned

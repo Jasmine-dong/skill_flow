@@ -502,7 +502,7 @@ workflow 确认后，`next` 应与该 workflow 的 `start` 任务所属角色一
 
 常规开发不会在拿到需求文档后立刻写代码。Product 先做需求澄清；如果有 Backend 介入，Backend 先出 `api.openapi.yaml` 和 `backend/todo.md`，FE 基于接口契约拆 `frontend/todo.md`；使用者确认接口文档和开发 TODO 后才进入开发阶段。如果使用者在开发前确认节点说“OK 继续推进”或“确认，可以开始开发”，Commander 会写入确认记录，推进到 `development_ready`，并立即衔接默认开发角色。full-stack 单代理执行默认先 Backend，除非使用者明确要求先前端；frontend-only 默认进入 Frontend。
 
-开发过程中允许分段验收：Backend 完成后必须在 `backend/notes.md` 里提供建议测试点、影响范围和扩测建议，再由 Test 测后端部分；FE 完成前必须做 UI 关键项自检，并在 `frontend/integration.md` 记录 Figma 节点、按钮、表格、弹窗/抽屉层级、footer 固定区域、disabled/loading/error/empty 状态和响应式等检查结果。类型检查、lint 或单测通过不能替代视觉自检。FE 完成后还必须提供建议测试点、影响范围和扩测建议。当前 feature 有 `design/source.md` 或使用者明确要求 UI 验收时，FE 完成后先由 Designer 做 UI 验收，UI 通过后 Test 测前端部分；如果开发阶段没有设计材料，FE 在 `frontend/integration.md` 记录跳过 UI 验收的原因，然后直接进入前端分段测试。Test 需要依据 Backend / FE 提供的信息判断是否扩大测试范围，并在报告中记录采纳或不采纳原因。所有开发与分段验收完成后，Test 执行全量测试。发现问题时进入对应修复阶段，修复后回到对应的 Test 或 UI 验收。全量测试通过后状态改为 `done`，并通知使用者。所有阶段都必须有文档记录。
+开发过程中允许分段验收：Backend 完成后必须在 `backend/notes.md` 里提供建议测试点、影响范围和扩测建议，再由 Test 测后端部分；FE 完成前必须做 UI 关键项自检，并在 `frontend/integration.md` 记录 Figma 节点、按钮、表格、弹窗/抽屉层级、footer 固定区域、disabled/loading/error/empty 状态和响应式等检查结果。类型检查、lint 或单测通过不能替代视觉自检。FE 完成后还必须提供建议测试点、影响范围和扩测建议。当前 feature 有 `design/source.md` 或使用者明确要求 UI 验收时，FE 完成后先由 Designer 做 UI 验收，UI 通过后 Test 测前端部分；如果开发阶段没有设计材料，FE 在 `frontend/integration.md` 记录跳过 UI 验收的原因，然后直接进入前端分段测试。后续一旦补充设计稿并写入 `design/source.md`，此前“跳过 UI 验收”的结论自动失效，状态进入 `ui_design_ready`，下一步交给 `designer-agent`；UI 走查有 P0/P1 时进入 `ui_fix_needed -> frontend-agent`，通过后交给 Test 判断是否需要重测前端或全量。Test 需要依据 Backend / FE / UI 走查提供的信息判断是否扩大测试范围，并在报告中记录采纳或不采纳原因。所有开发与分段验收完成后，Test 执行全量测试。发现问题时进入对应修复阶段，修复后回到对应的 Test 或 UI 验收。全量测试通过后状态改为 `done`，并通知使用者。所有阶段都必须有文档记录。
 
 如果后续才提供设计稿，可以单独调用 UI 走查：
 
@@ -513,6 +513,15 @@ workflow 确认后，`next` 应与该 workflow 的 `start` 任务所属角色一
 ```
 
 Commander 会先把设计稿归档到 `design/source.md`，再把 `next` 指向 `designer-agent` 执行 UI 走查。也可以创建 `design-review-only` 类型的功能包，只做 UI/UX 验收。
+
+如果这个 feature 此前因为没有设计材料跳过过 UI 验收，后补设计稿不是普通的“可选走查”，而是强制状态迁移：
+
+```yaml
+phase: ui_design_ready
+next: designer-agent
+```
+
+此时此前 `frontend/integration.md`、`test/frontend-report.md` 或 `test/full-report.md` 中基于“无设计材料”的 UI 跳过结论失效。Designer 必须重新走查；如果有 P0/P1，交回 Frontend 修复；如果通过，再由 Test 判断是否需要重测。
 
 开发期 UI 反馈用 `design/feedback.md` 和 `frontend/review-fixes.md` 快修；真实送测后发现 Bug 时，先进入 `bug_triage`，由 Test 判断归属和复测范围，再接回对应修复阶段。
 

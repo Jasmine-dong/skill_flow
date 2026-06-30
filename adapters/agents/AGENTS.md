@@ -51,6 +51,7 @@
 - 用户提交送测 Bug 时，先写入 `features/<feature-id>/bugs/<bug-id>.md`，再将 `status.phase` 设为 `bug_triage`、`status.next` 设为 `test-agent`，交由 Test 分诊；不要直接让实现角色修复未分诊 Bug
 - 用户在开发过程中通过截图或描述反馈按钮样式、抽屉层级、footer 透出、表格对齐、间距、文案、颜色、响应式等 UI 小问题时，使用 `frontend.ui_feedback_fix` 轻量通道：写入 `design/feedback.md` 和 `frontend/review-fixes.md`，默认不进入 `bugs/`、不交给 `test-agent` 分诊、不改变当前 `phase / next`
 - 开发期 UI 反馈快修是显式轻量通道；即使当前 `status.next` 已经是 `test-agent` 或 `designer-agent`，只要当前 `phase` 在 `frontend.ui_feedback_fix.allowed_phase` 内，也可临时交给 `frontend-agent` 快修
+- 如果前端曾因无设计材料跳过 UI 验收，后续一旦用户补充设计稿并写入 `design/source.md`，必须自动标记旧的“跳过 UI 验收”结论失效，将 `status.phase` 设为 `ui_design_ready`、`status.next` 设为 `designer-agent`，进入 UI 走查；不得继续沿用旧的前端测试或全量测试 UI 门禁结论
 - 如果反馈来自 QA、UAT、送测、线上回归、缺陷平台链接，或使用者明确说 Bug，则必须走正式 `bugs/` 流程，不得使用 UI 快修通道
 - 用户明确要求“提交代码、生成 commit、先 commit、提交当前进度、同步外部 Bug 备注”时，临时使用 `commit-agent`；这是可插入动作，不默认推进 `phase / next`
 - `commit-agent` 提交前必须让使用者确认 commit message 和文件范围；checkpoint 提交只提示已完成内容
@@ -91,7 +92,7 @@
 
 `材料：` 表示批量材料，必须先逐项识别类型并写入 `source-materials.md` 的“材料识别 / 批量材料”。`整合材料：` 表示单个文件或长文本中混合了需求、接口、测试或设计内容，必须先拆分并写入“材料识别 / 整合材料拆分”。分类或拆分不确定时，先向使用者确认，不要猜测归档。
 
-前端开发阶段 UI 验收是条件流程：有 `design/source.md` 或使用者明确要求 UI 验收时，前端完成后先交给 `designer-agent`；没有设计材料时，前端完成后直接交给 `test-agent` 做前端分段测试，并在 `frontend/integration.md` 记录跳过原因。后续补充设计稿时，可以显式调用 `designer-agent` 或使用 `design-review-only` 单独做 UI 走查。
+前端开发阶段 UI 验收是条件流程：有 `design/source.md` 或使用者明确要求 UI 验收时，前端完成后先交给 `designer-agent`；没有设计材料时，前端完成后直接交给 `test-agent` 做前端分段测试，并在 `frontend/integration.md` 记录跳过原因。后续补充设计稿时，必须先归档到 `design/source.md`，标记此前“跳过 UI 验收”结论失效，并把状态设为 `phase=ui_design_ready,next=designer-agent`；UI 走查有 P0/P1 时进入 `ui_fix_needed -> frontend-agent`，通过后再由 test-agent 判断是否需要重测。
 
 开发期 UI 截图反馈使用轻量通道：先归档到 `design/feedback.md`，再由 `frontend-agent` 快修并写入 `frontend/review-fixes.md`；不进入 `bugs/`。QA、UAT、送测、线上回归、缺陷平台链接或明确 Bug 才进入正式 Bug 流程。
 

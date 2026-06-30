@@ -14,11 +14,13 @@
 - 检查主要状态、文案、布局、响应式、交互反馈和视觉一致性
 - 输出 P0/P1/P2 问题、影响说明和建议修正方向
 - 判断是否允许进入前端分段测试
+- 处理后补设计稿：一旦 `design/source.md` 在跳过 UI 验收后补充，必须标记旧的“跳过 UI 验收”结论失效，并重新给出 UI 走查结论
 
 ## 可写
 
 - `features/<feature-id>/design/ui-review.md`
 - `features/<feature-id>/design/source.md`
+- `features/<feature-id>/frontend/integration.md` 中 UI 验收处理相关备注
 - `features/<feature-id>/activity.md`
 - `features/<feature-id>/status.yaml`
 - `pipeline.project.yaml` 中 `knowledge.project_details` 指向的项目画像文件
@@ -38,14 +40,15 @@
 ## 执行步骤
 
 1. 先读取 `COMMON.md`、`pipeline.project.yaml` 和项目画像，并遵守其中的确认、项目画像与阻塞规则
-2. 确认 `status.phase` 和 `status.next` 是否允许设计角色执行；不匹配时停止并说明当前应由哪个角色处理
+2. 确认 `status.phase` 和 `status.next` 是否允许设计角色执行；不匹配时停止并说明当前应由哪个角色处理。后补设计稿进入 `ui_design_ready` 时，必须执行 UI 走查
 3. 读取 `brief.md`，明确用户路径、页面范围、关键状态和验收标准
 4. 读取 `design/source.md`、前端实现说明、设计材料或可访问页面，确认走查对象和范围；如果用户本次才提供设计稿，先写入 `design/source.md`
-5. 检查布局、层级、文案、状态、反馈、响应式、可访问性和与既有产品的一致性
-6. 按严重程度记录问题：P0 阻塞主流程或明显错误，P1 影响体验或理解，P2 优化建议
-7. 写入 `design/ui-review.md`
-8. 如果本次走查发现可复用设计、文案、响应式或通用状态规则，补充到项目画像
-9. 没有 P0/P1 阻塞问题时才允许推进 `status.yaml`；否则写入 `blockers`，并把状态交回前端修复
+5. 如果此前 `frontend/integration.md`、`status.ui_review`、`test/frontend-report.md` 或 `test/full-report.md` 记录“无设计材料，跳过 UI 验收”，必须在 `design/ui-review.md` 和 `status.ui_review` 中标记这些结论对 UI 门禁失效；必要时在 `frontend/integration.md` 补充备注
+6. 检查布局、层级、文案、状态、反馈、响应式、可访问性和与既有产品的一致性
+7. 按严重程度记录问题：P0 阻塞主流程或明显错误，P1 影响体验或理解，P2 优化建议
+8. 写入 `design/ui-review.md`
+9. 如果本次走查发现可复用设计、文案、响应式或通用状态规则，补充到项目画像
+10. 没有 P0/P1 阻塞问题时才允许推进 `status.yaml` 到 `ui_reviewed`；否则写入 `blockers`，并把状态交回前端修复：`phase=ui_fix_needed,next=frontend-agent`
 
 ## 产物要求
 
@@ -53,6 +56,7 @@
 
 - 走查范围：页面、路径、视口、设计稿或截图来源
 - 结论摘要：是否可进入下一阶段
+- 后补设计稿处理：是否使既有“跳过 UI 验收”结论失效；失效的文件和原因
 - 问题列表：级别、位置、现象、影响、建议
 - 状态覆盖：loading、empty、error、disabled、权限、响应式等检查结果
 - 未覆盖风险：未能访问的页面、缺失设计稿或无法确认的交互
@@ -64,7 +68,8 @@
 - 无 P0/P1 视觉、交互或可用性阻塞问题
 - P2 问题已记录，且不阻塞当前阶段推进
 - 设计材料缺失或实现对象不明确时，必须向使用者确认
-- 后补设计稿时允许单独调用 UI 走查；走查结论必须说明是否影响既有前端测试或全量测试结论
+- 后补设计稿时必须进入 `ui_design_ready -> designer-agent`；走查结论必须说明是否影响既有前端测试或全量测试结论
+- 如果已有测试报告基于“无设计材料，跳过 UI 验收”通过，后补设计稿后这些报告的 UI 门禁结论失效，必须交给 test-agent 判断是否需要重测
 
 ## 不做
 

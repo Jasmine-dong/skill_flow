@@ -7,6 +7,7 @@
 # 注意：full-stack 在 development_ready 后允许 Backend / FE 并行推进；单代理执行时默认先进入 Backend。
 # 使用者在开发前确认节点明确“OK、继续、确认推进”时，确认完成后应自动衔接到 done_next 对应开发角色。
 # 开发期 UI 反馈快修是显式轻量通道，可临时使用 frontend.ui_feedback_fix，不按普通 next_task_map 分诊。
+# 后补设计稿进入 design/source.md 时，若此前已记录跳过 UI 验收，跳过结论自动失效，phase 进入 ui_design_ready，next 进入 designer-agent。
 
 tasks:
   project.rescan:
@@ -140,7 +141,7 @@ tasks:
       推进 frontend_done 前必须完成 UI 关键项自检，并在 frontend/integration.md 记录 checklist 结果；类型检查、lint 或单测通过不能替代视觉自检。
       前端完成后检查是否存在 design/source.md，或使用者是否明确要求 UI 验收。
       如果有设计材料或明确要求 UI 验收，next 设为 designer-agent，先进入 UI 验收。
-      如果没有设计材料且使用者未要求 UI 验收，next 设为 test-agent，直接进入前端分段测试；在 frontend/integration.md 和 status.history 中记录“本轮跳过 UI 验收”的原因。
+      如果没有设计材料且使用者未要求 UI 验收，next 设为 test-agent，直接进入前端分段测试；在 frontend/integration.md、status.ui_review 和 status.history 中记录“本轮跳过 UI 验收”的原因。
       后续补充设计稿时，可以显式把 next 设为 designer-agent，单独调用 UI 走查。
 
   frontend.ui_feedback_fix:
@@ -180,7 +181,7 @@ tasks:
   designer.review:
     agent: designer-agent
     title: UI 验收
-    allowed_phase: [planned, frontend_done, frontend_tested, full_tested, done]
+    allowed_phase: [planned, ui_design_ready, frontend_done, frontend_tested, full_tested, done]
     requires_next: designer-agent
     done_phase: ui_reviewed
     done_requires:
@@ -188,8 +189,9 @@ tasks:
     steps: |
       对照 brief.md、design/source.md、frontend/todo.md 与 frontend/integration.md 做 UI/交互验收。
       如果是后补设计稿或单独调用 UI 走查，先归档设计稿来源到 design/source.md，再限定本次走查范围。
+      如果此前 frontend/integration.md、status.ui_review 或测试报告记录过“无设计材料，跳过 UI 验收”，必须在 design/ui-review.md、status.ui_review 和 status.history 中标记该跳过结论已失效。
       写 design/ui-review.md。
-      通过后 test-agent 可以进入前端部分测试。
+      通过后 test-agent 可以进入前端部分测试；如果此前已经完成过 frontend/full 测试，test-agent 必须基于 UI 走查影响范围判断是否需要重测。
       有 P0/P1 阻塞问题时写 blockers，并把 phase 设为 ui_fix_needed，next 设为 frontend-agent。
 
   test.frontend:
@@ -202,7 +204,7 @@ tasks:
       - test/frontend-report.md
     steps: |
       读取 test/coverage.md、frontend/integration.md；如有 api.openapi.yaml，也读取接口契约。
-      如果存在 design/ui-review.md，则一并读取并纳入测试范围；如果本轮没有设计材料或 UI 验收被明确跳过，记录原因，不把 design/ui-review.md 作为门禁。
+      如果存在 design/ui-review.md，则一并读取并纳入测试范围；如果本轮没有设计材料或 UI 验收被明确跳过，记录原因，不把 design/ui-review.md 作为门禁。若 design/source.md 是后补且已使跳过 UI 验收结论失效，则必须等待 ui_reviewed 后再执行前端分段测试。
       先读取 FE 提供的建议测试点、影响范围和扩测建议，判断是否需要扩大测试范围，并在报告中记录判断。
       测试前端主流程、交互状态、接口联调、权限、异常、空状态和回归风险。
       写 test/frontend-report.md。
@@ -219,7 +221,7 @@ tasks:
     steps: |
       读取当前 workflow 要求的所有产物。
       确认当前 workflow 要求的 Backend 分段测试和 FE 分段测试已经通过。
-      如果本轮存在设计材料或已执行 UI 验收，则确认 UI 验收已通过；如果没有设计材料且已记录跳过原因，则 UI 验收不作为全量测试门禁。
+      如果本轮存在设计材料或已执行 UI 验收，则确认 UI 验收已通过；如果没有设计材料且已记录跳过原因，则 UI 验收不作为全量测试门禁。若后补 design/source.md 已使跳过 UI 验收结论失效，则必须等待 ui_reviewed 和必要的前端复测后再执行全量测试。
       执行全量回归或端到端验证。
       写 test/full-report.md。
       通过后推进到 full_tested；失败时按归属写 blockers，并把 phase 设为 backend_fix_needed、frontend_fix_needed 或 ui_fix_needed。
@@ -272,7 +274,7 @@ tasks:
   commit.note:
     agent: commit-agent
     title: 提交记录与可选提交
-    allowed_phase: [planned, requirements_ready, api_contract_ready, frontend_todo_ready, development_ready, backend_done, backend_tested, frontend_done, ui_reviewed, frontend_tested, full_tested, backend_fix_needed, frontend_fix_needed, ui_fix_needed, bug_triage, done]
+    allowed_phase: [planned, requirements_ready, api_contract_ready, frontend_todo_ready, development_ready, backend_done, backend_tested, frontend_done, ui_design_ready, ui_reviewed, frontend_tested, full_tested, backend_fix_needed, frontend_fix_needed, ui_fix_needed, bug_triage, done]
     requires_next: commit-agent
     done_phase: keep_current
     done_requires:
@@ -310,6 +312,7 @@ workflows:
         frontend_fix_needed: frontend.implement
         ui_fix_needed: frontend.implement
       designer-agent:
+        ui_design_ready: designer.review
         frontend_done: designer.review
         frontend_tested: designer.review
         full_tested: designer.review
@@ -329,6 +332,7 @@ workflows:
         backend_done: commit.note
         backend_tested: commit.note
         frontend_done: commit.note
+        ui_design_ready: commit.note
         ui_reviewed: commit.note
         frontend_tested: commit.note
         full_tested: commit.note
@@ -428,6 +432,7 @@ workflows:
         frontend_fix_needed: frontend.implement
         ui_fix_needed: frontend.implement
       designer-agent:
+        ui_design_ready: designer.review
         frontend_done: designer.review
         frontend_tested: designer.review
         full_tested: designer.review
@@ -443,6 +448,7 @@ workflows:
         frontend_todo_ready: commit.note
         development_ready: commit.note
         frontend_done: commit.note
+        ui_design_ready: commit.note
         ui_reviewed: commit.note
         frontend_tested: commit.note
         full_tested: commit.note
@@ -494,6 +500,7 @@ workflows:
     next_task_map:
       designer-agent:
         planned: designer.review
+        ui_design_ready: designer.review
         frontend_done: designer.review
         frontend_tested: designer.review
         full_tested: designer.review
