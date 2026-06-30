@@ -1142,6 +1142,33 @@ Meegle项目：futures
             <article class="usage-card">
               <div class="usage-head">
                 <div>
+                  <strong>单独 UI 走查</strong>
+                  <span>后补设计稿后输出可执行修正建议</span>
+                </div>
+                <button class="mini-copy" type="button" data-copy-target="usage-ui-review">复制</button>
+              </div>
+              <pre><code id="usage-ui-review">推进 2026-06-25--login
+设计稿：https://figma.com/design/xxx?node-id=12-34
+请单独做 UI 验收
+要求输出：Figma node、当前实现差异、期望 CSS/交互值、验证方式、是否阻塞</code></pre>
+            </article>
+
+            <article class="usage-card">
+              <div class="usage-head">
+                <div>
+                  <strong>反馈收口继续</strong>
+                  <span>一轮快修结束后再统一推进状态</span>
+                </div>
+                <button class="mini-copy" type="button" data-copy-target="usage-feedback-close">复制</button>
+              </div>
+              <pre><code id="usage-feedback-close">推进 2026-06-25--login
+这一轮 UI 反馈已收口，可以继续推进
+请汇总 frontend/review-fixes.md，并在 Handoff 里补 user_feedback_fixes</code></pre>
+            </article>
+
+            <article class="usage-card">
+              <div class="usage-head">
+                <div>
                   <strong>提交当前进度</strong>
                   <span>中途 checkpoint，只提示已完成</span>
                 </div>
@@ -1164,7 +1191,7 @@ Meegle项目：futures
             </div>
             <div class="status-line">
               <b>[完成]</b>
-              <span>角色完成后写入 activity.md 和 Handoff，明确产物、影响范围、建议测试点和下一步。</span>
+              <span>角色完成后写入 activity.md 和 Handoff，明确产物、影响范围、建议测试点、user_feedback_fixes 和下一步。</span>
             </div>
           </div>
         </section>
