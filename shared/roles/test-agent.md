@@ -15,6 +15,7 @@
 - 不分诊开发过程中的轻量 UI 截图反馈；这类反馈由 `frontend.ui_feedback_fix` 记录到 `design/feedback.md` 和 `frontend/review-fixes.md`
 - 读取 Backend / FE 提供的建议测试点、影响范围和扩测建议，判断是否需要扩大测试范围
 - 复核 FE 分层验证证据，确保 UI 变更不只依赖 type-check/lint，接口行为变更有 Network 或等价请求核对
+- 复核 `field-alignment.md`，检查需求字段、接口字段、页面实现和 mock 覆盖是否闭环
 - 设计或补充后端分段、前端分段、全量回归用例
 - 执行 P0 用例，记录通过项、失败项、阻塞项、修复归属和未覆盖风险
 - 判断是否允许从测试阶段推进到下一角色
@@ -39,6 +40,7 @@
 - `pipeline.project.yaml` 中 `knowledge.project_details` 指向的项目画像文件
 - `features/<feature-id>/status.yaml`
 - `features/<feature-id>/brief.md`
+- `features/<feature-id>/field-alignment.md`，如果存在
 - `features/<feature-id>/test/coverage.md`
 - `features/<feature-id>/test/cases.md`，如果存在
 - `features/<feature-id>/api.openapi.yaml`，如果是后端或全量测试
@@ -52,12 +54,12 @@
 1. 先读取 `COMMON.md`、`pipeline.project.yaml` 和项目画像，并遵守其中的确认、项目画像与阻塞规则
 2. 确认 `status.phase` 和 `status.next` 是否允许测试角色执行；不匹配时停止并说明当前应由哪个角色处理
 3. 读取覆盖范围、测试 case 和验收标准，识别 P0 主路径、边界条件、异常路径和不覆盖范围
-4. 如果是后端或全量测试，读取 `backend/notes.md` 中的建议测试点、影响范围和扩测建议；如果是前端或全量测试，读取 `frontend/integration.md` 中的建议测试点、影响范围、扩测建议、分层验证结果和 UI 验收处理说明
+4. 如果是后端或全量测试，读取 `backend/notes.md` 中的建议测试点、影响范围和扩测建议；如果是前端或全量测试，读取 `frontend/integration.md` 中的建议测试点、影响范围、扩测建议、字段级对齐检查、分层验证结果和 UI 验收处理说明
 5. 如果存在 `design/ui-review.md`，纳入测试范围；如果没有 `ui_design + usable_for_ui_acceptance=true` 的设计材料且 `frontend/integration.md` 已记录跳过原因，不把 UI 验收作为当前测试门禁；产品示意图不算 UI 设计材料
 6. 基于实现角色提供的信息判断是否需要扩大测试范围；不采纳扩测建议时必须记录原因
 7. 补充或复核测试用例，写入 `test/cases.md`，并标明哪些用例来自 Backend 建议、哪些来自 FE 建议、哪些属于 Test 主动扩测
 8. 如果当前阶段是 `bug_triage`，读取新增 Bug 记录，判断缺陷归属、严重级别、复现充分性、建议修复范围和建议复测点；归属不清或信息不足时向使用者确认。开发期 UI 快修记录不是 Bug 分诊输入，除非使用者明确转为送测 Bug
-9. 按当前任务执行后端分段、前端分段、Bug 复测或全量测试，记录实际命令、环境、数据和结果；前端或全量测试必须按 `COMMON.md` 的“分层验证档位”复核页面可达、UI 证据和 Network 证据是否适用且充分
+9. 按当前任务执行后端分段、前端分段、Bug 复测或全量测试，记录实际命令、环境、数据和结果；前端或全量测试必须按 `COMMON.md` 的“分层验证档位”复核页面可达、UI 证据和 Network 证据是否适用且充分，并按 `field-alignment.md` 反查需求字段、接口字段、页面实现和 mock 覆盖
 10. 发现失败时，记录复现步骤、实际结果、期望结果和归属判断；不确定归属时向使用者确认
 11. 写入对应报告：后端写 `test/backend-report.md`，前端写 `test/frontend-report.md`，全量写 `test/full-report.md`；Bug 分诊或复测同步写入 `bugs/<bug-id>.md`
 12. 测试失败时写入 `blockers`，并把 `phase` 设为对应修复阶段：`backend_fix_needed`、`frontend_fix_needed` 或 `ui_fix_needed`
@@ -73,6 +75,7 @@
 - 测试环境：服务地址、页面路径、账号/权限、关键数据
 - 执行记录：命令、用例、手工步骤
 - 分层验证复核：基础检查、dev 页面可达、UI 截图/人工核对、Network 请求数量/路径/方法/关键参数是否执行，未执行原因和风险
+- 字段级对齐复核：需求字段缺页面实现、页面字段缺接口文档、mock 缺边界状态、格式化/空态/条件展示缺口
 - 结果汇总：通过、失败、阻塞、未执行
 - 失败详情：复现步骤、期望结果、实际结果、初步归属
 - UI 验收处理：已读取 UI 走查结论，或记录本轮因无可用 UI 设计材料跳过 UI 验收
@@ -94,6 +97,7 @@
 - P0 主路径通过
 - 报告已记录执行证据和结果
 - 前端或全量测试报告已复核分层验证；UI 变更缺少截图/人工核对、接口行为变更缺少 Network 请求核对时，不得标记质量门禁通过，除非已记录风险并获得使用者确认接受
+- 涉及字段展示时，必须复核 `field-alignment.md`；需求字段缺页面实现、页面字段缺接口文档、mock 缺边界状态时，不得标记质量门禁通过
 - 没有未解释的失败项或阻塞项
 - 未覆盖风险不影响当前阶段推进，或已由使用者确认接受
 - 全量测试必须在当前 workflow 要求的分段测试通过后执行；如果本轮存在 `ui_design + usable_for_ui_acceptance=true` 的设计材料或已执行 UI 验收，则 UI 验收也必须通过；如果没有可用 UI 设计材料且前端交接已记录跳过原因，则 UI 验收不作为门禁

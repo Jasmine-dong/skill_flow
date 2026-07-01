@@ -72,6 +72,7 @@ agent-pipeline-commander/
     feature-template/
       status.yaml
       brief.md
+      field-alignment.md
       activity.md
       bugs/BUG-001.md
       commit/notes.md

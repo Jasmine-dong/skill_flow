@@ -12,6 +12,7 @@
 
 - 按 `brief.md` 和 `api.openapi.yaml` 实现接口、服务逻辑、任务调度或数据处理
 - 在开发前先产出或修正 `api.openapi.yaml`，再按需求和接口契约拆解 `backend/todo.md`
+- 涉及展示字段时，维护 `field-alignment.md` 的接口字段对照，保证每个 UI 字段能映射到 API 字段或明确阻塞
 - 补充必要的参数校验、权限处理、错误处理和边界逻辑
 - 保持接口行为与契约一致；发现契约问题时向使用者确认
 - 记录自测命令、请求样例、响应样例、建议测试点、影响范围、扩测建议、风险和未覆盖项
@@ -20,6 +21,7 @@
 
 - `apps.backend.path`
 - `features/<feature-id>/api.openapi.yaml`
+- `features/<feature-id>/field-alignment.md`
 - `features/<feature-id>/backend/todo.md`
 - `features/<feature-id>/backend/notes.md`
 - `features/<feature-id>/bugs/*.md` 中的 Fix 区块
@@ -35,6 +37,7 @@
 - `features/<feature-id>/status.yaml`
 - `features/<feature-id>/brief.md`
 - `features/<feature-id>/api.openapi.yaml`
+- `features/<feature-id>/field-alignment.md`，如果存在
 - `features/<feature-id>/test/coverage.md`，如果存在
 - `features/<feature-id>/test/backend-report.md`，如果是后端返工
 - `features/<feature-id>/bugs/*.md`，如果是送测 Bug 修复
@@ -44,9 +47,9 @@
 1. 先读取 `COMMON.md`、`pipeline.project.yaml` 和项目画像，并遵守其中的确认、项目画像与阻塞规则
 2. 确认 `status.phase` 和 `status.next` 是否允许后端执行；不匹配时停止并说明当前应由哪个角色处理
 3. 读取 `pipeline.project.yaml`，定位 `apps.backend.path`、服务启动方式和测试方式
-4. 读取 `brief.md` 和现有 `api.openapi.yaml`，提取接口路径、请求参数、响应字段、错误语义和权限要求
+4. 读取 `brief.md`、`field-alignment.md` 和现有 `api.openapi.yaml`，提取接口路径、请求参数、响应字段、错误语义、权限要求和展示字段映射要求
 5. 修改前搜索现有路由、控制器、服务、模型、数据访问、错误处理和测试约定，优先复用项目既有模式
-6. 如果当前阶段是 `requirements_ready`，先产出或修正 `api.openapi.yaml`，再拆解 `backend/todo.md`，不要写业务代码
+6. 如果当前阶段是 `requirements_ready`，先产出或修正 `api.openapi.yaml`，并把 `field-alignment.md` 的 UI 字段映射到 API 字段，再拆解 `backend/todo.md`，不要写业务代码
 7. 如果当前阶段是 `development_ready` 或 `backend_fix_needed`，按已确认的 `backend/todo.md` 或 `bugs/<bug-id>.md` 实现或修复服务端逻辑，并处理参数校验、权限、空数据、异常和边界条件
 8. 执行最小必要验证，优先包括单测、接口测试、类型检查、lint 或本地请求验证
 9. 写入 `backend/notes.md`，记录实现、验证、请求样例、建议测试点、影响范围、扩测建议和风险；如果是 Bug 修复，同时回写 `bugs/<bug-id>.md` 的 Fix 区块
@@ -59,6 +62,7 @@
 
 - 实现范围：改了哪些接口、服务、任务或数据逻辑
 - 契约对应：OpenAPI 字段和服务实现的对应关系
+- 字段对照：`field-alignment.md` 中每个展示字段对应的 API 字段、转换规则和未确认项
 - 自测记录：执行过的命令、请求样例、响应样例
 - 边界处理：权限、参数错误、空数据、异常和幂等性等
 - 建议测试点：建议 Test 优先验证的接口路径、请求参数、响应字段、错误码、权限、数据边界或任务执行场景
@@ -80,6 +84,7 @@
 `backend/todo.md` 必须包含：
 
 - 接口 TODO：新增或修改的路径、方法、字段、错误码
+- 字段 TODO：补齐或确认 `field-alignment.md` 中缺失、冲突或候选不唯一的 API 字段
 - 数据 TODO：模型、查询、迁移、缓存或任务处理
 - 权限 TODO：登录态、角色、数据权限和越权风险
 - 测试 TODO：单测、接口测试、回归点
@@ -90,6 +95,7 @@
 - `backend/notes.md` 已写明实现、验证结果、建议测试点、影响范围和扩测建议
 - 开发前拆解阶段只产出 `api.openapi.yaml` 和 `backend/todo.md`，不进入代码实现
 - API 行为与 `brief.md` / `api.openapi.yaml` 一致
+- 涉及字段展示时，`field-alignment.md` 的接口字段对照已更新；页面字段无法映射到 API 时必须阻塞并向使用者确认
 - P0 请求路径可用，且没有已知阻断 API 测试的问题
 - 如果验证失败，必须记录失败原因和是否与本次改动相关；不能直接推进
 - 如果接口契约不清楚或实现会改变产品语义，必须向使用者确认

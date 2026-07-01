@@ -13,6 +13,7 @@
 - `.agent-pipeline-commander/assets/project-details.md`：项目画像模板
 - `.agent-pipeline-commander/assets/feature-template/status.yaml`：功能包状态模板
 - `.agent-pipeline-commander/assets/feature-template/brief.md`：功能说明模板
+- `.agent-pipeline-commander/assets/feature-template/field-alignment.md`：字段级对齐关卡模板
 - `.agent-pipeline-commander/assets/feature-template/activity.md`：功能流程事件记录模板
 - `.agent-pipeline-commander/assets/feature-template/bugs/BUG-001.md`：送测 Bug 记录模板
 - `.agent-pipeline-commander/assets/feature-template/commit/notes.md`：提交记录模板
@@ -46,6 +47,7 @@
 - `workflows.done_next` 是默认下一角色；任务步骤写明条件分支时，以条件分支设置的 `next` 为准
 - 新功能包如果未确认 workflow，必须先由 `product-agent` 根据项目能力和需求意图给出 workflow 建议，并获得使用者确认；确认前不得进入开发流程。仓库只有前端但提供了接口文档时，默认建议 `frontend-only`，接口文档作为 FE 联调契约
 - 开发前确认节点收到使用者明确“OK、继续、确认推进、可以开始开发”时，`product-agent` 写入确认记录并推进到 `development_ready` 后，不要停住；立即按 `done_next` 衔接到开发角色。full-stack 单代理执行默认先 `backend-agent`，除非使用者明确要求先前端
+- 涉及列表、表单、弹窗、详情页、筛选项或状态展示时，必须启用字段级对齐关卡：Product 生成 `field-alignment.md`，Backend 补接口字段映射，Frontend 按表实现并反向检查，Test 复核字段闭环和 mock 覆盖；不涉及字段展示时必须写 `not_applicable` 原因
 - 所有角色必须遵守 Chat Status Protocol：在聊天界面输出 `[开始]`、`[阻塞]`、`[完成]` 三类状态事件；不输出百分比或进度条
 - 输出 `[阻塞]` 或 `[完成]` 时，必须同步追加 `features/<feature-id>/activity.md`
 - 所有角色完成任务时，必须在自己的主要产物中写入 `## Handoff`，并在 `[完成]` 状态中摘出简版交接

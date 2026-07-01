@@ -38,6 +38,14 @@
 - summary:
 - not_applicable_reason:
 
+### Field Alignment
+
+- applicable: true
+- file: `field-alignment.md`
+- status: draft | ready_for_dev | not_applicable
+- summary:
+- not_applicable_reason:
+
 ## 补充与调整
 
 - 待补充

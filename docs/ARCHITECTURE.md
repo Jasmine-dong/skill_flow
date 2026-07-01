@@ -15,6 +15,7 @@ flowchart TD
   Activity["features.root/<feature-id>/activity.md\n开始 / 阻塞 / 完成事件"]
   Bugs["features.root/<feature-id>/bugs/<bug-id>.md\n送测 Bug / Triage / Fix / Retest"]
   UIFeedback["features.root/<feature-id>/design/feedback.md + frontend/review-fixes.md\n开发期 UI 反馈快修"]
+  FieldAlignment["features.root/<feature-id>/field-alignment.md\n产品字段 / 接口字段 / 页面实现 / mock 覆盖"]
   Tasks["tasks.yaml\ntasks + workflows + next_task_map"]
   Common["roles/COMMON.md\n确认 / 阻塞 / 状态 / Chat Status Protocol"]
   Role["roles/<agent>.md\n角色边界卡片"]
@@ -31,12 +32,14 @@ flowchart TD
   Commander --> Activity
   Commander --> Bugs
   Commander --> UIFeedback
+  Commander --> FieldAlignment
   Commander --> Tasks
   Tasks --> Role
   Commander --> Common
   Common --> Role
   Commander --> Role
   Role --> Feature
+  Role --> FieldAlignment
   Commander --> Feature
   Commander --> Status
 ```

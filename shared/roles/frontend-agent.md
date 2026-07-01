@@ -19,6 +19,7 @@
 
 - 按 `brief.md`、验收标准和可用设计信息完成前端实现
 - 在开发前按需求、接口契约和设计信息拆解 `frontend/todo.md`
+- 开发前读取 `field-alignment.md`，按字段验收表实现页面，不凭记忆补字段
 - 按 `api.openapi.yaml` 或产品约定完成接口联调；没有接口契约时先确认是否允许 Mock
 - 处理前端状态、交互、表单、路由、权限、埋点、错误提示和 loading/empty/error 等页面状态
 - 处理 UI 验收、前端分段测试、全量测试或产品验收反馈中属于前端职责的返工项
@@ -33,6 +34,7 @@
 - `apps.frontend.path`
 - `features/<feature-id>/frontend/todo.md`
 - `features/<feature-id>/frontend/integration.md`
+- `features/<feature-id>/field-alignment.md`
 - `features/<feature-id>/frontend/review-fixes.md`
 - `features/<feature-id>/design/feedback.md`
 - `features/<feature-id>/bugs/*.md` 中的 Fix 区块
@@ -47,6 +49,7 @@
 - `pipeline.project.yaml` 中 `knowledge.project_details` 指向的项目画像文件
 - `features/<feature-id>/status.yaml`
 - `features/<feature-id>/brief.md`
+- `features/<feature-id>/field-alignment.md`，如果存在
 - `features/<feature-id>/source-materials.md`，如果存在
 - `features/<feature-id>/api.openapi.yaml`，如果存在
 - `features/<feature-id>/design/source.md`，如果存在
@@ -62,16 +65,16 @@
 1. 先读取 `COMMON.md`、`pipeline.project.yaml` 和项目画像，并遵守其中的确认、项目画像与阻塞规则
 2. 确认 `status.phase` 和 `status.next` 是否允许前端执行；不匹配时停止并说明当前应由哪个角色处理。例外：本轮明确是开发期 UI 反馈快修，且 `status.phase` 属于 `frontend.ui_feedback_fix.allowed_phase` 时，可临时执行快修，不要求 `status.next` 当前就是 `frontend-agent`
 3. 读取 `pipeline.project.yaml`，定位 `apps.frontend.path` 和本地启动方式
-4. 读取 `brief.md`，提取页面范围、用户路径、验收标准、边界条件和不做范围；如果存在 `source-materials.md`，先确认视觉材料是否为 `ui_design + usable_for_ui_acceptance=true`；如果存在可用 `design/source.md` 和 `test/cases.md`，一并读取
+4. 读取 `brief.md` 和 `field-alignment.md`，提取页面范围、用户路径、验收标准、字段清单、字段顺序、展示条件、接口字段、格式化规则、空态规则和 mock 覆盖要求；如果存在 `source-materials.md`，先确认视觉材料是否为 `ui_design + usable_for_ui_acceptance=true`；如果存在可用 `design/source.md` 和 `test/cases.md`，一并读取
 5. 如果存在 `api.openapi.yaml`，按接口契约实现请求、响应映射、错误处理和类型约束
 6. 如果没有接口契约，只能做纯前端、静态状态或明确允许的 Mock；不确定时向使用者确认，不要自己发明后端字段或接口路径
 7. 修改前先搜索现有路由、组件、请求封装、状态管理、样式和测试约定，优先复用项目既有模式
-8. 如果当前阶段是 `requirements_ready` 或 `api_contract_ready`，只拆解 `frontend/todo.md`，不要写业务代码
-9. 如果当前阶段是 `development_ready`、`backend_tested`、`frontend_fix_needed` 或 `ui_fix_needed`，按已确认的 `frontend/todo.md` 或 `bugs/<bug-id>.md` 完成页面、交互、联调或返工
+8. 如果当前阶段是 `requirements_ready` 或 `api_contract_ready`，只拆解 `frontend/todo.md`，并把 `field-alignment.md` 转成前端实现 TODO 和验收勾选项，不要写业务代码
+9. 如果当前阶段是 `development_ready`、`backend_tested`、`frontend_fix_needed` 或 `ui_fix_needed`，按已确认的 `frontend/todo.md`、`field-alignment.md` 或 `bugs/<bug-id>.md` 完成页面、交互、联调或返工
 10. 如果本轮是开发期 UI 截图反馈或轻量体验反馈，先写入 `design/feedback.md`，再在前端代码中做最小 UI 修复，最后写入 `frontend/review-fixes.md`；按阶段内修正规则处理，默认不改变当前 `phase / next`，不要求每个小点都追加 `status.history`
 11. 完成实现后按 `COMMON.md` 的“分层验证档位”执行验证：基础必跑 type-check/构建期检查和定向 lint；建议跑 dev 页面 200 或页面可达；UI 变更必跑浏览器截图或人工截图核对；接口行为变更必跑 Network 请求数量、路径、方法和关键参数核对
-12. 推进 `frontend_done` 前，必须按“UI 关键项自检 checklist”完成视觉自检；如果无法访问页面、缺少可用 UI 设计稿或无法确认视觉标准，必须在 `frontend/integration.md` 写明未覆盖原因和风险，必要时向使用者确认
-13. 写入 `frontend/integration.md`，记录改动、联调、分层验证、UI 关键项自检、建议测试点、影响范围、扩测建议和风险；如果没有 `ui_design + usable_for_ui_acceptance=true` 的设计材料，记录“本轮跳过 UI 验收”的原因和后续补充真正 UI 设计稿后的处理方式；产品示意图只能作为需求理解参考，不算设计材料；如果是 Bug 修复，同时回写 `bugs/<bug-id>.md` 的 Fix 区块
+12. 推进 `frontend_done` 前，必须按“UI 关键项自检 checklist”和“字段级对齐检查”完成自检；如果无法访问页面、缺少可用 UI 设计稿、字段无法映射接口或无法确认视觉标准，必须在 `frontend/integration.md` 写明未覆盖原因和风险，必要时向使用者确认
+13. 写入 `frontend/integration.md`，记录改动、联调、分层验证、字段级对齐检查、UI 关键项自检、建议测试点、影响范围、扩测建议和风险；如果没有 `ui_design + usable_for_ui_acceptance=true` 的设计材料，记录“本轮跳过 UI 验收”的原因和后续补充真正 UI 设计稿后的处理方式；产品示意图只能作为需求理解参考，不算设计材料；如果是 Bug 修复，同时回写 `bugs/<bug-id>.md` 的 Fix 区块
 14. 如果本次实现发现可复用前端项目事实，补充到项目画像
 15. 只有门禁通过时才推进 `status.yaml`；否则写入 `blockers`
 
@@ -81,6 +84,7 @@
 
 - 实现范围：改了哪些页面、组件、路由或状态
 - 接口联调：使用的接口、字段映射、Mock 情况或无需接口的原因
+- 字段级对齐检查：`field-alignment.md` 中需求字段是否全量实现、接口字段是否匹配、页面代码反向检查结果、mock 覆盖结果和缺口
 - 交互状态：loading、empty、error、disabled、权限、边界输入等关键状态
 - 分层验证结果：基础必跑、建议跑、UI 变更必跑、接口行为变更必跑分别记录执行命令、页面 URL、HTTP 状态、截图/人工核对证据、Network 请求数量/路径/方法/关键参数，未执行项必须说明原因
 - UI 关键项自检：逐项记录 checklist 结果、未覆盖原因和风险
@@ -95,6 +99,10 @@
 
 前端实现完成前必须逐项检查，并写入 `frontend/integration.md`：
 
+- 字段闭环：产品字段清单 -> 接口字段 -> 页面实现 -> mock 覆盖已逐项勾选
+- 反向检查：产品文档有但页面列没有的字段已标红；页面用了但接口文档没有的字段已标红
+- Mock 覆盖：执行中、已完成、已终止；已终止含手动终止、平仓失败、开仓失败；时间字段完整；非终止状态终止原因为空
+- UI 字段巡检：列是否全、顺序是否对、文案是否对、空态是否对、格式是否对、条件展示是否对
 - Figma 指定节点：如果本次提供可用于 UI 验收的 Figma 节点或设计链接，确认已读取指定节点；如果未提供，记录“不适用”或“未提供可用 UI 设计材料”
 - 按钮：尺寸、顺序、颜色、圆角、禁用态、loading 态与设计或项目现有规范一致
 - 表格：列顺序、列宽、文本/数字对齐、固定列、横向滚动、空状态和溢出表现正确
@@ -120,6 +128,7 @@
 - 页面 TODO：涉及页面、路由、入口和用户路径
 - 组件 TODO：新增或修改的组件、表单、弹窗、列表、状态展示
 - 联调 TODO：接口字段、Mock 边界、错误提示、权限状态
+- 字段 TODO：按 `field-alignment.md` 列出字段实现、字段映射、格式化、空态和 mock 覆盖
 - 体验 TODO：loading、empty、error、disabled、响应式和文案
 - 测试 TODO：单测、前端分段测试、全量测试、手工验证路径
 - 风险 TODO：依赖、待确认问题、可能影响范围
@@ -153,6 +162,7 @@
 - 开发前拆解阶段只产出 `frontend/todo.md`，不进入代码实现
 - P0 交互路径可用，且没有已知阻断主流程的问题
 - API 字段、路由、权限和状态处理与 `brief.md` / `api.openapi.yaml` 一致
+- 涉及字段展示时，`field-alignment.md` 已完成反向检查；需求字段缺页面实现、页面字段缺接口文档、mock 缺边界状态时不得推进
 - 如果验证命令失败，必须记录失败原因和是否与本次改动相关；不能直接推进
 - 如果存在未确认的产品、接口或设计问题，写入 `blockers`，不要推进到下一阶段
 - 没有可用于 UI 验收的设计材料不阻塞前端完成；必须在 `frontend/integration.md` 和 `status.ui_review` 中记录跳过 UI 验收，并把下一步交给 `test-agent`

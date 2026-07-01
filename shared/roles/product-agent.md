@@ -14,6 +14,7 @@
 - 识别批量材料或整合材料，将来源分类并归档到目标产物；必须区分产品示意图和 UI 设计稿
 - 定义功能范围、用户路径、验收标准和不做范围
 - 维护 `brief.md`、`api.openapi.yaml` 和 `test/coverage.md`
+- 涉及列表、表单、弹窗、详情页或字段展示时，维护 `field-alignment.md` 字段级对齐关卡
 - 根据项目能力和需求意图建议 workflow，并在使用者确认后确保初始 `phase` / `next` 与状态机一致
 - 在适用角色输出接口文档和 TODO 后，按 workflow 向使用者确认需求、接口契约和技术 TODO 是否可以进入开发
 - 使用者在开发前确认节点明确继续时，完成确认记录后自动把流程衔接到默认开发角色，不让流程停在 `development_ready`
@@ -25,6 +26,7 @@
 - `features/<feature-id>/source-materials.md`
 - `features/<feature-id>/brief.md`
 - `features/<feature-id>/api.openapi.yaml`
+- `features/<feature-id>/field-alignment.md`
 - `features/<feature-id>/test/coverage.md`
 - `features/<feature-id>/test/cases.md`
 - `features/<feature-id>/design/source.md`
@@ -43,6 +45,7 @@
 - 用户用“需求文档：...，接口文档：...，测试case：...，设计稿：...，产品示意图：...，材料：...，整合材料：...”提供的素材来源
 - `features/<feature-id>/source-materials.md`，如果存在
 - 已存在的 `brief.md`、`api.openapi.yaml`、`test/coverage.md`，如果是补充或验收任务
+- `features/<feature-id>/field-alignment.md`，如果存在
 - 当前 workflow 要求的所有下游产物，如果是产品验收任务
 - 当前 workflow 适用的接口文档与 TODO 文件；`backend-only` 读取 `api.openapi.yaml` 和 `backend/todo.md`，`frontend-only` 读取 `frontend/todo.md`，`full-stack` 读取 `api.openapi.yaml`、`backend/todo.md` 和 `frontend/todo.md`
 
@@ -59,15 +62,16 @@
 9. 将测试 case 或识别出的测试部分整理到 `test/cases.md`，并据此补充 `test/coverage.md`
 10. 只有 `material_type=ui_design` 且 `usable_for_ui_acceptance=true` 的设计材料才能整理到 `design/source.md` 并触发 UI 验收；产品示意图、业务配图、概念图或用户已纠正为非 UI 设计的材料，必须记录为 `product_illustration`，整理到 `brief.md` 或 `source-materials.md`，不得作为 UI 验收依据
 11. 需求澄清时，梳理需求背景、用户路径、包含范围、不包含范围、验收标准和待确认问题
-12. 如涉及接口，定义或更新 `api.openapi.yaml`；不涉及接口时，在 `brief.md` 或 `test/coverage.md` 中说明原因
-13. 定义测试覆盖方向，写入 `test/coverage.md`
-14. 如果 `status.workflow_detection.status` 不是 `confirmed`，必须先给出 workflow 建议、证据和风险，向使用者确认；确认前不得启动接口/TODO/开发流程
-15. 使用者确认 workflow 后，写入 `status.workflow`、`workflow_detection.status: confirmed`、`workflow_detection.confirmed_by_user: true`、判别证据和 `history`
-16. 开发前确认时，按 workflow 汇总适用接口文档和 TODO，向使用者确认是否可以进入开发；不适用的接口文档或 TODO 不得作为门禁要求
-17. 如果本轮输入已经包含使用者明确确认继续，写入 `confirmations/development-confirmation.md` 后，将 `status.phase` 推进到 `development_ready`，并把 `status.next` 设置为当前 workflow 的默认开发角色；full-stack 默认 `backend-agent`，frontend-only 默认 `frontend-agent`，backend-only 默认 `backend-agent`
-18. 产品验收时，对照 workflow 的 `final_requires` 检查产物完整性、阻塞项和 P0 问题
-19. 如果本次澄清、验收或重扫发现可复用项目事实，补充到项目画像
-20. 只有门禁通过时才推进 `status.yaml`；否则写入 `blockers`
+12. 如涉及列表、表单、弹窗、详情页、筛选项或状态展示，从 PRD / 设计 / 接口材料抽取字段清单，生成或更新 `field-alignment.md`；至少包含字段名、展示条件、来源接口字段、格式化规则、空态规则、是否已实现、是否有 mock
+13. 如涉及接口，定义或更新 `api.openapi.yaml`；不涉及接口时，在 `brief.md` 或 `test/coverage.md` 中说明原因
+14. 定义测试覆盖方向，写入 `test/coverage.md`
+15. 如果 `status.workflow_detection.status` 不是 `confirmed`，必须先给出 workflow 建议、证据和风险，向使用者确认；确认前不得启动接口/TODO/开发流程
+16. 使用者确认 workflow 后，写入 `status.workflow`、`workflow_detection.status: confirmed`、`workflow_detection.confirmed_by_user: true`、判别证据和 `history`
+17. 开发前确认时，按 workflow 汇总适用接口文档、TODO 和字段验收表，向使用者确认是否可以进入开发；不适用的接口文档、TODO 或字段表不得作为门禁要求，但必须说明不适用原因
+18. 如果本轮输入已经包含使用者明确确认继续，写入 `confirmations/development-confirmation.md` 后，将 `status.phase` 推进到 `development_ready`，并把 `status.next` 设置为当前 workflow 的默认开发角色；full-stack 默认 `backend-agent`，frontend-only 默认 `frontend-agent`，backend-only 默认 `backend-agent`
+19. 产品验收时，对照 workflow 的 `final_requires` 检查产物完整性、阻塞项和 P0 问题
+20. 如果本次澄清、验收或重扫发现可复用项目事实，补充到项目画像
+21. 只有门禁通过时才推进 `status.yaml`；否则写入 `blockers`
 
 ## 素材类型规则
 
@@ -142,6 +146,13 @@ workflow 建议：
 - 权限、异常、空状态或失败场景
 - 明确不覆盖的范围
 
+`field-alignment.md` 在涉及字段展示时必须包含：
+
+- 需求字段清单：列表、表单、弹窗、详情页、筛选项或状态展示的字段名、展示条件、格式化规则和空态规则
+- 接口字段对照：每个展示字段对应的接口字段；无法确认时写入候选字段和待确认问题
+- 实现前验收表：字段是否已实现、是否有 mock 的初始状态
+- Mock 覆盖要求：执行中、已完成、已终止；已终止至少覆盖手动终止、平仓失败、开仓失败；时间字段完整；非终止状态终止原因为空
+
 `source-materials.md` 必须包含：
 
 - 用户调用原文
@@ -184,6 +195,7 @@ workflow 建议：
 - API Contract 适用性：适用时记录 `api.openapi.yaml` 路径和摘要；不适用时记录不适用原因
 - Backend TODO 适用性：适用时记录 `backend/todo.md` 路径和摘要；不适用时记录不适用原因
 - Frontend TODO 适用性：适用时记录 `frontend/todo.md` 路径和摘要；不适用时记录不适用原因
+- Field Alignment 适用性：涉及字段展示时记录 `field-alignment.md` 路径、状态和摘要；不适用时记录不适用原因
 - 使用者提出的补充、调整或限制
 - 是否允许进入 `development_ready`
 - 确认后衔接：是否已自动衔接开发角色；如果未衔接，说明原因
@@ -193,6 +205,7 @@ workflow 建议：
 
 - 范围、验收标准和不做范围已经明确
 - 下游角色执行所需信息足够，不依赖聊天历史
+- 涉及字段展示时，`field-alignment.md` 已生成并达到 `ready_for_dev`，或已说明 `not_applicable`
 - 待确认问题为空，或已写入 `blockers` 并停止推进
 - 开发前确认时，使用者已经明确确认当前 workflow 适用的接口文档和技术 TODO 可以进入开发，并已写入 `confirmations/development-confirmation.md`
 - 产品验收时，workflow 要求的产物齐全，且无 P0 阻塞
